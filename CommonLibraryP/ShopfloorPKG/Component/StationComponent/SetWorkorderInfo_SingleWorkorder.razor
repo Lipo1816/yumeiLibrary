@@ -1,0 +1,31 @@
+﻿@inherits WorkorderInfoComponent
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+@inject ShopfloorService shopfloorService  
+
+<EditForm OnValidSubmit="SetWorkorder" Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout>
+        <DxFormLayoutItem ColSpanLg="12">
+            <hr />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </DxFormLayoutItem>
+    </DxFormLayout>
+</EditForm>
+
+
+@code {
+    private IEnumerable<Workorder> Workorders = new List<Workorder>();
+
+    private SetWorkorderID workorderID = new();
+
+    private async Task SetWorkorder()
+    {
+        
+    }
+}

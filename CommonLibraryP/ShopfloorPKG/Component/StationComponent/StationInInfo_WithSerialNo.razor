@@ -1,0 +1,34 @@
+﻿@rendermode RenderMode.InteractiveServer
+
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+
+<EditForm Model="@singleSarialNo" OnValidSubmit="StationIn" Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout>
+        <DxFormLayoutItem Caption="@($"{localizer["Serial no"]}")" CaptionPosition="CaptionPosition.Vertical">
+            <DxTextBox @bind-Text="@singleSarialNo.serialNo" />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem ColSpanLg="12">
+            <hr />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </DxFormLayoutItem>
+    </DxFormLayout>
+</EditForm>
+@code {
+
+    [Parameter]
+    public EventCallback<string> StationInCallback { get; set; }
+
+    private SingleSarialNo singleSarialNo = new();
+
+    private async void StationIn()
+    {
+        await StationInCallback.InvokeAsync(singleSarialNo.serialNo);
+    }
+}

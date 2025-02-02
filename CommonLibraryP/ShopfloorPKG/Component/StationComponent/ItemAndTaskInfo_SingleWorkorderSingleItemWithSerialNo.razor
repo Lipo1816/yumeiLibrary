@@ -1,0 +1,41 @@
+﻿@inherits WorkorderInfoComponent
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+
+@if (hasStation)
+{
+    <DxFormLayout>
+        @if (StationParamFromRoot.ItemAmountValid)
+        {
+            <DxFormLayoutItem Caption="@($"{localizer["Serial no"]}")" CaptionPosition="CaptionPosition.Vertical">
+                <DxTextBox Text="@ItemDetail?.SerialNo" ReadOnly="true" />
+            </DxFormLayoutItem>
+            @if (StationParamFromRoot.TaskAmountValid)
+            {
+                <DxFormLayoutItem Caption="@($"{localizer["Start time"]}")" CaptionPosition="CaptionPosition.Vertical">
+                    <DxDateEdit Date="@TaskDetail?.StartTime" ReadOnly="true" DisplayFormat="G" />
+                </DxFormLayoutItem>
+            }
+        }
+
+        else
+        {
+        }
+    </DxFormLayout>
+}
+else
+{
+
+}
+
+@code {
+    private Workorder? Workorder
+    => ToWorkorderLevelValid ? StationParamFromRoot.Workorders.FirstOrDefault() : null;
+
+    private ItemDetail? ItemDetail
+    => ToItemLevelValid ? StationParamFromRoot.WIPItemDetails.FirstOrDefault() : null;
+    private bool hasItem => ItemDetail != null;
+
+    private TaskDetail? TaskDetail
+    => hasItem && ItemDetail.OneTaskValid ? ItemDetail.TaskDetails.FirstOrDefault() : null;
+
+}

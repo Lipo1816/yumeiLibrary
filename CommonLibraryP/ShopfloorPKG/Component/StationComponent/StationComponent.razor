@@ -1,0 +1,196 @@
+﻿@inject IStringLocalizer<ShopfloorLanguage> localizer
+@inject ShopfloorService shopfloorService
+@implements IDisposable
+
+<style>
+    .stationheight-s {
+    height: 35rem;
+    }
+
+    .stationheight-l {
+    height: 40rem;
+    }
+
+    .stationwide-s {
+    width: 28rem;
+    }
+
+    .stationwide-l {
+    width: 25rem;
+    }
+</style>
+
+@if (hasStation)
+{
+    <DxPopup HeaderText="Error Message" @bind-Visible="@showErrorMsg" CloseOnOutsideClick="false" />
+    @* main layout*@
+    <div class="card shadow p-3 @sizeCss" style="border-color:@(statusStyle.ColorRGBString)">
+        <DxGridLayout>
+            <Rows>
+                <DxGridLayoutRow Areas="name status" Height="1fr" />
+                <DxGridLayoutRow Areas="process process" Height="2fr" />
+                <DxGridLayoutRow Areas="workorderinfo workorderinfo" Height="3fr" />
+                <DxGridLayoutRow Areas="itemandtaskinfo itemandtaskinfo" Height="4fr" />
+                <DxGridLayoutRow Areas="actionbtn actionbtn" Height="2fr" />
+            </Rows>
+            <Columns>
+                <DxGridLayoutColumn Width="8fr" />
+                <DxGridLayoutColumn Width="4fr" />
+            </Columns>
+            <Items>
+                <DxGridLayoutItem Area="name">
+                    <Template>
+                        <div class="w-100 h-100 d-flex flex-wrap justify-content-around align-items-center">
+                            <DxButton Text="@StationParam?.Name" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" />
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+                <DxGridLayoutItem Area="status">
+                    <Template>
+                        <div class="w-100 h-100 d-flex flex-wrap justify-content-around align-items-center">
+                            <DxButton Text="@($"{localizer[StationParam?.StationStatus.ToString()]}")" RenderStyle="@statusBtnStyle" />
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+                <DxGridLayoutItem Area="process">
+                    <Template>
+                        <div>
+                            <DxFormLayout>
+                                <DxFormLayoutItem Caption="@($"{localizer["Process"]}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                                    <DxTextBox Text="@StationParam?.Process?.Name" ReadOnly="true" />
+                                </DxFormLayoutItem>
+                            </DxFormLayout>
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+                <DxGridLayoutItem Area="workorderinfo">
+                    <Template>
+                        <div class="h-100 w-100">
+                            @WorkorderInfoArea
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+                <DxGridLayoutItem Area="itemandtaskinfo">
+                    <Template>
+                        <div class="h-100 w-100 overflow-y">
+                            @ItenAndTaskInfoArea
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+                <DxGridLayoutItem Area="actionbtn">
+                    <Template>
+                        <div class="w-100 h-100 d-flex flex-wrap justify-content-around align-items-center">
+                            <DxButton Enabled="@canrun" IconCssClass="oi oi-media-play" RenderStyle="ButtonRenderStyle.Success" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Large"></DxButton>
+                            <DxButton Click="@ShowOperationPopup" IconCssClass="oi oi-clipboard" RenderStyle="ButtonRenderStyle.Info" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Large"></DxButton>
+                            <DxButton IconCssClass="oi oi-reload" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Large"></DxButton>
+                            <DxButton IconCssClass="oi oi-ellipses" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Large"></DxButton>
+                        </div>
+                    </Template>
+                </DxGridLayoutItem>
+            </Items>
+        </DxGridLayout>
+    </div>
+    @* operations popup*@
+    <DxPopup @bind-Visible="@showOperation" CloseOnOutsideClick="false" ShowFooter="true">
+        <HeaderTemplate>
+            <div class="w-100 p-3 border border-bottom">
+                <DxToolbar Title="@StationParam?.Name">
+                    <Items>
+                        <DxToolbarItem IconCssClass="oi oi-x" Click="CloseOperationPopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                    </Items>
+                </DxToolbar>
+            </div>
+        </HeaderTemplate>
+        <BodyContentTemplate>
+            <DxTabs>
+                <DxTabPage Text="@($"{localizer["Station in"]}")">
+                    <div class="p-3">
+                        @StationInInfo
+                    </div>
+                </DxTabPage>
+                <DxTabPage Text="@($"{localizer["Station out"]}")"></DxTabPage>
+                <DxTabPage Text="@($"{localizer["Item record"]}")"></DxTabPage>
+            </DxTabs>
+        </BodyContentTemplate>
+    </DxPopup>
+}
+
+@code {
+    [Parameter]
+    public Station? StationParam { get; set; }
+    protected bool hasStation => StationParam != null;
+
+    private StatusStyle? statusStyle => CommonEnumHelper.GetStatusStyle((int)(StationParam?.StationStatus));
+
+    private ButtonRenderStyle statusBtnStyle
+    => statusStyle is null ? ButtonRenderStyle.None : statusStyle.buttonRenderStyle;
+
+
+    private RenderFragment? WorkorderInfoArea => StationParam.IsSingleWorkorder?
+    @<WorkorderInfo_SingleWorkorder StationParamFromRoot="@StationParam" /> : null;
+
+
+    private RenderFragment? ItenAndTaskInfoArea => StationParam?.StationType switch
+    {
+        111 => @<ItemAndTaskInfo_SingleWorkorderSingleItemWithSerialNo StationParamFromRoot="@StationParam" /> ,
+        _ => null,
+    };
+
+    private RenderFragment? StationInInfo => StationParam.IsSingleItem ?
+    @<StationInInfo_WithSerialNo StationInCallback="StationWithSerialNo"/>:null;
+    
+    private RenderFragment? StationOutInfo;
+
+    private RenderFragment? ItemRecordInfo;
+
+    public bool showErrorMsg = false;
+
+    private string sizeCss => StationParam.IsSingleItem ? "stationheight-s stationwide-s" : "stationheight-l stationwide-l";
+
+    private bool showOperation = false;
+    private void ShowOperationPopup()
+    => showOperation = true;
+    private void CloseOperationPopup()
+    => showOperation = false;
+
+    protected bool canedit => hasStation ? StationParam.StationStatus == Status.Init : false;
+    protected bool canrun => hasStation ? StationParam.Canrun : false;
+    protected bool canoperate => hasStation ? StationParam.StationStatus == Status.Running : false;
+    protected bool canpause => hasStation ? StationParam.StationStatus == Status.Running : false;
+    protected bool canstop => hasStation ? StationParam.StationStatus == Status.Running : false;
+    protected bool iserror => hasStation ? StationParam.StationStatus == Status.Error : false;
+
+    protected override Task OnInitializedAsync()
+    {
+        if (hasStation)
+        {
+            StationParam.UIUpdateAct += UpdateUIFromStation;
+        }
+        return base.OnInitializedAsync();
+    }
+
+    void IDisposable.Dispose()
+    {
+        if (hasStation)
+        {
+            StationParam.UIUpdateAct += UpdateUIFromStation;
+        }
+    }
+
+    private async void UpdateUIFromStation()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    #region station in
+
+    private async Task StationWithSerialNo(string serialNo)
+    {
+        var res = await shopfloorService.StationInByNameAndSerialNo(StationParam?.Name, serialNo);
+        CloseOperationPopup();
+    }
+
+    #endregion
+}
+

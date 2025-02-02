@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
+
+namespace CommonLibraryP.MachinePKG
+{
+    public static class MachineExtention
+    {
+        public static IHostApplicationBuilder AddMachineService(this IHostApplicationBuilder builder, string dbConnectionStringName = "DefaultConnection")
+        {
+            builder.Services.AddDbContextFactory<MachineDBContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString(dbConnectionStringName));
+            });
+            builder.Services.AddSingleton<MachineService>();
+            builder.Services.AddHostedService<MachineInitHostingService>();
+            builder.Services.AddLocalization();
+            return builder;
+        }
+
+        public static IHostApplicationBuilder AddMachineService<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] MachineServiceImplementation>(this IHostApplicationBuilder builder, string dbConnectionStringName = "DefaultConnection")
+        where MachineServiceImplementation : MachineService
+        {
+            builder.Services.AddDbContextFactory<MachineDBContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString(dbConnectionStringName));
+            });
+            builder.Services.AddSingleton<MachineService, MachineServiceImplementation>();
+            builder.Services.AddHostedService<MachineInitHostingService>();
+            builder.Services.AddLocalization();
+            return builder;
+        }
+    }
+}

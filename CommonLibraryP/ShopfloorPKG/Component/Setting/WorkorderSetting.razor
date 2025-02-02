@@ -1,0 +1,148 @@
+﻿@rendermode RenderMode.InteractiveServer
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+@inject ShopfloorService shopfloorService
+
+<DxGridLayout ColumnSpacing="1rem">
+    <Rows>
+        <DxGridLayoutRow Height="auto"></DxGridLayoutRow>
+        <DxGridLayoutRow Height="auto"></DxGridLayoutRow>
+    </Rows>
+    <Columns>
+        <DxGridLayoutColumn Width="100%"></DxGridLayoutColumn>
+    </Columns>
+    <Items>
+        <DxGridLayoutItem Row="1" Column="0">
+            <Template>
+                <div class="p-3">
+                    <DxGrid @ref="grid" Data="@workorders" FocusedRowEnabled="true" FocusedRowChanged="OnFocusedRowChanged" DataItemDeleting="DeleteWorkorder" HighlightRowOnHover="true">
+                        <ToolbarTemplate>
+                            <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+                                <DxToolbarItem IconCssClass="oi oi-plus" Click="NewWorkorderClicked" BeginGroup="true" />
+                                <DxToolbarItem IconCssClass="oi oi-pencil" Enabled="@workorderSelected" Click="ShowPopup" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
+                                <DxToolbarItem Enabled="@workorderSelected" Click="ShowDelete" IconCssClass="oi oi-trash" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+                            </DxToolbar>
+                        </ToolbarTemplate>
+                        <Columns>
+                            <DxGridDataColumn Caption="@($"{localizer["Status"]}")" FieldName="@nameof(Workorder.Status)">
+                                <CellDisplayTemplate>
+                                    <div>
+                                        @($"{localizer[(context.DataItem as Workorder)?.Status.ToString()]}")
+                                    </div>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn Caption="@($"{localizer["Workorder"]}")" FieldName="@nameof(Workorder.WorkorderNo)" />
+                            <DxGridDataColumn Caption="@($"{localizer["Lot"]}")" FieldName="@nameof(Workorder.Lot)" />
+                            <DxGridDataColumn Caption="@($"{localizer["Part No"]}")" FieldName="@nameof(Workorder.PartNo)" />
+                            <DxGridDataColumn Caption="@($"{localizer["Target"]}")" FieldName="@nameof(Workorder.TargetAmount)" />
+                            <DxGridDataColumn Caption="@($"{localizer["OK"]}")" FieldName="@nameof(Workorder.Okamount)" />
+                            <DxGridDataColumn Caption="@($"{localizer["NG"]}")" FieldName="@nameof(Workorder.Ngamount)" />
+                        </Columns>
+                    </DxGrid>
+                </div>
+            </Template>
+        </DxGridLayoutItem>
+    </Items>
+</DxGridLayout>
+
+<DxPopup @bind-Visible="@popupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
+    <HeaderTemplate>
+        <div class="w-100 p-3 border border-bottom">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-x" Click="ClosePopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </div>
+    </HeaderTemplate>
+    <BodyContentTemplate Context="bodycontext">
+        <EditForm Model="@targetWorkorder" Context="EditFormContext" OnValidSubmit="UpsertWorkorder">
+            <DataAnnotationsValidator />
+            <DxFormLayout>
+                <DxFormLayoutItem Caption="@($"{localizer["Basic Info"]}")" ColSpanLg="12">
+                    <hr>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="@($"{localizer["Process"]}")" CaptionPosition="CaptionPosition.Vertical" BeginRow="true">
+                    <DxComboBox Data="@processes" @bind-Value="@targetWorkorder.ProcessId" ShowValidationIcon="true" ValueFieldName="@nameof(Process.Id)" TextFieldName="@nameof(Process.Name)" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"></DxComboBox>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Workorder"]}")" ColSpanLg="6">
+                    <DxTextBox @bind-Text="@targetWorkorder.WorkorderNo" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Lot"]}")" ColSpanLg="6">
+                    <DxTextBox @bind-Text="@targetWorkorder.Lot" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Part No"]}")" ColSpanLg="6">
+                    <DxTextBox @bind-Text="@targetWorkorder.PartNo"/>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Target"]}")" ColSpanLg="6">
+                    <DxSpinEdit @bind-Value="@targetWorkorder.TargetAmount" MinValue="1" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                    <DxToolbar>
+                        <Items>
+                            <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                        </Items>
+                    </DxToolbar>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </EditForm>
+    </BodyContentTemplate>
+</DxPopup>
+
+@code {
+    IGrid grid { get; set; }
+    private List<Workorder> workorders = new();
+    private Workorder? targetWorkorder;
+    private bool workorderSelected => targetWorkorder != null;
+
+    private bool popupVisible = false;
+    private IEnumerable<Process> processes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetParameter();
+    }
+
+    private async Task GetParameter()
+    {
+        var a = await shopfloorService.GetAllWorkordersConfig();
+        processes = await shopfloorService.GetAllProcesses();
+    }
+
+    private void ShowPopup() => popupVisible = true;
+    private async void ClosePopup()
+    {
+        popupVisible = false;
+        await GetParameter();
+    } 
+
+    private void OnFocusedRowChanged(GridFocusedRowChangedEventArgs e)
+    {
+        targetWorkorder = e.DataItem as Workorder;
+    }
+
+    private void NewWorkorderClicked()
+    {
+        targetWorkorder = new Workorder();
+        ShowPopup();
+    }
+
+    private async Task UpsertWorkorder()
+    {
+        var res = await shopfloorService.UpsertWorkorderConfig(targetWorkorder);
+        ClosePopup();
+    }
+
+    private void ShowDelete()
+    {
+        grid.ShowDataItemDeleteConfirmation(targetWorkorder);
+    }
+
+    private async Task DeleteWorkorder()
+    {
+        var res = await shopfloorService.DeleteWorkorder(targetWorkorder);
+        await GetParameter();
+    }
+}

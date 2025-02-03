@@ -1,40 +1,36 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
-    public partial class Workorder
+    public class Workorder
     {
-        public Guid Id { get; set; }
-
-        [Required]
-        public string WorkorderNo { get; set; } = null!;
-        [Required]
-        public string Lot { get; set; } = null!;
-
-        public int Status { get; set; }
-
-        public Guid? RecipeCategoryId { get; set; }
-
-        public Guid? WorkorderRecordCategoryId { get; set; }
-
-        public Guid? ItemRecordsCategoryId { get; set; }
-
-        public Guid? TaskRecordCategoryId { get; set; }
-
-        [Required]
-        public Guid? ProcessId { get; set; }
-        public string? PartNo { get; set; }
-        [Range(1, Int16.MaxValue)]
-        public int TargetAmount { get; set; }
-        public int Okamount { get; set; }
-        public int Ngamount { get; set; }
-        
-        public DateTime? StartTime { get; set; }
-
-        public DateTime? FinishedTime { get; set; }
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime? CreateTime { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        [StringLength(50)]
+        public string WorkorderNo { get; set; } = null!;
+        [StringLength(50)]
+        public string Lot { get; set; } = null!;
+        public Guid ProcessId { get; set; }
+        public int Status { get; set; }
+        public Guid? RecipeCategoryId { get; set; }
+        public Guid? WorkorderRecordCategoryId { get; set; }
+        public Guid? ItemRecordsCategoryId { get; set; }
+        public Guid? TaskRecordCategoryId { get; set; }
+        [MaxLength(50)]
+        public string? PartNo { get; set; }
+        public int TargetAmount { get; set; }
+        
+        public int OkAmount { get; set; }
+        public int NgAmount { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? FinishedTime { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public DateTime CreateTime { get; set; } = DateTime.Now;
+
+
 
         public virtual ICollection<ItemDetail> ItemDetails { get; set; } = new List<ItemDetail>();
 

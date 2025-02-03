@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CommonLibraryP.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
@@ -8,6 +9,12 @@ namespace CommonLibraryP.ShopfloorPKG
         : base(options)
         {
         }
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.AddInterceptors(new CommandInterceptor());
+        //    base.OnConfiguring(optionsBuilder);
+        //}
 
         #region process
         public virtual DbSet<Process> Processes { get; set; }
@@ -91,29 +98,30 @@ namespace CommonLibraryP.ShopfloorPKG
 
             modelBuilder.Entity<Workorder>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                //entity.HasKey(e => e.Id);
 
                 entity.HasIndex(e => new { e.WorkorderNo, e.Lot }).IsUnique();
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("ID");
-                entity.Property(e => e.FinishedTime).HasColumnType("datetime");
-                entity.Property(e => e.ItemRecordsCategoryId).HasColumnName("ItemRecordsCategoryID");
-                entity.Property(e => e.Lot).HasMaxLength(50);
-                entity.Property(e => e.WorkorderNo).HasColumnName("WorkorderNo");
-                entity.Property(e => e.Status).HasColumnName("Status");
-                entity.Property(e => e.Ngamount).HasColumnName("NGAmount");
-                entity.Property(e => e.Okamount).HasColumnName("OKAmount");
-                entity.Property(e => e.TargetAmount).HasColumnName("TargetAmount");
-                entity.Property(e => e.PartNo).HasMaxLength(50);
-                entity.Property(e => e.ProcessId).HasColumnName("ProcessID");
-                entity.Property(e => e.RecipeCategoryId).HasColumnName("RecipeCategoryID");
-                entity.Property(e => e.StartTime).HasColumnType("datetime");
-                entity.Property(e => e.CreateTime).HasColumnType("datetime");
-                entity.Property(e => e.TaskRecordCategoryId).HasColumnName("TaskRecordCategoryID");
-                entity.Property(e => e.WorkorderNo).HasMaxLength(50);
-                entity.Property(e => e.WorkorderRecordCategoryId).HasColumnName("WorkorderRecordCategoryID");
+                entity.Property(e => e.Id);
+                entity.Property(e => e.WorkorderNo);
+                entity.Property(e => e.Lot);
+
+                entity.Property(e => e.ProcessId);
+
+                entity.Property(e => e.Status);
+                entity.Property(e => e.PartNo);
+                entity.Property(e => e.NgAmount);
+                //entity.Property(e => e.OkAmount);
+                entity.Property(e => e.TargetAmount);
+
+                entity.Property(e => e.CreateTime);
+                entity.Property(e => e.StartTime);
+                entity.Property(e => e.FinishedTime);
+
+                entity.Property(e => e.WorkorderRecordCategoryId);
+                entity.Property(e => e.RecipeCategoryId);
+                entity.Property(e => e.ItemRecordsCategoryId);
+                entity.Property(e => e.TaskRecordCategoryId);
 
                 entity.HasOne(d => d.Process).WithMany(p => p.Workorders)
                     .HasForeignKey(d => d.ProcessId)

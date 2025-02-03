@@ -40,6 +40,8 @@ namespace CommonLibraryP.MachinePKG
         private Object value = new();
         public string ValueString => FormatingValueToString();
 
+        public Action<Tag>? TagValueChanged;
+
         private void InitVal()
         {
             switch (DataType)
@@ -83,7 +85,7 @@ namespace CommonLibraryP.MachinePKG
                     if (!StructuralComparisons.StructuralEqualityComparer.Equals(value, obj))
                     {
                         value = obj;
-                        lastChangedTime = DateTime.Now;
+                        ValueChanged();
                         return new(1, $"Update tag {Name} success");
                     }
                     else
@@ -96,7 +98,7 @@ namespace CommonLibraryP.MachinePKG
                     if (!value.Equals(obj))
                     {
                         value = obj;
-                        lastChangedTime = DateTime.Now;
+                        ValueChanged();
                         return new(1, $"Update tag {Name} success");
                     }
                     else
@@ -110,6 +112,12 @@ namespace CommonLibraryP.MachinePKG
                 return new(4, $"Update tag {Name} fail data type not match");
             }
         }
+
+        private void ValueChanged()
+        {
+            lastChangedTime = DateTime.Now;
+            TagValueChanged.Invoke(this);
+        } 
         private string FormatingValueToString()
         {
             if (value == null)

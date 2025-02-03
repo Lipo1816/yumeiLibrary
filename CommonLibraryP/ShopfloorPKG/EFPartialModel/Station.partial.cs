@@ -1,8 +1,10 @@
 ﻿using CommonLibraryP.API;
 using CommonLibraryP.Data;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
+    
     public partial class Station
     {
         public Station() { }
@@ -68,11 +70,13 @@ namespace CommonLibraryP.ShopfloorPKG
         }
 
         protected List<Workorder> workorders = new();
+        [NotMapped]
         public List<Workorder> Workorders => workorders;
         public virtual int WorkorderAmount => throw new NotImplementedException();
         public virtual bool WorkorderAmountValid => throw new NotImplementedException();
         public virtual bool Canrun => throw new NotImplementedException();
         protected List<ItemDetail> wipItemDetails = new();
+        [NotMapped]
         public List<ItemDetail> WIPItemDetails => wipItemDetails;
         protected int ItemAmount => wipItemDetails.Count;
         public virtual bool ItemAmountValid => throw new NotImplementedException();

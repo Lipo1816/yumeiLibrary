@@ -237,6 +237,23 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
+        public RequestResult RegisterTagValueChange(string machineName ,string tagName, Action<Tag> tagListener)
+        {
+            var targetMachine = machines.FirstOrDefault(x => x.Name == machineName);
+            if (targetMachine is null)
+            {
+                return new(4, $"Machine {machineName} not found");
+            }
+            var targetTag = targetMachine.TagCategory?.Tags.FirstOrDefault(x => x.Name == tagName);
+            if(targetTag is null)
+            {
+                return new(4, $"Tag {tagName} not found in machine {machineName}");
+            }
+
+            tagListener += targetTag?.TagValueChanged;
+            return new(2, $"Listen machine {machineName} tag {tagName} value change success");
+        }
+
         #endregion
 
         #region utilization

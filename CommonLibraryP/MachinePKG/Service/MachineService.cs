@@ -35,6 +35,8 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
+        //public virtual IEnumerable<ConnectionTypeWrapperClass> GetConnectTypesWrapperClass() { }
+
         public async Task InitAllMachinesFromDB()
         {
             using (var scope = scopeFactory.CreateScope())

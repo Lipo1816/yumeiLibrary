@@ -116,7 +116,7 @@ namespace CommonLibraryP.MachinePKG
         private void ValueChanged()
         {
             lastChangedTime = DateTime.Now;
-            TagValueChanged.Invoke(this);
+            TagValueChanged?.Invoke(this);
         } 
         private string FormatingValueToString()
         {

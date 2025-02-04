@@ -1,0 +1,153 @@
+﻿@namespace CommonLibraryP.MachinePKG.Component
+
+@rendermode RenderMode.InteractiveServer
+@implements IDisposable
+@inject IStringLocalizer<MachineLanguage> localizer
+@inject MachineService machineService
+
+@if (hasMachine)
+{
+    <DxGridLayout ColumnSpacing="3rem" RowSpacing="1rem">
+        <Rows>
+            <DxGridLayoutRow Height="auto"></DxGridLayoutRow>
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="4fr"></DxGridLayoutColumn>
+            <DxGridLayoutColumn Width="8fr"></DxGridLayoutColumn>
+        </Columns>
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0">
+                <Template>
+                    <DxFormLayout CaptionPosition="CaptionPosition.Vertical" Data="@machine" ReadOnly="true">
+                        <DxFormLayoutGroup Caption="Machine Config" CssClass="rounded">
+                            <DxFormLayoutItem Caption="Name">
+                                <DxTextBox @bind-Text="@machine.Name" ReadOnly="true" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Enable">
+                                <DxCheckBox @bind-Checked="@machine.Enabled" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Max retry count" ColSpanLg="4">
+                                <DxSpinEdit Value="@machine.MaxRetryCount" ReadOnly="true"></DxSpinEdit>
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Retry count" ColSpanLg="4">
+                                <DxSpinEdit Value="@machine.RetryCount" ReadOnly="true"></DxSpinEdit>
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Auto Retrying" ColSpanLg="4">
+                                <DxCheckBox Checked="@machine.isAutoRetry" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="IP">
+                                <DxTextBox @bind-Text="@machine.Ip" ReadOnly="true" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Port">
+                                <DxSpinEdit @bind-Value="@machine.Port" ReadOnly="true"></DxSpinEdit>
+                            </DxFormLayoutItem>
+                            @* <DxFormLayoutItem Caption="@($"{localizer["Connection Type"]}")">
+                                <DxComboBox Data="@(connectionType)" @bind-Value="@(machine.ConnectionType)" ReadOnly="true" ValueFieldName="@nameof(ConnectionTypeWrapperClass.Index)" TextFieldName="@nameof(ConnectionTypeWrapperClass.DisplayName)"></DxComboBox>
+                            </DxFormLayoutItem> *@
+                            <DxFormLayoutItem Caption="Tag Category">
+                                <DxComboBox Data="@tagCategories" @bind-Value="@machine.TagCategoryId" ReadOnly="true" ValueFieldName="@nameof(TagCategory.Id)" TextFieldName="@nameof(TagCategory.Name)" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                            </DxFormLayoutItem>
+                        </DxFormLayoutGroup>
+                        <DxFormLayoutGroup Caption="Runtime data" CssClass="rounded">
+                            <DxFormLayoutItem Caption="Status" Field="@nameof(Machine.StatusStr)" ColSpanLg="4" />
+                            <DxFormLayoutItem Caption="Running" Field="@nameof(Machine.RunFlag)" ColSpanLg="4">
+                                <DxCheckBox Checked="@machine?.RunFlag" CheckType="CheckType.Switch" ReadOnly="true" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Retry" ColSpanLg="4">
+                                <DxButton RenderStyle="ButtonRenderStyle.Success" Enabled="@(machine.canManualRetryFlag)" IconCssClass="oi oi-reload"></DxButton>
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Error Message" Field="@nameof(Machine.ErrorMsg)" ColSpanLg="12" />
+                        </DxFormLayoutGroup>
+                    </DxFormLayout>
+                </Template>
+            </DxGridLayoutItem>
+            <DxGridLayoutItem Row="0" Column="1">
+                <Template>
+                    <div>
+                        <DxFormLayout>
+                            <DxFormLayoutTabPages>
+                                <DxFormLayoutTabPage Caption="Basic Tag" Visible="@(machine.hasTags && machine.RunFlag)">
+                                    <DxFormLayoutItem ColSpanLg="12">
+                                        <DxGrid Data="@machine.TagCategory.Tags">
+                                            <Columns>
+                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" />
+                                                <DxGridDataColumn FieldName="@nameof(Tag.DataType)">
+                                                    <CellDisplayTemplate Context="datatypecontext">
+                                                        <div>@((DataType)((int)datatypecontext.Value))</div>
+                                                    </CellDisplayTemplate>
+                                                </DxGridDataColumn>
+                                                <DxGridDataColumn FieldName="@nameof(Tag.UpdateByTime)" />
+                                                <DxGridDataColumn FieldName="@nameof(Tag.ValueString)" />
+                                                <DxGridDataColumn FieldName="@nameof(Tag.LastChangedTime)" DisplayFormat="G" />
+                                                <DxGridDataColumn FieldName="@nameof(Tag.LastUpdateTime)" DisplayFormat="G" />
+                                                <DxGridDataColumn>
+                                                    <CellDisplayTemplate Context="btncontext">
+                                                        <div class="d-flex justify-content-center">
+                                                            <DxToolbar>
+                                                                <Items>
+@*                                                                     <DxToolbarItem Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" Click="@(()=>UpdateTagClicked(btncontext.DataItem))" IconCssClass="oi oi-loop"></DxToolbarItem>
+                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem> *@
+                                                                </Items>
+                                                            </DxToolbar>
+                                                        </div>
+                                                    </CellDisplayTemplate>
+                                                </DxGridDataColumn>
+                                            </Columns>
+                                        </DxGrid>
+                                    </DxFormLayoutItem>
+                                </DxFormLayoutTabPage>
+                            </DxFormLayoutTabPages>
+                        </DxFormLayout>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+}
+
+
+@code {
+    [Parameter]
+    public Machine? machine { get; set; }
+    private bool hasMachine => machine is not null;
+
+    private IEnumerable<TagCategory> tagCategories = new List<TagCategory>();
+    //private IEnumerable<ConnectionTypeWrapperClass> connectionType => machineService.GetMachin
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (hasMachine)
+        {
+            await RetriveTagCategory();
+            machine.MachineStatechangedAct += StatusUpdate;
+            machine.TagsStatechangedAct += UIUpdate;
+            machine.UIUpdateAct += UIUpdate;
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        if (hasMachine)
+        {
+            machine.MachineStatechangedAct -= StatusUpdate;
+            machine.TagsStatechangedAct -= UIUpdate;
+            machine.UIUpdateAct -= UIUpdate;
+        }
+
+    }
+
+    private async Task RetriveTagCategory()
+    {
+        tagCategories = await machineService.GetAllTagCategories();
+    }
+
+    private async void StatusUpdate(Status status)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void UIUpdate()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+}

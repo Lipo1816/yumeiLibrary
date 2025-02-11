@@ -1,0 +1,131 @@
+﻿@namespace CommonLibraryP.MachinePKG.Component
+@inherits TagValueBaseComponent
+
+@if (hasTag)
+{
+    <div class="p-3">
+        @switch (TagParam.DataType)
+        {
+            case 1:
+                <EditForm Model="@boolVal" Context="EditFormContext" OnValidSubmit="@(async () => await TagValueSubmit.InvokeAsync(boolVal?.Value))">
+                    <DxFormLayout>
+                        <DxFormLayoutItem>
+                            <DxCheckBox @bind-Checked="@boolVal.Value" CheckType="CheckType.Switch" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <hr />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <DxToolbar>
+                                <Items>
+                                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                                </Items>
+                            </DxToolbar>
+                        </DxFormLayoutItem>
+                    </DxFormLayout>
+                </EditForm>
+                break;
+            case 2:
+                <EditForm Model="@ushortVal" Context="EditFormContext" OnValidSubmit="@(async () => await TagValueSubmit.InvokeAsync(ushortVal?.Value))">
+                    <DxFormLayout>
+                        <DxFormLayoutItem>
+                            <DxSpinEdit @bind-Value="@ushortVal.Value"></DxSpinEdit>
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <hr />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <DxToolbar>
+                                <Items>
+                                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                                </Items>
+                            </DxToolbar>
+                        </DxFormLayoutItem>
+                    </DxFormLayout>
+                </EditForm>
+                break;
+            case 4:
+                <EditForm Model="@stringVal" Context="EditFormContext" OnValidSubmit="@(async () => await TagValueSubmit.InvokeAsync(stringVal?.Value))">
+                    <DxFormLayout>
+                        <DxFormLayoutItem>
+                            <DxTextBox @bind-Text="@stringVal.Value"></DxTextBox>
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <hr />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem ColSpanLg="12">
+                            <DxToolbar>
+                                <Items>
+                                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                                </Items>
+                            </DxToolbar>
+                        </DxFormLayoutItem>
+                    </DxFormLayout>
+                </EditForm>
+                break;
+            default:
+                break;
+        }
+    </div>
+
+}
+
+
+@code {
+    private class BoolVal
+    {
+        public bool Value { get; set; }
+
+        public BoolVal(Object? obj)
+        {
+            Value = Convert.ToBoolean(obj);
+        }
+    }
+    private BoolVal boolVal;
+
+    private class UshortVal
+    {
+        public ushort Value { get; set; }
+        public UshortVal(Object? obj)
+        {
+            Value = Convert.ToUInt16(obj);
+        }
+    }
+    private UshortVal ushortVal;
+
+    private class StringVal
+    {
+        public string Value { get; set; } = string.Empty;
+        public StringVal(Object? obj)
+        {
+            Value = Convert.ToString(obj);
+        }
+    }
+    private StringVal stringVal;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        if (hasTag)
+        {
+            switch (TagParam.DataType)
+            {
+                case 1:
+                    boolVal = new(TagParam.Value);
+                    break;
+                case 2:
+                    ushortVal = new(TagParam.Value);
+                    break;
+                case 4:
+                    stringVal = new(TagParam.Value);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return base.OnInitializedAsync();
+    }
+
+
+
+}

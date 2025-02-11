@@ -36,7 +36,7 @@ namespace CommonLibraryP.MachinePKG
         {
             { DataType.Bool, typeof(bool) },
             { DataType.Ushort, typeof(ushort) },
-            { DataType.Float, typeof(float) },
+            //{ DataType.Float, typeof(float) },
             { DataType.String, typeof(string) },
             //{ DataType.ArrayOfBool, typeof(bool[]) },
             //{ DataType.ArrayOfUshort, typeof(ushort[]) },
@@ -196,7 +196,7 @@ namespace CommonLibraryP.MachinePKG
     {
         Bool = 1,
         Ushort = 2,
-        Float = 3,
+        //Float = 3,
         String = 4,
         //ArrayOfBool = 11,
         //ArrayOfUshort = 22,

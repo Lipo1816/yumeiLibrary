@@ -21,25 +21,25 @@
                     <DxFormLayout CaptionPosition="CaptionPosition.Vertical" Data="@machine" ReadOnly="true">
                         <DxFormLayoutGroup Caption="Machine Config" CssClass="rounded">
                             <DxFormLayoutItem Caption="Name">
-                                <DxTextBox @bind-Text="@machine.Name" ReadOnly="true" />
+                                <DxTextBox Text="@machine?.Name" ReadOnly="true" />
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Enable">
-                                <DxCheckBox @bind-Checked="@machine.Enabled" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                                <DxCheckBox Checked="@machine?.Enabled" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Max retry count" ColSpanLg="4">
-                                <DxSpinEdit Value="@machine.MaxRetryCount" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.MaxRetryCount" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Retry count" ColSpanLg="4">
-                                <DxSpinEdit Value="@machine.RetryCount" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.RetryCount" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Auto Retrying" ColSpanLg="4">
-                                <DxCheckBox Checked="@machine.isAutoRetry" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                                <DxCheckBox Checked="@machine?.isAutoRetry" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="IP">
-                                <DxTextBox @bind-Text="@machine.Ip" ReadOnly="true" />
+                                <DxTextBox Text="@machine?.Ip" ReadOnly="true" />
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Port">
-                                <DxSpinEdit @bind-Value="@machine.Port" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.Port" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             @* <DxFormLayoutItem Caption="@($"{localizer["Connection Type"]}")">
                                 <DxComboBox Data="@(connectionType)" @bind-Value="@(machine.ConnectionType)" ReadOnly="true" ValueFieldName="@nameof(ConnectionTypeWrapperClass.Index)" TextFieldName="@nameof(ConnectionTypeWrapperClass.DisplayName)"></DxComboBox>
@@ -68,32 +68,34 @@
                             <DxFormLayoutTabPages>
                                 <DxFormLayoutTabPage Caption="Basic Tag" Visible="@(machine.hasTags && machine.RunFlag)">
                                     <DxFormLayoutItem ColSpanLg="12">
-                                        <DxGrid Data="@machine.TagCategory.Tags">
-                                            <Columns>
-                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" />
-                                                <DxGridDataColumn FieldName="@nameof(Tag.DataType)">
-                                                    <CellDisplayTemplate Context="datatypecontext">
-                                                        <div>@((DataType)((int)datatypecontext.Value))</div>
-                                                    </CellDisplayTemplate>
-                                                </DxGridDataColumn>
-                                                <DxGridDataColumn FieldName="@nameof(Tag.UpdateByTime)" />
-                                                <DxGridDataColumn FieldName="@nameof(Tag.ValueString)" />
-                                                <DxGridDataColumn FieldName="@nameof(Tag.LastChangedTime)" DisplayFormat="G" />
-                                                <DxGridDataColumn FieldName="@nameof(Tag.LastUpdateTime)" DisplayFormat="G" />
-                                                <DxGridDataColumn>
-                                                    <CellDisplayTemplate Context="btncontext">
-                                                        <div class="d-flex justify-content-center">
-                                                            <DxToolbar>
-                                                                <Items>
-@*                                                                     <DxToolbarItem Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" Click="@(()=>UpdateTagClicked(btncontext.DataItem))" IconCssClass="oi oi-loop"></DxToolbarItem>
-                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem> *@
-                                                                </Items>
-                                                            </DxToolbar>
-                                                        </div>
-                                                    </CellDisplayTemplate>
-                                                </DxGridDataColumn>
-                                            </Columns>
-                                        </DxGrid>
+                                        <div class="h-100 overflow-auto">
+                                            <DxGrid Data="@machine.TagCategory.Tags" PageSizeSelectorVisible="true">
+                                                <Columns>
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.Name)" />
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.DataType)">
+                                                        <CellDisplayTemplate Context="datatypecontext">
+                                                            <div>@((DataType)((int)datatypecontext.Value))</div>
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.UpdateByTime)" />
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.ValueString)" />
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.LastChangedTime)" DisplayFormat="G" />
+                                                    <DxGridDataColumn FieldName="@nameof(Tag.LastUpdateTime)" DisplayFormat="G" />
+                                                    <DxGridDataColumn>
+                                                        <CellDisplayTemplate Context="btncontext">
+                                                            <div class="d-flex justify-content-center">
+                                                                <DxToolbar>
+                                                                    <Items>
+                                                                        <DxToolbarItem Visible="@(!(btncontext.DataItem as Tag).UpdateByTime)" Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" BeginGroup="true" IconCssClass="oi oi-loop"></DxToolbarItem>
+                                                                        <DxToolbarItem BeginGroup="true" IconCssClass="oi oi-location" Click="@(()=> TagClicked(btncontext.DataItem))"></DxToolbarItem>
+                                                                    </Items>
+                                                                </DxToolbar>
+                                                            </div>
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+                                                </Columns>
+                                            </DxGrid>
+                                        </div>
                                     </DxFormLayoutItem>
                                 </DxFormLayoutTabPage>
                             </DxFormLayoutTabPages>
@@ -103,6 +105,21 @@
             </DxGridLayoutItem>
         </Items>
     </DxGridLayout>
+
+    <DxPopup @bind-Visible="@SetTagVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false">
+        <HeaderTemplate>
+            <div class="w-100 p-3 border border-bottom">
+                <DxToolbar>
+                    <Items>
+                        <DxToolbarItem IconCssClass="oi oi-x" Click="CloseSetTagPopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                    </Items>
+                </DxToolbar>
+            </div>
+        </HeaderTemplate>
+        <BodyTemplate>
+            <TagValueSetting TagParam="@targetTag" TagValueSubmit="TagValueSubmit" />
+        </BodyTemplate>
+    </DxPopup>
 }
 
 
@@ -113,6 +130,11 @@
 
     private IEnumerable<TagCategory> tagCategories = new List<TagCategory>();
     //private IEnumerable<ConnectionTypeWrapperClass> connectionType => machineService.GetMachin
+    private Tag? targetTag;
+    private bool tagSelected => targetTag is not null;
+
+
+    private bool SetTagVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -150,4 +172,30 @@
     {
         await InvokeAsync(StateHasChanged);
     }
+
+
+    private void ShowSetTagPopup()
+    {
+        SetTagVisible = true;
+    }
+    private void CloseSetTagPopup()
+    {
+        SetTagVisible = false;
+    }
+
+    private void TagClicked(Object obj)
+    {
+        targetTag = obj as Tag;
+        if (tagSelected)
+        {
+            ShowSetTagPopup();
+        }
+    }
+
+    private async Task TagValueSubmit(Object obj)
+    {
+        await machineService.SetMachineTag(machine.Name, targetTag.Name, obj);
+        CloseSetTagPopup();
+    }
+
 }

@@ -28,7 +28,7 @@ or
 builder.AddMachineService(your connection string); //if your connection string name is not "DefaultConnection"
 ```
 ### Component setting
-Put following components in your page.
+Put following components in your page./
 Set machines and tags configuration in DB with following components.
 
 ```

@@ -54,4 +54,4 @@ how to set tag value
 ```
 RequestResult res = await MachineService.SetMachineTag(string machineName, string tagName, object val);
 ```
-
+![ㄏㄏ](https://imgcdn.sigstick.com/mPcgGpNRlLbwjPCSCtxC/0-1.png)

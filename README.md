@@ -1,11 +1,11 @@
 ### Use Case
 > Simplifying the connection and communication to machine with common protocol.
 ### Environment
-> Dotnet 8 Blazor Server-Side with Devexpress style
-> SQL server
+* Dotnet 8 Blazor Server-Side with Devexpress style
+* SQL server
 ### DB preparatory works
-> Using machineDB.sql file to create necessary table schema.
-> Check your SQL server can login with sql authentication.
+* Using machineDB.sql file to create necessary table schema.
+* Check your SQL server can login with sql authentication.
 ### Code setting
 appsettings.json
 ```

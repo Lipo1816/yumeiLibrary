@@ -6,6 +6,4 @@
 ### Preparatory works
 > Using machineDB.sql file to create necessary table schema.
 ### Code
-'''
-builder.Services.AddMachineService(your connection string);
-'''
+`builder.Services.AddMachineService(your connection string);`

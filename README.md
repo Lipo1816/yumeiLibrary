@@ -43,7 +43,13 @@ builder.AddMachineService(your connection string); //if your connection string n
 ```
 ### Verify service
 * Inject MachineService to your own service (or component) which is already injected with singleton lifecycle in previous steps.
+how to get tag value
 ```
-var tag = await MachineService.GetMachineTag(string machineName, string tagName);
+Tag? tag = await MachineService.GetMachineTag(string machineName, string tagName);
+Object val = tag?.Value;
+```
+how to set tag value
+```
+RequestResult res = await MachineService.SetMachineTag(string machineName, string tagName, object val);
 ```
 

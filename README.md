@@ -35,4 +35,15 @@ builder.AddMachineService(your connection string); //if your connection string n
 <MachineSetting/>
 <TagCategoriesSetting/>
 ```
+### Verify setting
+* Put following components in your page.
+* Verify machine information is accessible with following component.
+```
+<MachineDashboard Machine="@machine object"/>
+```
+### Verify service
+* Inject MachineService to your own service (or component) which is already injected with singleton lifecycle in previous steps.
+```
+var tag = await MachineService.GetMachineTag(string machineName, string tagName);
+```
 

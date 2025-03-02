@@ -6,7 +6,7 @@
 ### DB preparatory works
 > Using machineDB.sql file to create necessary table schema.
 > Check your SQL server can login with sql authentication.
-### Code preparatory works
+### Code setting
 appsettings.json
 ```
 {
@@ -28,3 +28,4 @@ or
 builder.AddMachineService(your connection string); //if your connection string name is not "DefaultConnection"
 ```
 
+### Component setting

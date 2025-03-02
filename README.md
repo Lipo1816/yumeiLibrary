@@ -46,7 +46,9 @@ builder.AddMachineService(your connection string); //if your connection string n
 how to get tag value
 ```
 Tag? tag = await MachineService.GetMachineTag(string machineName, string tagName);
-Object val = tag?.Value;
+Object? val = tag?.Value;//need to downcast by yourself
+or
+string s = tag?.ValueString();
 ```
 how to set tag value
 ```

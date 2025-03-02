@@ -3,10 +3,10 @@
 ### Environment
 > Dotnet 8 Blazor Server-Side with Devexpress style
 > SQL server
-### Preparatory works
+### DB preparatory works
 > Using machineDB.sql file to create necessary table schema.
 > Check your SQL server can login with sql authentication.
-### Code
+### Code preparatory works
 appsettings.json
 ```
 {

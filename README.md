@@ -5,5 +5,26 @@
 > SQL server
 ### Preparatory works
 > Using machineDB.sql file to create necessary table schema.
+> Check your SQL server can login with sql authentication.
 ### Code
-`builder.Services.AddMachineService(your connection string);`
+appsettings.json
+```
+{
+  "ConnectionStrings":
+    {
+      "connection string name": "connection string value" //Data Source=ip;Initial Catalog=db name;User ID=sa;Password=**********;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False
+    },
+  "othersetting"
+  {
+    ...
+  },
+  ...
+}
+```
+Progeam.cs
+```
+builder.AddMachineService(); //if your connection string name is "DefaultConnection"
+or
+builder.AddMachineService(your connection string); //if your connection string name is not "DefaultConnection"
+```
+

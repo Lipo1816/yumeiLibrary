@@ -32,9 +32,9 @@ namespace CommonLibraryP.MachinePKG
 
         public Guid? TagCategoryId { get; set; }
 
-        public Guid? LogicStatusCategoryId { get; set; }
+        //public Guid? LogicStatusCategoryId { get; set; }
 
-        public Guid? ErrorCodeCategoryId { get; set; }
+        //public Guid? ErrorCodeCategoryId { get; set; }
 
         public bool Enabled { get; set; }
 

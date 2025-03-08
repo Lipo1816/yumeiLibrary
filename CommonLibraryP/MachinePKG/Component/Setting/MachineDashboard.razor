@@ -85,8 +85,9 @@
                                                         <div class="d-flex justify-content-center">
                                                             <DxToolbar>
                                                                 <Items>
-@*                                                                     <DxToolbarItem Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" Click="@(()=>UpdateTagClicked(btncontext.DataItem))" IconCssClass="oi oi-loop"></DxToolbarItem>
-                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem> *@
+                                                                    @*                                                                     <DxToolbarItem Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" Click="@(()=>UpdateTagClicked(btncontext.DataItem))" IconCssClass="oi oi-loop"></DxToolbarItem>
+                                                                    *@
+                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem> 
                                                                 </Items>
                                                             </DxToolbar>
                                                         </div>
@@ -103,6 +104,55 @@
             </DxGridLayoutItem>
         </Items>
     </DxGridLayout>
+
+    <DxPopup @bind-Visible="@setPopup" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="true">
+        <HeaderTemplate>
+            <div class="w-100 p-3 border border-bottom">
+                <DxToolbar>
+                    <Items>
+                        <DxToolbarItem IconCssClass="oi oi-x" Click="CloseSetPopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                    </Items>
+                </DxToolbar>
+            </div>
+        </HeaderTemplate>
+        <BodyContentTemplate Context="bodycontext">
+            <DxFormLayout>
+                @switch (targetTag?.DataType)
+                {
+                    case 1:
+                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                            <DxCheckBox @bind-Checked="@setVal_bool" CheckType="CheckType.Switch" />
+                        </DxFormLayoutItem>
+                        break;
+                    case 2:
+                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                            <DxSpinEdit @bind-Value="@setVal_ushort" />
+                        </DxFormLayoutItem>
+                        break;
+                    case 3:
+                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                            <DxSpinEdit @bind-Value="@setVal_float"></DxSpinEdit>
+                        </DxFormLayoutItem>
+                        break;
+                    case 4:
+                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                            <DxTextBox @bind-Text="@setVal_string"></DxTextBox>
+                        </DxFormLayoutItem>
+                        break;
+                    default:
+                        break;
+                }
+
+            </DxFormLayout>
+        </BodyContentTemplate>
+        <FooterTemplate>
+            <DxToolbar ItemRenderStyleMode="@ToolbarRenderStyleMode.Contained" SizeMode="SizeMode.Large">
+                <Items>
+                    <DxToolbarItem RenderStyle="ButtonRenderStyle.Info" IconCssClass="oi oi-data-transfer-download" Click="@(async () => await SetTagValue(targetTag))" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+                </Items>
+            </DxToolbar>
+        </FooterTemplate>
+    </DxPopup>
 }
 
 
@@ -112,7 +162,13 @@
     private bool hasMachine => machine is not null;
 
     private IEnumerable<TagCategory> tagCategories = new List<TagCategory>();
-    //private IEnumerable<ConnectionTypeWrapperClass> connectionType => machineService.GetMachin
+
+    private bool setPopup = false;
+    private Tag? targetTag;
+    private bool setVal_bool = false;
+    private ushort setVal_ushort = 0;
+    private float setVal_float = 0;
+    private string setVal_string = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -149,5 +205,61 @@
     private async void UIUpdate()
     {
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void ShowSetPopup()
+    => setPopup = true;
+
+    private void CloseSetPopup()
+    => setPopup = false;
+
+    private void SetTagClicked(Object tagObj)
+    {
+
+        targetTag = tagObj as Tag;
+        if (targetTag != null)
+        {
+            switch (targetTag.DataType)
+            {
+                case 1:
+                    setVal_bool = (bool)targetTag.Value;
+                    break;
+                case 2:
+                    setVal_ushort = (ushort)targetTag.Value;
+                    break;
+                default:
+                    break;
+
+            }
+            ShowSetPopup();
+        }
+
+    }
+
+    private async Task SetTagValue(Object tagObj)
+    {
+        Tag? targetTag = tagObj as Tag;
+        if (targetTag != null)
+        {
+            switch (targetTag.DataType)
+            {
+                case 1:
+                    await machine.SetTag(targetTag, setVal_bool);
+                    break;
+                case 2:
+                    await machine.SetTag(targetTag, setVal_ushort);
+                    break;
+                case 3:
+                    await machine.SetTag(targetTag, setVal_float);
+                    break;
+                case 4:
+                    await machine.SetTag(targetTag, setVal_string);
+                    break;
+                default:
+                    break;
+
+            }
+        }
+        CloseSetPopup();
     }
 }

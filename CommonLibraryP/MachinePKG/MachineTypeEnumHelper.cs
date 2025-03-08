@@ -145,6 +145,29 @@ namespace CommonLibraryP.MachinePKG
             return target is null ? "Not Defined" : target.parameterName;
         }
         #endregion
+
+        #region logical operations
+
+        public static List<LogicalOperationWrapperClass> LogicalOperationWrapperClassDict = new()
+        {
+            new LogicalOperationWrapperClass(LogicalOperation.Const, "Const"),
+            new LogicalOperationWrapperClass(LogicalOperation.TagVariable, "Tag variable"),
+            new LogicalOperationWrapperClass(LogicalOperation.Equal, "=="),
+            new LogicalOperationWrapperClass(LogicalOperation.NotEqual, "!="),
+            new LogicalOperationWrapperClass(LogicalOperation.Large, ">"),
+            new LogicalOperationWrapperClass(LogicalOperation.Less, "<"),
+            new LogicalOperationWrapperClass(LogicalOperation.LargerThanOrEqualTo, ">="),
+            new LogicalOperationWrapperClass(LogicalOperation.LessThanOrEqualTo, "<="),
+
+        };
+
+        public static string GetLogicalOperationSymbol(int code)
+        {
+            var target = LogicalOperationWrapperClassDict.FirstOrDefault(x => x.Index == code);
+            return target is null ? "?" : target.Symbol;
+        }
+
+        #endregion
     }
 
     #region connection type
@@ -245,6 +268,34 @@ namespace CommonLibraryP.MachinePKG
         public ConnectType connectType { get; init; }
         public string variableName { get; init; } = null!;
         public string parameterName { get; init; } = null!;
+    }
+
+    #endregion
+
+    #region logical operations
+
+    public enum LogicalOperation
+    {
+        Const = -1,
+        TagVariable = -2,
+        Equal = 1,
+        NotEqual = 2,
+        Large = 3,
+        Less = 4,
+        LargerThanOrEqualTo = 5,
+        LessThanOrEqualTo = 6,
+    }
+
+    public class LogicalOperationWrapperClass : EnumWrapper
+    {
+        private string symbol;
+        public string Symbol => symbol;
+        public LogicalOperationWrapperClass(LogicalOperation logicalOperation, string symbol)
+        {
+            index = (int)logicalOperation;
+            displayName = logicalOperation.ToString();
+            this.symbol = symbol;
+        }
     }
 
     #endregion

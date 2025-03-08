@@ -20,6 +20,7 @@ namespace CommonLibraryP.MachinePKG
             using (var scope = scopeFactory.CreateScope())
             {
                 var machineService = scope.ServiceProvider.GetRequiredService<MachineService>();
+                await machineService.InitAllModbusSlaves();
                 await machineService.InitAllMachinesFromDB();
             }
         }

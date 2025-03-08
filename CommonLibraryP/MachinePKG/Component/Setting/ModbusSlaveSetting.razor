@@ -1,0 +1,124 @@
+﻿@namespace CommonLibraryP.MachinePKG.Component
+
+@rendermode RenderMode.InteractiveServer
+@inject IStringLocalizer<MachineLanguage> localizer
+@inject MachineService machineService
+
+<DxGrid @ref="grid" Data="@modbusSlaveConfig" FocusedRowEnabled="true" FocusedRowChanged="ModbusSlaveConfigSelected" DataItemDeleting="DeleteModbusSlaveConfig" HighlightRowOnHover="true">
+    <ToolbarTemplate>
+        <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+            <DxToolbarItem IconCssClass="oi oi-plus" Click="NewModbusSlaveConfigClicked" BeginGroup="true" />
+            <DxToolbarItem Enabled="@modbusSlaveConfigSelected" Click="ShowModbusSlaveConfigPopup" IconCssClass="oi oi-pencil" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
+            <DxToolbarItem Enabled="@modbusSlaveConfigSelected" Click="ShowDelete" IconCssClass="oi oi-trash" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+        </DxToolbar>
+    </ToolbarTemplate>
+    <Columns>
+        <DxGridDataColumn Caption="@($"{localizer["IP"]}")" FieldName="@nameof(ModbusSlaveConfig.Ip)" />
+        <DxGridDataColumn Caption="@($"{localizer["Port"]}")" FieldName="@nameof(ModbusSlaveConfig.Port)" />
+        <DxGridDataColumn Caption="@($"{localizer["Station"]}")" FieldName="@nameof(ModbusSlaveConfig.Station)" />
+    </Columns>
+</DxGrid>
+
+<DxPopup @bind-Visible="@popupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
+    <HeaderTemplate>
+        <div class="w-100 p-3 border border-bottom">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-x" Click="CloseModbusSlaveConfigPopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </div>
+    </HeaderTemplate>
+    <BodyContentTemplate Context="bodycontext">
+        <EditForm Model="@taregtModbusSlaveConfig" Context="EditFormContext" OnValidSubmit="UpsertMudbusConfig">
+            <DataAnnotationsValidator />
+            <DxFormLayout>
+
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["IP"]}")" ColSpanLg="6">
+                    <DxTextBox @bind-Text="@taregtModbusSlaveConfig.Ip" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Port"]}")" ColSpanLg="6">
+                    <DxSpinEdit @bind-Value="@taregtModbusSlaveConfig.Port" MinValue="0" MaxValue="65535" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["MaxRetryCount"]}")" ColSpanLg="6">
+                    <DxSpinEdit @bind-Value="@taregtModbusSlaveConfig.Station" MinValue="1" MaxValue="10" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr/>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                    <DxToolbar>
+                        <Items>
+                            <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                        </Items>
+                    </DxToolbar>
+                </DxFormLayoutItem>
+
+            </DxFormLayout>
+        </EditForm>
+    </BodyContentTemplate>
+</DxPopup>
+
+@code {
+    IGrid? grid { get; set; }
+    private IEnumerable<ModbusSlaveConfig>? modbusSlaveConfig;
+    private ModbusSlaveConfig? taregtModbusSlaveConfig;
+    private bool modbusSlaveConfigSelected => taregtModbusSlaveConfig is not null;
+
+    private bool popupVisible;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitParam();
+    }
+
+    private async Task InitParam()
+    {
+        modbusSlaveConfig = await machineService.GetAllModbusSlaveConfigs();
+    }
+
+    private void ModbusSlaveConfigSelected(GridFocusedRowChangedEventArgs args)
+    {
+        taregtModbusSlaveConfig = args.DataItem as ModbusSlaveConfig;
+    }
+
+    private void ShowModbusSlaveConfigPopup()
+    {
+        popupVisible = true;
+    }
+
+    private async void CloseModbusSlaveConfigPopup()
+    {
+        popupVisible = false;
+        await InitParam();
+    }
+
+    
+
+    private void NewModbusSlaveConfigClicked()
+    {
+        taregtModbusSlaveConfig = new();
+        ShowModbusSlaveConfigPopup();
+    }
+
+    private async Task UpsertMudbusConfig()
+    {
+        var res = await machineService.UpsertMudbusConfig(taregtModbusSlaveConfig);
+        CloseModbusSlaveConfigPopup();
+        //await ActionCallback.InvokeAsync(res);
+        //uiService.ShowToast(res);
+    }
+
+    private void ShowDelete()
+    {
+        grid.ShowDataItemDeleteConfirmation(taregtModbusSlaveConfig);
+    }
+
+    private async Task DeleteModbusSlaveConfig()
+    {
+        //var res = await machineService.DeleteMachine(taregtMachine);
+        //await InitParam();
+        //await ActionCallback.InvokeAsync(res);
+        //uiService.ShowToast(res);
+    }
+}

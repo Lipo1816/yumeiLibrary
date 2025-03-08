@@ -281,12 +281,12 @@
 
     private string GetLocalization(string s)
     {
-        return localizer[MachineTypeEnumHelper.GetTagParameterMeaning((ConnectType)targetCat.ConnectionType, s)];
+        return targetCat is null ? string.Empty : localizer[MachineTypeEnumHelper.GetTagParameterMeaning((ConnectType)targetCat?.ConnectionType, s)];
     }
 
     private bool GetVariableDefined(string s)
     {
-        return MachineTypeEnumHelper.GetTagParameterMeaning((ConnectType)targetCat.ConnectionType, s) != "Not Defined";
+        return targetCat is null ? false : MachineTypeEnumHelper.GetTagParameterMeaning((ConnectType)targetCat.ConnectionType, s) != "Not Defined";
     }
 
     #endregion

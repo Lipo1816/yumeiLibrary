@@ -14,14 +14,31 @@ namespace CommonLibraryP.MachinePKG
 
         }
 
+        public virtual DbSet<ModbusSlaveConfig> ModbusSlaveConfigs { get; set; }
+
         public virtual DbSet<Machine> Machines { get; set; }
         public virtual DbSet<MachineStatusLog> MachineStatusLogs { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
 
         public virtual DbSet<TagCategory> TagCategories { get; set; }
 
+        public virtual DbSet<Condition> Conditions { get; set; }
+
+        public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ModbusSlaveConfig>(entity =>
+            {
+
+                entity.ToTable("ModbusSlaveConfigs");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Ip).HasColumnName("Ip");
+                entity.Property(e => e.Port).HasColumnName("Port");
+                entity.Property(e => e.Station).HasColumnName("Station");
+            });
+
             modelBuilder.Entity<Machine>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -39,7 +56,7 @@ namespace CommonLibraryP.MachinePKG
 
                 entity.Property(e => e.Name).HasMaxLength(50);
                 entity.Property(e => e.TagCategoryId).HasColumnName("TagCategoryID");
-                entity.Property(e => e.LogicStatusCategoryId).HasColumnName("LogicStatusCategoryID");
+                //entity.Property(e => e.LogicStatusCategoryId).HasColumnName("LogicStatusCategoryID");
 
 
                 entity.HasOne(d => d.TagCategory).WithMany(p => p.Machines)
@@ -119,7 +136,30 @@ namespace CommonLibraryP.MachinePKG
                 entity.HasOne(d => d.Category).WithMany(p => p.Tags)
                     .HasForeignKey(d => d.CategoryId)
                     .OnDelete(DeleteBehavior.ClientCascade);
-                //.HasConstraintName("FK__Tag__CategoryID__68487DD7");
+            });
+
+            modelBuilder.Entity<Condition>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.ToTable("Conditions");
+
+                entity.HasIndex(e => e.Name).IsUnique();
+
+                entity.HasMany(e => e.ConditionRootNode).WithOne(p => p.Condition)
+                    .HasForeignKey(q => q.ConditionId);
+            });
+
+            modelBuilder.Entity<ConditionNode>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.ToTable("ConditionNodes");
+
+                entity.HasOne(e => e.Condition).WithMany(p => p.ConditionRootNode);
+
+                entity.HasOne(e => e.ParentNode).WithMany(f => f.ChildrenNodes)
+                .HasForeignKey(g => g.ParentNodeId);
             });
         }
     }

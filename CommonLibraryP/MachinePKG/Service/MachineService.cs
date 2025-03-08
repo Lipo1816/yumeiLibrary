@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using CommonLibraryP.Data;
+using System.Net;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -16,8 +17,68 @@ namespace CommonLibraryP.MachinePKG
         public MachineService(IServiceScopeFactory scopeFactory)
         {
             this.scopeFactory = scopeFactory;
+            //IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
+            //var addr = ipEntry.AddressList.Where(x=>x.AddressFamily== System.Net.Sockets.AddressFamily.InterNetwork);
         }
 
+        #region modbus slave
+
+        private List<ModbusSlaveConfig> modbusSlaves = new();
+        public List<ModbusSlaveConfig> ModbusSlaves => modbusSlaves;
+        public async Task InitAllModbusSlaves()
+        {
+            modbusSlaves = await GetAllModbusSlaveConfigs();
+            foreach (var slave in modbusSlaves)
+            {
+                try
+                {
+                    await slave.Init();
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+        }
+        public Task<List<ModbusSlaveConfig>> GetAllModbusSlaveConfigs()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return Task.FromResult(dbContext.ModbusSlaveConfigs.AsNoTracking().ToList());
+            }
+        }
+        public async Task<RequestResult> UpsertMudbusConfig(ModbusSlaveConfig modbusSlaveConfig)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.ModbusSlaveConfigs.FirstOrDefault(x => x.Id == modbusSlaveConfig.Id);
+                    bool exist = target is not null;
+                    if (exist)
+                    {
+                        target.Ip = modbusSlaveConfig.Ip;
+                        target.Port = modbusSlaveConfig.Port;
+                        target.Station = modbusSlaveConfig.Station;
+                    }
+                    else
+                    {
+                        await dbContext.ModbusSlaveConfigs.AddAsync(modbusSlaveConfig);
+                    }
+                    await dbContext.SaveChangesAsync();
+                    return new(2, $"upsert modbus slave {modbusSlaveConfig.Ip} success");
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"upsert modbus slave {modbusSlaveConfig.Ip} fail({e.Message})");
+                }
+
+            }
+        }
+
+        #endregion
 
         #region machine
         private List<Machine> machines = new();
@@ -101,8 +162,8 @@ namespace CommonLibraryP.MachinePKG
                         target.ConnectionType = machine.ConnectionType;
                         target.MaxRetryCount = machine.MaxRetryCount;
                         target.TagCategoryId = machine.TagCategoryId;
-                        target.LogicStatusCategoryId = machine.LogicStatusCategoryId;
-                        target.ErrorCodeCategoryId = machine.ErrorCodeCategoryId;
+                        //target.LogicStatusCategoryId = machine.LogicStatusCategoryId;
+                        //target.ErrorCodeCategoryId = machine.ErrorCodeCategoryId;
                         target.Enabled = machine.Enabled;
                         target.UpdateDelay = machine.UpdateDelay;
                         target.RecordStatusChanged = machine.RecordStatusChanged;
@@ -239,7 +300,7 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
-        public RequestResult RegisterTagValueChange(string machineName ,string tagName, Action<Tag> tagListener)
+        public RequestResult RegisterTagValueChange(string machineName, string tagName, Action<Tag> tagListener)
         {
             var targetMachine = machines.FirstOrDefault(x => x.Name == machineName);
             if (targetMachine is null)
@@ -247,12 +308,12 @@ namespace CommonLibraryP.MachinePKG
                 return new(4, $"Machine {machineName} not found");
             }
             var targetTag = targetMachine.TagCategory?.Tags.FirstOrDefault(x => x.Name == tagName);
-            if(targetTag is null)
+            if (targetTag is null)
             {
                 return new(4, $"Tag {tagName} not found in machine {machineName}");
             }
 
-            tagListener += targetTag?.TagValueChanged;
+            tagListener += targetTag.TagValueChanged;
             return new(2, $"Listen machine {machineName} tag {tagName} value change success");
         }
 
@@ -555,6 +616,147 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
+
+        #endregion
+
+        #region condition
+
+        private List<Condition> conditions = new();
+        public List<Condition> Conditions => conditions;
+        public async Task InitConditions()
+        {
+            conditions = await GetAllConditions();
+        }
+
+        public async Task<List<Condition>> GetAllConditions()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return await dbContext.Conditions.Include(x => x.ConditionRootNode)
+                    .ThenInclude(x => x.ChildrenNodes)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+        }
+        public async Task<RequestResult> UpsertCondition(Condition condition)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.Conditions.FirstOrDefault(x => x.Id == condition.Id);
+                    bool exist = target is not null;
+                    if (exist)
+                    {
+                        target.Name = condition.Name;
+                        target.Enable = condition.Enable;
+                    }
+                    else
+                    {
+                        await dbContext.Conditions.AddAsync(condition);
+                    }
+                    await dbContext.SaveChangesAsync();
+                    //DataEditMode dataEditMode = exist ? DataEditMode.Update : DataEditMode.Insert;
+                    //await RefreshMachine(machine, dataEditMode);
+                    return new(2, $"upsert condition {condition.Name} success");
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"upsert condition {condition.Name} fail({e.Message})");
+                }
+
+            }
+        }
+        public async Task<RequestResult> DeleteCondition(Condition condition)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.Conditions.FirstOrDefault(x => x.Id == condition.Id);
+                    if (target != null)
+                    {
+                        dbContext.Remove(target);
+                        await dbContext.SaveChangesAsync();
+                        return new(2, $"Delete condition {target.Name} success");
+                    }
+                    else
+                    {
+                        return new(4, $"condition {condition.Name} not found");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"Delete condition {condition.Name} fail({e.Message})");
+                }
+
+            }
+        }
+
+        public async Task<RequestResult> UpsertConditionNode(ConditionNode conditionNode)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.ConditionNodes.FirstOrDefault(x => x.Id == conditionNode.Id);
+                    bool exist = target is not null;
+                    if (exist)
+                    {
+                        target.ConditionId = conditionNode.ConditionId;
+                        target.ParentNodeId = conditionNode.ParentNodeId;
+                        target.LeafPosition = conditionNode.LeafPosition;
+                        target.MachineId = conditionNode.MachineId;
+                        target.TagId = conditionNode.TagId;
+                        target.LogicalOperation = conditionNode.LogicalOperation;
+                    }
+                    else
+                    {
+                        await dbContext.ConditionNodes.AddAsync(conditionNode);
+                    }
+                    await dbContext.SaveChangesAsync();
+                    return new(2, $"upsert condition node success");
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"upsert condition condition node fail({e.Message})");
+                }
+
+            }
+        }
+
+        public async Task<RequestResult> DeleteConditionNode(ConditionNode conditionNode)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.ConditionNodes.FirstOrDefault(x => x.Id == conditionNode.Id);
+                    if (target != null)
+                    {
+                        dbContext.Remove(target);
+                        await dbContext.SaveChangesAsync();
+                        return new(2, $"Delete condition node success");
+                    }
+                    else
+                    {
+                        return new(4, $"condition node not found");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"Delete condition node fail({e.Message})");
+                }
+
+            }
+        }
 
         #endregion
     }

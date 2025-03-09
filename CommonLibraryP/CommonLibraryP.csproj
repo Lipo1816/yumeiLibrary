@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.12" />
     <PackageReference Include="NModbus" Version="3.0.81" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>

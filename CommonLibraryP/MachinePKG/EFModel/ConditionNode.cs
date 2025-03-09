@@ -1,39 +1,28 @@
-﻿using System;
+﻿using DevExpress.XtraPrinting;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CommonLibraryP.MachinePKG
 {
-    public partial class ConditionNode
+    public abstract partial class ConditionNode
     {
+        [Required]
         public Guid Id { get; set; }
+        [Required]
+        public string Name { get; set; } = null!;
         public Guid? ConditionId { get; set; }
         public virtual Condition? Condition { get; set; }
-        public Guid? ParentNodeId { get; set; }
+        public virtual Guid? ParentNodeId { get; set; }
         public virtual ConditionNode? ParentNode { get; set; }
-        public int LeafPosition { get; set; }
-        public virtual ICollection<ConditionNode> ChildrenNodes { get; set; } = new List<ConditionNode>();
-        public Guid? MachineId { get; set; }
-        public Guid? TagId { get; set; }
-        public int LogicalOperation
-        {
-            get
-            {
-                return logicalOperation;
-            }
-            set
-            {
-                logicalOperation = value;
-                if (logicalOperation > 0)
-                {
-                    MachineId = null;
-                    TagId = null;
-                }
-            }
-        }
+        public virtual ICollection<ConditionNode> ChildNodes { get; set; } = new List<ConditionNode>();
 
-        private int logicalOperation;
+        public abstract bool ContentValid { get; }
+
+        public abstract string NameAndContent { get; }
     }
 }

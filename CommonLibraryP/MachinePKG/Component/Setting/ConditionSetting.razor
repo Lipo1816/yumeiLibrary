@@ -4,13 +4,15 @@
 @inject IStringLocalizer<MachineLanguage> localizer
 @inject MachineService machineService
 
+@implements IDisposable
+
 <DxGridLayout RowSpacing="1rem" ColumnSpacing="1rem">
     <Rows>
         <DxGridLayoutRow></DxGridLayoutRow>
     </Rows>
     <Columns>
-        <DxGridLayoutColumn Width="3fr"></DxGridLayoutColumn>
-        <DxGridLayoutColumn Width="8fr"></DxGridLayoutColumn>
+        <DxGridLayoutColumn Width="6fr"></DxGridLayoutColumn>
+        <DxGridLayoutColumn Width="6fr"></DxGridLayoutColumn>
     </Columns>
     <Items>
         <DxGridLayoutItem Row="0" Column="0">
@@ -23,7 +25,6 @@
                                     <DxToolbarItem IconCssClass="oi oi-plus" Click="NewConditionClicked" BeginGroup="true" />
                                     <DxToolbarItem Enabled="@conditionSelected" Click="ShowConditionPopup" IconCssClass="oi oi-pencil" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
                                     <DxToolbarItem Enabled="@conditionSelected" Click="ShowConditionDelete" IconCssClass="oi oi-trash" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
-
                                 </Items>
                             </DxToolbar>
                         </ToolbarTemplate>
@@ -34,7 +35,23 @@
                                     <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
-
+                            <DxGridDataColumn Caption="@($"{localizer["NodesValid"]}")" FieldName="@nameof(Condition.NodesValid)">
+                                <CellDisplayTemplate>
+                                    <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn Caption="@($"{localizer["ConditionMatch"]}")" FieldName="@nameof(Condition.ConditionMatch)">
+                                <CellDisplayTemplate>
+                                    <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn Caption="@($"{localizer["Triggered"]}")" FieldName="@nameof(Condition.Triggered)" >
+                                <CellDisplayTemplate>
+                                    <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn Caption="@($"{localizer["LastCheckTime"]}")" FieldName="@nameof(Condition.LastCheckTime)" DisplayFormat="G"/>
+                            <DxGridDataColumn Caption="@($"{localizer["LastTriggetTime"]}")" FieldName="@nameof(Condition.LastTriggetTime)" DisplayFormat="G" />
                         </Columns>
                     </DxGrid>
                 </div>
@@ -43,27 +60,68 @@
         <DxGridLayoutItem Row="0" Column="1">
             <Template>
                 <div>
-                    <DxTreeList @ref="treeView"
-                    Data="@conditionNodes"
-                    KeyFieldName="@nameof(ConditionNode.Id)"
-                    ChildrenFieldName="@nameof(ConditionNode.ChildrenNodes)"
-                    VirtualScrollingEnabled="true"
-                    ColumnResizeMode="TreeListColumnResizeMode.NextColumn"
-                    FocusedRowEnabled="true"
-                    FocusedRowChanged="ConditionNodeSelected">
-                        <ToolbarTemplate>
-                            <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
-                                <Items>
-                                    <DxToolbarItem Click="NewConditionNodeClicked" BeginGroup="true" IconCssClass="oi oi-plus" />
-                                    <DxToolbarItem Click="ShowNodePopup" Visible="@conditionNodeSelected" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" IconCssClass="oi oi-pencil" />
-                                    <DxToolbarItem Click="ShowConditionNodeDelete" Enabled="@conditionNodeSelected" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" IconCssClass="oi oi-trash" Alignment="ToolbarItemAlignment.Right" />
-                                </Items>
-                            </DxToolbar>
-                        </ToolbarTemplate>
-                        <Columns>
-                            <DxTreeListDataColumn FieldName="@nameof(ConditionNode.Symbol)" SortOrder="TreeListColumnSortOrder.Ascending" />
-                        </Columns>
-                    </DxTreeList>
+                    <DxTabs>
+                        <DxTabPage Text="Syntax tree">
+                            <DxTreeList @ref="treeView"
+                                        Data="@hierarchicalConditionNodes"
+                                        KeyFieldName="@nameof(ConditionNode.Id)"
+                                        ChildrenFieldName="@(nameof(ConditionNode.ChildNodes))"
+                                        VirtualScrollingEnabled="true"
+                                        ColumnResizeMode="TreeListColumnResizeMode.NextColumn"
+                                        FocusedRowEnabled="true"
+                                        FocusedRowChanged="ConditionNodeSelected">
+                                <ToolbarTemplate>
+                                    <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+                                        <Items>
+                                            <DxToolbarItem BeginGroup="true" IconCssClass="oi oi-plus">
+                                                <Items>
+                                                    <DxToolbarItem Text="Condition" Click="(()=> NewConditionNodeClicked(0))" />
+                                                    <DxToolbarItem Text="Constant" Click="(()=> NewConditionNodeClicked(1))" />
+                                                    <DxToolbarItem Text="TagVariable" Click="(()=> NewConditionNodeClicked(2))" />
+                                                </Items>
+                                            </DxToolbarItem>
+                                            <DxToolbarItem Click="ShowNodePopup" Visible="@conditionNodeSelected" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" IconCssClass="oi oi-pencil" />
+                                            <DxToolbarItem Click="ShowConditionNodeDelete" Enabled="@conditionNodeSelected" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" IconCssClass="oi oi-trash" Alignment="ToolbarItemAlignment.Right" />
+                                        </Items>
+                                    </DxToolbar>
+                                </ToolbarTemplate>
+                                <Columns>
+                                    <DxTreeListDataColumn FieldName="@nameof(ConditionNode.NameAndContent)" SortOrder="TreeListColumnSortOrder.Ascending" />
+                                    <DxTreeListDataColumn FieldName="@nameof(ConditionNode.AllValid)" SortOrder="TreeListColumnSortOrder.Ascending" />
+                                    <DxTreeListDataColumn FieldName="@nameof(ConditionNode.ContentValid)" SortOrder="TreeListColumnSortOrder.Ascending" />
+                                </Columns>
+                            </DxTreeList>
+                        </DxTabPage>
+                        <DxTabPage Text="Actions">
+                            <DxGrid @ref="@actionGrid" Data="@conditionActions" FocusedRowEnabled="true" FocusedRowChanged="ConditionActionSelected" DataItemDeleting="DeleteConditionAction" HighlightRowOnHover="true">
+                                <ToolbarTemplate>
+                                    <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+                                        <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+                                            <Items>
+                                                <DxToolbarItem BeginGroup="true" IconCssClass="oi oi-plus">
+                                                    <Items>
+                                                        <DxToolbarItem Text="Await" Click="(()=> NewConditionActionClicked(0))" />
+                                                        <DxToolbarItem Text="Set Tag" Click="(()=> NewConditionActionClicked(1))" />
+                                                    </Items>
+                                                </DxToolbarItem>
+                                                <DxToolbarItem Click="ShowActionPopup" Visible="@conditionActionSelected" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" IconCssClass="oi oi-pencil" />
+                                                <DxToolbarItem Click="ShowConditionActionDelete" Enabled="@conditionActionSelected" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" IconCssClass="oi oi-trash" Alignment="ToolbarItemAlignment.Right" />
+                                            </Items>
+                                        </DxToolbar>
+                                    </DxToolbar>
+                                </ToolbarTemplate>
+                                <Columns>
+                                    <DxGridDataColumn Caption="@($"{localizer["Name"]}")" FieldName="@nameof(ConditionAction.Name)" />
+                                    <DxGridDataColumn Caption="@($"{localizer["Command"]}")" FieldName="@nameof(ConditionAction.CommandCode)">
+                                        <CellDisplayTemplate>
+                                            <DxTextBox Text="@(((ConditionCommandCode)context.Value).ToString())" ReadOnly="true" />
+                                        </CellDisplayTemplate>
+                                    </DxGridDataColumn>
+                                </Columns>
+                            </DxGrid>
+                        </DxTabPage>
+                    </DxTabs>
+
                 </div>
             </Template>
         </DxGridLayoutItem>
@@ -87,8 +145,11 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Name"]}")" ColSpanLg="6" BeginRow="true">
                     <DxTextBox @bind-Text="@targetCondition.Name" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Connection Type"]}")" ColSpanLg="6">
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Enable"]}")" ColSpanLg="6">
                     <DxCheckBox @bind-Checked="@targetCondition.Enable" CheckType="CheckType.Switch" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
                     <DxToolbar>
@@ -116,11 +177,103 @@
         <EditForm Model="@targetConditionNode" Context="ConditionNodeContext" OnValidSubmit="UpsertConditionNode">
             <DataAnnotationsValidator />
             <DxFormLayout>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Logic Type"]}")" ColSpanLg="6" BeginRow="true">
-                    <DxComboBox @bind-Value="@targetConditionNode.LogicalOperation" Data="@MachineTypeEnumHelper.LogicalOperationWrapperClassDict" TextFieldName="@nameof(LogicalOperationWrapperClass.Symbol)" ValueFieldName="@nameof(LogicalOperationWrapperClass.Index)" ShowValidationIcon="true" />
-                </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Name"]}")" ColSpanLg="6" BeginRow="true">
-                    <DxComboBox @bind-Value="@targetConditionNode.MachineId" Data="@machines" TextFieldName="@nameof(Machine.Name)" ValueFieldName="@nameof(Machine.Id)" ShowValidationIcon="true" />
+                    <DxTextBox @bind-Text="@targetConditionNode.Name" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Parent Node"]}")" ColSpanLg="6" BeginRow="true">
+                    <DxComboBox @bind-Value="@targetConditionNode.ParentNodeId" Data="@flatConditionNodes" ValueFieldName="@nameof(ConditionNode.Id)" TextFieldName="@nameof(ConditionNode.NameAndContent)" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
+                </DxFormLayoutItem>
+                @if (targetConditionNode?.GetType() == typeof(ConditionLogicNode))
+                {
+                    ConditionLogicNode conditionLogicNode = targetConditionNode as ConditionLogicNode;
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Logic"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxComboBox @bind-Value="@conditionLogicNode.LogicalOperation" Data="@MachineTypeEnumHelper.LogicalOperationWrapperClassDict" ValueFieldName="@nameof(LogicalOperationWrapperClass.Index)" TextFieldName="@nameof(LogicalOperationWrapperClass.Symbol)" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                }
+                else if (targetConditionNode?.GetType() == typeof(ConditionConstDataNode))
+                {
+                    ConditionConstDataNode conditionConstDataNode = targetConditionNode as ConditionConstDataNode;
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Value"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxTextBox @bind-Text="@conditionConstDataNode.Value"></DxTextBox>
+                    </DxFormLayoutItem>
+                }
+                else if (targetConditionNode?.GetType() == typeof(ConditionTagDataNode))
+                {
+                    ConditionTagDataNode conditionTagDataNode = targetConditionNode as ConditionTagDataNode;
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Target Machine"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxComboBox @bind-Value="@conditionTagDataNode.TargetMachineId" Data="@machines" ValueFieldName="@nameof(Machine.Id)" TextFieldName="@nameof(Machine.Name)" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Target Tag"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxComboBox @bind-Value="@conditionTagDataNode.TargetTagId" Data="@machineService.GetMachineByID(conditionTagDataNode?.TargetMachineId)?.TagCategory?.Tags" ValueFieldName="@nameof(Tag.Id)" TextFieldName="@nameof(Tag.Name)" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                }
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                    <DxToolbar>
+                        <Items>
+                            <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                        </Items>
+                    </DxToolbar>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </EditForm>
+    </BodyContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@conditionActionPopupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
+    <HeaderTemplate>
+        <div class="w-100 p-3 border border-bottom">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-x" Click="CloseActionPopup" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </div>
+    </HeaderTemplate>
+    <BodyContentTemplate Context="bodycontext">
+        <EditForm Model="@targetConditionAction" Context="ConditionNodeContext" OnValidSubmit="UpsertConditionAction">
+            <DataAnnotationsValidator />
+            <DxFormLayout>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Name"]}")" ColSpanLg="6" BeginRow="true">
+                    <DxTextBox @bind-Text="@targetConditionAction.Name" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Parent Node"]}")" ColSpanLg="6" BeginRow="true">
+                    <DxComboBox @bind-Value="@targetConditionAction.CommandCode" Data="@MachineTypeEnumHelper.ConditionCommandCodeWrapperClassDict" ValueFieldName="@nameof(ConditionCommandCodeWrapperClass.Index)" TextFieldName="@nameof(ConditionCommandCodeWrapperClass.DisplayName)" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Sequence"]}")" ColSpanLg="6" BeginRow="true">
+                    <DxSpinEdit @bind-Value="@targetConditionAction.Sequence" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
+                </DxFormLayoutItem>
+                @if (targetConditionAction?.GetType() == typeof(AwaitAction))
+                {
+                    AwaitAction awaitAction = targetConditionAction as AwaitAction;
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["await time"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxSpinEdit @bind-Value="@awaitAction.DelayMillisecond" />
+                    </DxFormLayoutItem>
+                }
+                else if (targetConditionAction?.GetType() == typeof(SetTagAction))
+                {
+                    SetTagAction setTagAction = targetConditionAction as SetTagAction;
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Target Machine"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxComboBox @bind-Value="@setTagAction.TargetMachineId" Data="@machines" ValueFieldName="@nameof(Machine.Id)" TextFieldName="@nameof(Machine.Name)" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Target Tag"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxComboBox @bind-Value="@setTagAction.TargetTagId" Data="@machineService.GetMachineByID(setTagAction?.TargetMachineId)?.TagCategory?.Tags" ValueFieldName="@nameof(Tag.Id)" TextFieldName="@nameof(Tag.Name)" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Value string"]}")" ColSpanLg="6" BeginRow="true">
+                        <DxTextBox @bind-Text="@setTagAction.ValueString" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+                }
+
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
                     <DxToolbar>
@@ -137,23 +290,31 @@
 @code {
 
     IGrid? conditionGrid { get; set; }
-    private IEnumerable<Condition>? allConditions;
+    private List<Condition> allConditions = new();
     private Condition? targetCondition;
     private bool conditionSelected => targetCondition is not null;
 
 
     IGrid? conditionNodeGrid { get; set; }
     DxTreeList? treeView { get; set; }
-    private List<ConditionNode> conditionNodes => conditionSelected ? targetCondition?.ConditionRootNode.ToList() : new();
+    private List<ConditionNode> hierarchicalConditionNodes => conditionSelected ? targetCondition?.ConditionNodes.ToList() : new();
+    private IEnumerable<ConditionNode>? flatConditionNodes;
     private ConditionNode? targetConditionNode;
     private bool conditionNodeSelected => targetConditionNode is not null;
 
 
+
+    IGrid? actionGrid { get; set; }
+    private ConditionAction? targetConditionAction;
+    private bool conditionActionSelected => targetConditionAction is not null;
+    private List<ConditionAction> conditionActions => conditionSelected ? targetCondition.ConditionActions.ToList() : new();
+
+
     private bool conditionPopupVisible;
     private bool conditionNodePopupVisible;
+    private bool conditionActionPopupVisible;
 
-    private IEnumerable<Machine>? machines;
-    private IEnumerable<Tag> tags;
+    private List<Machine> machines = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,10 +322,32 @@
         await base.OnInitializedAsync();
     }
 
-    private async Task InitParam()
+    public void Dispose()
     {
-        allConditions = await machineService.GetAllConditions();
+        foreach (var c in allConditions)
+        {
+            c.UIUpdateAct -= UIUpdate;
+        }
+    }
+
+    private async void UIUpdate()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task InitParam()
+    {
+        allConditions = machineService.Conditions;
+
+        foreach (var c in allConditions)
+        {
+            c.UIUpdateAct += UIUpdate;
+        }
+
         machines = machineService.Machines.Where(x => x.hasTags).ToList();
+
+        return Task.CompletedTask;
+
     }
 
     private void ShowConditionPopup()
@@ -178,14 +361,36 @@
         await InitParam();
     }
 
-    private void ShowNodePopup()
-    => conditionNodePopupVisible = true;
+    private async Task ShowNodePopup()
+    {
+        if (conditionSelected)
+        {
+            flatConditionNodes = await machineService.GetConditionNodesFlatById(targetCondition.Id);
+        }
+        conditionNodePopupVisible = true;
+    }
 
     private async Task CloseNodePopup()
     {
         conditionNodePopupVisible = false;
         await InitParam();
     }
+
+    private void ShowActionPopup()
+    {
+        conditionActionPopupVisible = true;
+
+    }
+
+    private async Task CloseActionPopup()
+    {
+        conditionActionPopupVisible = false;
+        await InitParam();
+    }
+
+
+
+
 
     private void ConditionSelected(GridFocusedRowChangedEventArgs args)
     {
@@ -220,13 +425,22 @@
 
     private void ConditionNodeSelected(TreeListFocusedRowChangedEventArgs e)
     {
-        targetConditionNode = e.DataItem as  ConditionNode;
+        targetConditionNode = e.DataItem as ConditionNode;
     }
 
-    private void NewConditionNodeClicked()
+    private async Task NewConditionNodeClicked(int i)
     {
-        targetConditionNode = new();
-        ShowNodePopup();
+        targetConditionNode = i switch
+        {
+            0 => new ConditionLogicNode(targetCondition.Id),
+            1 => new ConditionConstDataNode(targetCondition.Id),
+            2 => new ConditionTagDataNode(targetCondition.Id),
+            _ => null,
+        };
+        if (targetConditionNode is not null)
+        {
+            await ShowNodePopup();
+        }
     }
 
     private async Task UpsertConditionNode()
@@ -244,6 +458,48 @@
     private async Task DeleteConditionNode()
     {
         await machineService.DeleteConditionNode(targetConditionNode);
+        await InitParam();
+    }
+
+
+
+
+    private void ConditionActionSelected(GridFocusedRowChangedEventArgs args)
+    {
+        targetConditionAction = args.DataItem as ConditionAction;
+    }
+
+    private void NewConditionActionClicked(int i)
+    {
+        targetConditionAction = i switch
+        {
+            0 => new AwaitAction(targetCondition.Id),
+            1 => new SetTagAction(targetCondition.Id),
+            _ => null,
+        };
+        if (targetConditionAction is not null)
+        {
+            ShowActionPopup();
+        }
+    }
+
+    private async Task UpsertConditionAction()
+    {
+        await machineService.UpsertConditionAction(targetConditionAction);
+        await CloseActionPopup();
+
+    }
+
+    private void ShowConditionActionDelete()
+    {
+        actionGrid?.ShowDataItemDeleteConfirmation(targetConditionAction);
+    }
+
+
+
+    private async Task DeleteConditionAction()
+    {
+        await machineService.DeleteConditionAction(targetConditionAction);
         await InitParam();
     }
 }

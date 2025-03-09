@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace CommonLibraryP.MachinePKG
 {
-    public partial class ConditionNode
+    public abstract partial class ConditionNode
     {
-        public bool IsLeaf => ChildrenNodes.Count() == 0 && LogicalOperation < 0;
-        public bool IsRoot => ParentNode is null && Condition is not null;
-        public bool BindingToTag => MachineId is not null && TagId is not null;
+        public bool AllValid => ContentValid && ChildNodes.All(x => x.ContentValid);
 
-        public string Symbol => MachineTypeEnumHelper.GetLogicalOperationSymbol(LogicalOperation);
+        public abstract Object GetNodeValue(MachineService machineService);
     }
 }

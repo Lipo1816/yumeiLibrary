@@ -36,7 +36,7 @@ namespace CommonLibraryP.MachinePKG
         {
             { DataType.Bool, typeof(bool) },
             { DataType.Ushort, typeof(ushort) },
-            { DataType.Float, typeof(float) },
+            //{ DataType.Float, typeof(float) },
             { DataType.String, typeof(string) },
             //{ DataType.ArrayOfBool, typeof(bool[]) },
             //{ DataType.ArrayOfUshort, typeof(ushort[]) },
@@ -150,14 +150,12 @@ namespace CommonLibraryP.MachinePKG
 
         public static List<LogicalOperationWrapperClass> LogicalOperationWrapperClassDict = new()
         {
-            new LogicalOperationWrapperClass(LogicalOperation.Const, "Const"),
-            new LogicalOperationWrapperClass(LogicalOperation.TagVariable, "Tag variable"),
             new LogicalOperationWrapperClass(LogicalOperation.Equal, "=="),
             new LogicalOperationWrapperClass(LogicalOperation.NotEqual, "!="),
-            new LogicalOperationWrapperClass(LogicalOperation.Large, ">"),
-            new LogicalOperationWrapperClass(LogicalOperation.Less, "<"),
-            new LogicalOperationWrapperClass(LogicalOperation.LargerThanOrEqualTo, ">="),
-            new LogicalOperationWrapperClass(LogicalOperation.LessThanOrEqualTo, "<="),
+            //new LogicalOperationWrapperClass(LogicalOperation.Large, ">"),
+            //new LogicalOperationWrapperClass(LogicalOperation.Less, "<"),
+            //new LogicalOperationWrapperClass(LogicalOperation.LargerThanOrEqualTo, ">="),
+            //new LogicalOperationWrapperClass(LogicalOperation.LessThanOrEqualTo, "<="),
 
         };
 
@@ -166,6 +164,13 @@ namespace CommonLibraryP.MachinePKG
             var target = LogicalOperationWrapperClassDict.FirstOrDefault(x => x.Index == code);
             return target is null ? "?" : target.Symbol;
         }
+
+        public static List<ConditionCommandCodeWrapperClass> ConditionCommandCodeWrapperClassDict = new()
+        {
+            new ConditionCommandCodeWrapperClass(ConditionCommandCode.Await),
+            new ConditionCommandCodeWrapperClass(ConditionCommandCode.SetTagValue),
+
+        };
 
         #endregion
     }
@@ -276,8 +281,6 @@ namespace CommonLibraryP.MachinePKG
 
     public enum LogicalOperation
     {
-        Const = -1,
-        TagVariable = -2,
         Equal = 1,
         NotEqual = 2,
         Large = 3,
@@ -295,6 +298,21 @@ namespace CommonLibraryP.MachinePKG
             index = (int)logicalOperation;
             displayName = logicalOperation.ToString();
             this.symbol = symbol;
+        }
+    }
+
+    public enum ConditionCommandCode
+    {
+        Await = 0,
+        SetTagValue = 1,
+    }
+
+    public class ConditionCommandCodeWrapperClass : EnumWrapper
+    {
+        public ConditionCommandCodeWrapperClass(ConditionCommandCode conditionCommandCode)
+        {
+            index = (int)conditionCommandCode;
+            displayName = conditionCommandCode.ToString();
         }
     }
 

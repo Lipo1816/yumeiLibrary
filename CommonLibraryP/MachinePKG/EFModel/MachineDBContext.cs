@@ -26,6 +26,8 @@ namespace CommonLibraryP.MachinePKG
 
         public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
 
+        public virtual DbSet<ConditionAction> ConditionActions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ModbusSlaveConfig>(entity =>
@@ -146,21 +148,70 @@ namespace CommonLibraryP.MachinePKG
 
                 entity.HasIndex(e => e.Name).IsUnique();
 
-                entity.HasMany(e => e.ConditionRootNode).WithOne(p => p.Condition)
+                entity.HasMany(e => e.ConditionNodes).WithOne(p => p.Condition)
                     .HasForeignKey(q => q.ConditionId);
             });
 
             modelBuilder.Entity<ConditionNode>(entity =>
             {
+                entity.UseTpcMappingStrategy();
+
                 entity.HasKey(e => e.Id);
 
-                entity.ToTable("ConditionNodes");
+                //entity.ToTable("ConditionNodes");
 
-                entity.HasOne(e => e.Condition).WithMany(p => p.ConditionRootNode);
+                entity.HasOne(e => e.Condition).WithMany(p => p.ConditionNodes);
 
-                entity.HasOne(e => e.ParentNode).WithMany(f => f.ChildrenNodes)
+                entity.HasOne(e => e.ParentNode).WithMany(f => f.ChildNodes)
                 .HasForeignKey(g => g.ParentNodeId);
             });
+
+            modelBuilder.Entity<ConditionLogicNode>(entity =>
+            {
+
+                entity.ToTable("ConditionLogicNodes");
+
+            });
+
+            modelBuilder.Entity<ConditionConstDataNode>(entity =>
+            {
+
+                entity.ToTable("ConditionConstDataNodes");
+
+            });
+
+            modelBuilder.Entity<ConditionTagDataNode>(entity =>
+            {
+
+                entity.ToTable("ConditionTagDataNodes");
+
+            });
+
+
+
+
+
+            modelBuilder.Entity<ConditionAction>(entity =>
+            {
+                entity.UseTpcMappingStrategy();
+
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Condition).WithMany(p => p.ConditionActions);
+            });
+            modelBuilder.Entity<AwaitAction>(entity =>
+            {
+
+                entity.ToTable("AwaitActions");
+
+            });
+            modelBuilder.Entity<SetTagAction>(entity =>
+            {
+
+                entity.ToTable("SetTagActions");
+
+            });
+
         }
     }
 }

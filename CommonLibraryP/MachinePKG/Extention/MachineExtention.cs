@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using CommonLibraryP.MachinePKG.Service;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -21,6 +22,7 @@ namespace CommonLibraryP.MachinePKG
             });
             builder.Services.AddSingleton<MachineService>();
             builder.Services.AddHostedService<MachineInitHostingService>();
+            builder.Services.AddHostedService<ConditionHostService>();
             builder.Services.AddLocalization();
             return builder;
         }
@@ -34,6 +36,7 @@ namespace CommonLibraryP.MachinePKG
             });
             builder.Services.AddSingleton<MachineService, MachineServiceImplementation>();
             builder.Services.AddHostedService<MachineInitHostingService>();
+            builder.Services.AddHostedService<ConditionHostService>();
             builder.Services.AddLocalization();
             return builder;
         }

@@ -117,7 +117,7 @@
         </HeaderTemplate>
         <BodyContentTemplate Context="bodycontext">
             <DxFormLayout>
-                @switch (targetTag?.DataType)
+                @* @switch (targetTag?.DataType)
                 {
                     case 1:
                         <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
@@ -141,8 +141,10 @@
                         break;
                     default:
                         break;
-                }
-
+                } *@
+                <DxFormLayoutItem Caption="@($"{targetTag?.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                    <DxTextBox @bind-Text="@setVal_string"></DxTextBox>
+                </DxFormLayoutItem>
             </DxFormLayout>
         </BodyContentTemplate>
         <FooterTemplate>
@@ -241,24 +243,7 @@
         Tag? targetTag = tagObj as Tag;
         if (targetTag != null)
         {
-            switch (targetTag.DataType)
-            {
-                case 1:
-                    await machine.SetTag(targetTag, setVal_bool);
-                    break;
-                case 2:
-                    await machine.SetTag(targetTag, setVal_ushort);
-                    break;
-                case 3:
-                    await machine.SetTag(targetTag, setVal_float);
-                    break;
-                case 4:
-                    await machine.SetTag(targetTag, setVal_string);
-                    break;
-                default:
-                    break;
-
-            }
+            var setRes = await machineService.SetMachineTagByString(machine.Name, targetTag.Name, setVal_string);
         }
         CloseSetPopup();
     }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using CommonLibraryP.Data;
 using System.Net;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -95,8 +96,6 @@ namespace CommonLibraryP.MachinePKG
                 return Task.FromResult(dbContext.Machines.AsNoTracking().ToList());
             }
         }
-
-        //public virtual IEnumerable<ConnectionTypeWrapperClass> GetConnectTypesWrapperClass() { }
 
         public async Task InitAllMachinesFromDB()
         {
@@ -214,9 +213,14 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
-        public Task<Machine?> GetMachineByID(Guid? id)
+        public Task<Machine?> GetMachineByIDAsync(Guid? id)
         {
             return Task.FromResult(machines.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Machine? GetMachineByID(Guid? id)
+        {
+            return machines.FirstOrDefault(x => x.Id == id);
         }
 
         public Task<Machine?> GetMachineByName(string name)
@@ -249,11 +253,11 @@ namespace CommonLibraryP.MachinePKG
 
         public async Task RefreshMachine(Machine machine, DataEditMode dataEditMode)
         {
-            var target = await GetMachineByID(machine.Id);
+            var target = await GetMachineByIDAsync(machine.Id);
             if (target != null)
             {
                 //update or delete
-                target.MachineStatechangedRecordAct += MachineStatusChangedRecord;
+                target.MachineStatechangedRecordAct -= MachineStatusChangedRecord;
                 machines.Remove(target);
                 target.Dispose();
 
@@ -588,6 +592,24 @@ namespace CommonLibraryP.MachinePKG
             return null;
         }
 
+        public Tag? GetMachineTagById(Guid machineId, Guid tagId)
+        {
+            Machine? targetMachine = GetMachineByID(machineId);
+            if (targetMachine != null)
+            {
+                if (targetMachine.hasCategory)
+                {
+                    Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Id == tagId);
+                    if (targetTag != null)
+                    {
+                        return targetTag;
+                    }
+                }
+            }
+            return null;
+        }
+
+        //main set function
         public async Task<RequestResult> SetMachineTag(string machineName, string tagName, object val)
         {
             Machine? targetMachine = await GetMachineByName(machineName);
@@ -616,6 +638,100 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
+        public async Task<RequestResult> SetMachineTagByString(string machineName, string tagName, string valString)
+        {
+            Machine? targetMachine = await GetMachineByName(machineName);
+            if (targetMachine != null)
+            {
+                if (targetMachine.hasCategory)
+                {
+                    Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
+                    if (targetTag != null)
+                    {
+                        try
+                        {
+                            switch (targetTag.DataType)
+                            {
+                                case 1:
+                                    bool boolVal;
+                                    bool boolParseRes = bool.TryParse(valString, out boolVal);
+                                    if (boolParseRes)
+                                    {
+                                        return await SetMachineTag(machineName, targetTag.Name, boolVal);
+                                    }
+                                    else
+                                    {
+                                        return new(4, $"Set tag {targetTag.Name} fail(parsing {valString} to bool fail)");
+                                    }
+                                case 2:
+                                    ushort ushortVal;
+                                    bool ushortParseRes = ushort.TryParse(valString, out ushortVal);
+                                    if (ushortParseRes)
+                                    {
+                                        return await SetMachineTag(machineName, targetTag.Name, ushortVal);
+                                    }
+                                    else
+                                    {
+                                        return new(4, $"Set tag {targetTag.Name} fail(parsing {valString} to ushort fail)");
+                                    }
+                                case 4:
+                                    return await SetMachineTag(machineName, targetTag.Name, valString);
+                                default:
+                                        return new(4, $"Set tag {targetTag.Name} fail({((DataType)targetTag.DataType)} not support yet)");
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            return new(4, $"Set tag {targetTag.Name} fail({e.Message})");
+                        }
+
+                    }
+                    else
+                    {
+                        return new(4, $"Tag {tagName} not found in machine {machineName}");
+                    }
+                }
+                else
+                {
+                    return new(4, $"Machine tag category not set");
+                }
+            }
+            else
+            {
+                return new(4, $"Machine {machineName} not found");
+            }
+        }
+
+        public async Task<RequestResult> SetMachineTagByIdAndString(Guid? machineId, Guid? tagId, string valString)
+        {
+            Machine? targetMachine = GetMachineByID(machineId);
+            if (targetMachine != null)
+            {
+                if (targetMachine.hasCategory)
+                {
+                    Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Id == tagId);
+                    if (targetTag != null)
+                    {
+                        return await SetMachineTagByString(targetMachine.Name, targetTag.Name, valString);
+                    }
+                    else
+                    {
+                        return new(4, $"Tag not found in machine");
+                    }
+                }
+                else
+                {
+                    return new(4, $"Machine tag category not set");
+                }
+            }
+            else
+            {
+                return new(4, $"Machine not found");
+            }
+        }
+
+
+
 
         #endregion
 
@@ -625,20 +741,53 @@ namespace CommonLibraryP.MachinePKG
         public List<Condition> Conditions => conditions;
         public async Task InitConditions()
         {
-            conditions = await GetAllConditions();
+            conditions = await InitAllConditionsHierarchical();
+            foreach (var condition in conditions)
+            {
+                condition.StartMonitorThread(this);
+            }
         }
 
-        public async Task<List<Condition>> GetAllConditions()
+        private async Task<List<Condition>> InitAllConditionsHierarchical()
         {
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                return await dbContext.Conditions.Include(x => x.ConditionRootNode)
-                    .ThenInclude(x => x.ChildrenNodes)
+                return await dbContext.Conditions.Include(x => x.ConditionNodes.Where(x => x.ParentNodeId == null))
+                    .ThenInclude(x => x.ChildNodes)
+                    .Include(x=>x.ConditionActions.OrderBy(x=>x.Sequence))
                     .AsNoTracking()
                     .ToListAsync();
             }
         }
+
+        private async Task<Condition?> InitConditionsHierarchicalById(Guid id)
+        {
+            using(var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return await dbContext.Conditions.Include(x => x.ConditionNodes.Where(x => x.ParentNodeId == null))
+                    .ThenInclude(x => x.ChildNodes)
+                    .Include(x => x.ConditionActions.OrderBy(x => x.Sequence))
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x=>x.Id == id);
+            }
+        }
+
+        public Condition? GetConditionById(Guid id)
+            => conditions.FirstOrDefault(x => x.Id == id);
+
+        public async Task<List<ConditionNode>> GetConditionNodesFlatById(Guid conditionId)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return await dbContext.ConditionNodes.Where(x => x.ConditionId == conditionId)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+        }
+
         public async Task<RequestResult> UpsertCondition(Condition condition)
         {
             using (var scope = scopeFactory.CreateScope())
@@ -708,23 +857,18 @@ namespace CommonLibraryP.MachinePKG
                     bool exist = target is not null;
                     if (exist)
                     {
-                        target.ConditionId = conditionNode.ConditionId;
-                        target.ParentNodeId = conditionNode.ParentNodeId;
-                        target.LeafPosition = conditionNode.LeafPosition;
-                        target.MachineId = conditionNode.MachineId;
-                        target.TagId = conditionNode.TagId;
-                        target.LogicalOperation = conditionNode.LogicalOperation;
+                        dbContext.Update(conditionNode);
                     }
                     else
                     {
                         await dbContext.ConditionNodes.AddAsync(conditionNode);
                     }
                     await dbContext.SaveChangesAsync();
-                    return new(2, $"upsert condition node success");
+                    return new(2, $"upsert condition node {conditionNode.Name} success");
                 }
                 catch (Exception e)
                 {
-                    return new(4, $"upsert condition condition node fail({e.Message})");
+                    return new(4, $"upsert condition condition node {conditionNode.Name} fail({e.Message})");
                 }
 
             }
@@ -742,7 +886,7 @@ namespace CommonLibraryP.MachinePKG
                     {
                         dbContext.Remove(target);
                         await dbContext.SaveChangesAsync();
-                        return new(2, $"Delete condition node success");
+                        return new(2, $"Delete condition node {conditionNode.Name} success");
                     }
                     else
                     {
@@ -752,10 +896,98 @@ namespace CommonLibraryP.MachinePKG
                 }
                 catch (Exception e)
                 {
-                    return new(4, $"Delete condition node fail({e.Message})");
+                    return new(4, $"Delete condition node {conditionNode.Name} fail({e.Message})");
                 }
 
             }
+        }
+
+        public async Task<RequestResult> UpsertConditionAction(ConditionAction conditionAction)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.ConditionActions.FirstOrDefault(x => x.Id == conditionAction.Id);
+                    bool exist = target is not null;
+                    if (exist)
+                    {
+                        dbContext.Update(conditionAction);
+                    }
+                    else
+                    {
+                        await dbContext.ConditionActions.AddAsync(conditionAction);
+                    }
+                    await dbContext.SaveChangesAsync();
+                    return new(2, $"upsert condition action {conditionAction.Name} success");
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"upsert condition condition action {conditionAction.Name} fail({e.Message})");
+                }
+
+            }
+        }
+
+        public async Task<RequestResult> DeleteConditionAction(ConditionAction conditionAction)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var target = dbContext.ConditionActions.FirstOrDefault(x => x.Id == conditionAction.Id);
+                    if (target != null)
+                    {
+                        dbContext.Remove(target);
+                        await dbContext.SaveChangesAsync();
+                        return new(2, $"Delete condition action {conditionAction.Name} success");
+                    }
+                    else
+                    {
+                        return new(4, $"condition action {conditionAction.Name} not found");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"Delete condition action {conditionAction.Name} fail({e.Message})");
+                }
+
+            }
+        }
+
+        public async Task RefreshComdition(Condition condition, DataEditMode dataEditMode)
+        {
+            var target = GetConditionById(condition.Id);
+            if (target != null)
+            {
+                //update or delete
+                conditions.Remove(target);
+                target.StopMonitorThread();
+
+                if (dataEditMode != DataEditMode.Delete)
+                {
+                    var tmp = await InitConditionsHierarchicalById(target.Id);
+                    if (tmp is not null)
+                    {
+                        conditions.Add(tmp);
+                    }
+                }
+                else
+                {
+                }
+            }
+            else
+            {
+                var tmp = await InitConditionsHierarchicalById(target.Id);
+                if (tmp is not null)
+                {
+                    conditions.Add(tmp);
+                }
+            }
+            //MachineConfigChanged(condition.Id, dataEditMode);
         }
 
         #endregion

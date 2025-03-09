@@ -11,6 +11,8 @@ namespace CommonLibraryP.MachinePKG
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public bool Enable { get; set; }
-        public virtual ICollection<ConditionNode> ConditionRootNode { get; set; } = new List<ConditionNode>();
+        public virtual ICollection<ConditionNode> ConditionNodes { get; set; } = new List<ConditionNode>();
+
+        public virtual ICollection<ConditionAction> ConditionActions { get; set; } = new List<ConditionAction>();
     }
 }

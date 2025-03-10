@@ -21,25 +21,25 @@
                     <DxFormLayout CaptionPosition="CaptionPosition.Vertical" Data="@machine" ReadOnly="true">
                         <DxFormLayoutGroup Caption="Machine Config" CssClass="rounded">
                             <DxFormLayoutItem Caption="Name">
-                                <DxTextBox @bind-Text="@machine.Name" ReadOnly="true" />
+                                <DxTextBox Text="@machine?.Name" ReadOnly="true" />
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Enable">
-                                <DxCheckBox @bind-Checked="@machine.Enabled" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                                <DxCheckBox Checked="@machine?.Enabled" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Max retry count" ColSpanLg="4">
-                                <DxSpinEdit Value="@machine.MaxRetryCount" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.MaxRetryCount" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Retry count" ColSpanLg="4">
-                                <DxSpinEdit Value="@machine.RetryCount" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.RetryCount" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Auto Retrying" ColSpanLg="4">
-                                <DxCheckBox Checked="@machine.isAutoRetry" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
+                                <DxCheckBox Checked="@machine?.isAutoRetry" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="IP">
-                                <DxTextBox @bind-Text="@machine.Ip" ReadOnly="true" />
+                                <DxTextBox Text="@machine?.Ip" ReadOnly="true" />
                             </DxFormLayoutItem>
                             <DxFormLayoutItem Caption="Port">
-                                <DxSpinEdit @bind-Value="@machine.Port" ReadOnly="true"></DxSpinEdit>
+                                <DxSpinEdit Value="@machine?.Port" ReadOnly="true"></DxSpinEdit>
                             </DxFormLayoutItem>
                             @* <DxFormLayoutItem Caption="@($"{localizer["Connection Type"]}")">
                                 <DxComboBox Data="@(connectionType)" @bind-Value="@(machine.ConnectionType)" ReadOnly="true" ValueFieldName="@nameof(ConnectionTypeWrapperClass.Index)" TextFieldName="@nameof(ConnectionTypeWrapperClass.DisplayName)"></DxComboBox>

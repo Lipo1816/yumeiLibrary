@@ -224,7 +224,7 @@ namespace CommonLibraryP.MachinePKG
     {
         Bool = 1,
         Ushort = 2,
-        Float = 3,
+        //Float = 3,
         String = 4,
         //ArrayOfBool = 11,
         //ArrayOfUshort = 22,

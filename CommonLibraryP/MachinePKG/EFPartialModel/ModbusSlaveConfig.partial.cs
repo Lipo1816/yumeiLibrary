@@ -20,14 +20,14 @@ namespace CommonLibraryP.MachinePKG
         {
             tcpListener = new(IPAddress.Parse(Ip), Port);
             tcpListener.Start();
-            IModbusFactory factory = new ModbusFactory();
+
+            factory = new ModbusFactory();
             IModbusSlaveNetwork network = factory.CreateSlaveNetwork(tcpListener);
-            IModbusSlave slave = factory.CreateSlave((byte)Station);
+            var slave = new ModbusSlaveWithLogging(factory.CreateSlave((byte)Station));
             network.AddSlave(slave);
-            //network.
-            var bgThread = new Thread(() =>
+            var bgThread = new Thread(async () =>
             {
-                network.ListenAsync().GetAwaiter().GetResult();
+                await network.ListenAsync();
             });
             bgThread.IsBackground = true;
             bgThread.Start();

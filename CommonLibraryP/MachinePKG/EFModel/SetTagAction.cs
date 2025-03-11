@@ -16,7 +16,7 @@ namespace CommonLibraryP.MachinePKG
 
         public override async Task RunCommand(MachineService machineService)
         {
-            await machineService.SetMachineTagByIdAndString(TargetMachineId, TargetTagId, ValueString);
+            var res = await machineService.SetMachineTagByIdAndString(TargetMachineId, TargetTagId, ValueString);
         }
     }
 }

@@ -40,18 +40,6 @@
                                     <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
-                            <DxGridDataColumn Caption="@($"{localizer["ConditionMatch"]}")" FieldName="@nameof(Condition.ConditionMatch)">
-                                <CellDisplayTemplate>
-                                    <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                            <DxGridDataColumn Caption="@($"{localizer["Triggered"]}")" FieldName="@nameof(Condition.Triggered)" >
-                                <CellDisplayTemplate>
-                                    <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                            <DxGridDataColumn Caption="@($"{localizer["LastCheckTime"]}")" FieldName="@nameof(Condition.LastCheckTime)" DisplayFormat="G"/>
-                            <DxGridDataColumn Caption="@($"{localizer["LastTriggetTime"]}")" FieldName="@nameof(Condition.LastTriggetTime)" DisplayFormat="G" />
                         </Columns>
                     </DxGrid>
                 </div>
@@ -62,14 +50,15 @@
                 <div>
                     <DxTabs>
                         <DxTabPage Text="Syntax tree">
-                            <DxTreeList @ref="treeView"
+                            <DxTreeList @ref="conditionNodeGrid"
                                         Data="@hierarchicalConditionNodes"
                                         KeyFieldName="@nameof(ConditionNode.Id)"
                                         ChildrenFieldName="@(nameof(ConditionNode.ChildNodes))"
                                         VirtualScrollingEnabled="true"
                                         ColumnResizeMode="TreeListColumnResizeMode.NextColumn"
                                         FocusedRowEnabled="true"
-                                        FocusedRowChanged="ConditionNodeSelected">
+                                        FocusedRowChanged="ConditionNodeSelected"
+                                        DataItemDeleting="DeleteConditionNode">
                                 <ToolbarTemplate>
                                     <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
                                         <Items>
@@ -114,7 +103,7 @@
                                     <DxGridDataColumn Caption="@($"{localizer["Name"]}")" FieldName="@nameof(ConditionAction.Name)" />
                                     <DxGridDataColumn Caption="@($"{localizer["Command"]}")" FieldName="@nameof(ConditionAction.CommandCode)">
                                         <CellDisplayTemplate>
-                                            <DxTextBox Text="@(((ConditionCommandCode)context.Value).ToString())" ReadOnly="true" />
+                                            <div>@(((ConditionCommandCode)context.Value).ToString())</div>
                                         </CellDisplayTemplate>
                                     </DxGridDataColumn>
                                 </Columns>
@@ -243,7 +232,7 @@
                     <DxTextBox @bind-Text="@targetConditionAction.Name" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Parent Node"]}")" ColSpanLg="6" BeginRow="true">
-                    <DxComboBox @bind-Value="@targetConditionAction.CommandCode" Data="@MachineTypeEnumHelper.ConditionCommandCodeWrapperClassDict" ValueFieldName="@nameof(ConditionCommandCodeWrapperClass.Index)" TextFieldName="@nameof(ConditionCommandCodeWrapperClass.DisplayName)" ShowValidationIcon="true" />
+                    <DxComboBox @bind-Value="@targetConditionAction.CommandCode" Data="@MachineTypeEnumHelper.ConditionCommandCodeWrapperClassDict" ReadOnly="true" ValueFieldName="@nameof(ConditionCommandCodeWrapperClass.Index)" TextFieldName="@nameof(ConditionCommandCodeWrapperClass.DisplayName)" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Sequence"]}")" ColSpanLg="6" BeginRow="true">
                     <DxSpinEdit @bind-Value="@targetConditionAction.Sequence" />
@@ -335,18 +324,18 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private Task InitParam()
+    private async Task InitParam()
     {
-        allConditions = machineService.Conditions;
+        allConditions = await machineService.GetAllConditionsConfig();
 
-        foreach (var c in allConditions)
-        {
-            c.UIUpdateAct += UIUpdate;
-        }
+        // foreach (var c in allConditions)
+        // {
+        //     c.UIUpdateAct += UIUpdate;
+        // }
 
         machines = machineService.Machines.Where(x => x.hasTags).ToList();
 
-        return Task.CompletedTask;
+        //return Task.CompletedTask;
 
     }
 
@@ -445,7 +434,8 @@
 
     private async Task UpsertConditionNode()
     {
-        var res = await machineService.UpsertConditionNode(targetConditionNode);
+        //var type = targetConditionNode.GetType();
+        var res = await machineService.UpsertConditionNodeTPC(targetConditionNode);
         await CloseNodePopup();
 
     }
@@ -457,7 +447,7 @@
 
     private async Task DeleteConditionNode()
     {
-        await machineService.DeleteConditionNode(targetConditionNode);
+        await machineService.DeleteConditionNodeTCP(targetConditionNode);
         await InitParam();
     }
 
@@ -485,7 +475,7 @@
 
     private async Task UpsertConditionAction()
     {
-        await machineService.UpsertConditionAction(targetConditionAction);
+        await machineService.UpsertConditionActionTPC(targetConditionAction);
         await CloseActionPopup();
 
     }
@@ -499,7 +489,7 @@
 
     private async Task DeleteConditionAction()
     {
-        await machineService.DeleteConditionAction(targetConditionAction);
+        await machineService.DeleteConditionActionTPC(targetConditionAction);
         await InitParam();
     }
 }

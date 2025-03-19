@@ -13,6 +13,8 @@ namespace CommonLibraryP.MachinePKG
 
         public bool isAutoRetry => retryCount < MaxRetryCount;
 
+        private PeriodicTimer periodicTimer;
+        private CancellationToken _cts;
         public Machine() { }
 
         public Machine(Machine machine)
@@ -286,7 +288,6 @@ namespace CommonLibraryP.MachinePKG
                     {
                         try
                         {
-                            var a = UpdateDelay;
                             if (runFlag)
                             {
                                 await UpdateStatus();
@@ -295,8 +296,6 @@ namespace CommonLibraryP.MachinePKG
                                     await UpdateTags();
                                     TagsStatechange();
                                 }
-                                //await UpdateCustomStatus();
-                                //await UpdateErrorCode();
                             }
                             else
                             {

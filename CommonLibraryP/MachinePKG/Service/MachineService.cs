@@ -316,8 +316,7 @@ namespace CommonLibraryP.MachinePKG
             {
                 return new(4, $"Tag {tagName} not found in machine {machineName}");
             }
-
-            tagListener += targetTag.TagValueChanged;
+            targetTag.TagValueChanged += tagListener;
             return new(2, $"Listen machine {machineName} tag {tagName} value change success");
         }
 

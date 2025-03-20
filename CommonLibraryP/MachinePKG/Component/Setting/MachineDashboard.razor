@@ -70,7 +70,7 @@
                                     <DxFormLayoutItem ColSpanLg="12">
                                         <DxGrid Data="@machine.TagCategory.Tags">
                                             <Columns>
-                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" />
+                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"/>
                                                 <DxGridDataColumn FieldName="@nameof(Tag.DataType)">
                                                     <CellDisplayTemplate Context="datatypecontext">
                                                         <div>@((DataType)((int)datatypecontext.Value))</div>

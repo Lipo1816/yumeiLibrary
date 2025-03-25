@@ -1,11 +1,5 @@
 ﻿using CommonLibraryP.API;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -41,7 +35,7 @@ namespace CommonLibraryP.MachinePKG
         //private bool 
         public string ValueString => FormatingValueToString();
 
-        public Action<Tag>? TagValueChanged;
+        public event Action<Tag, Task>? TagValueChanged;
 
         private void InitVal()
         {
@@ -117,7 +111,25 @@ namespace CommonLibraryP.MachinePKG
         private void ValueChanged()
         {
             lastChangedTime = DateTime.Now;
-            TagValueChanged?.Invoke(this);
+            if (TagValueChanged is not null)
+            {
+                foreach (var handler in TagValueChanged.GetInvocationList())
+                {
+                    try
+                    {
+                        Task.Run(() => ((Func<Tag, Task>)handler).Invoke(this));
+
+                        //((Func<object, Task>)handler).Invoke(this);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"訂閱者執行失敗：{ex.Message}");
+                    }
+                }
+
+                //TagValueChanged?.Invoke(this);
+            }
+            
         } 
         private string FormatingValueToString()
         {

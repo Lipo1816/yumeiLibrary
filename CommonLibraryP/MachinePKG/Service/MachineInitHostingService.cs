@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using CommonLibraryP.LogPKG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace CommonLibraryP.MachinePKG
             {
                 var machineService = scope.ServiceProvider.GetRequiredService<MachineService>();
                 await machineService.InitAllModbusSlaves();
+                //SerilogByNamespaceRollbyday.Information("InitAllModbusSlaves");
                 await machineService.InitAllMachinesFromDB();
             }
         }

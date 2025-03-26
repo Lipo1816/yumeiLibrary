@@ -35,7 +35,7 @@ namespace CommonLibraryP.MachinePKG
         //private bool 
         public string ValueString => FormatingValueToString();
 
-        public event Action<Tag, Task>? TagValueChanged;
+        public event Func<Tag, Task>? TagValueChanged;
 
         private void InitVal()
         {

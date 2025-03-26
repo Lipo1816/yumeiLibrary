@@ -304,7 +304,7 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
-        public RequestResult RegisterTagValueChange(string machineName, string tagName, Action<Tag, Task> tagListener)
+        public RequestResult RegisterTagValueChange(string machineName, string tagName, Func<Tag, Task> tagListener)
         {
             var targetMachine = machines.FirstOrDefault(x => x.Name == machineName);
             if (targetMachine is null)

@@ -70,7 +70,7 @@
                                     <DxFormLayoutItem ColSpanLg="12">
                                         <DxGrid Data="@machine.TagCategory.Tags">
                                             <Columns>
-                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"/>
+                                                <DxGridDataColumn FieldName="@nameof(Tag.Name)" FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" />
                                                 <DxGridDataColumn FieldName="@nameof(Tag.DataType)">
                                                     <CellDisplayTemplate Context="datatypecontext">
                                                         <div>@((DataType)((int)datatypecontext.Value))</div>
@@ -85,9 +85,7 @@
                                                         <div class="d-flex justify-content-center">
                                                             <DxToolbar>
                                                                 <Items>
-                                                                    @*                                                                     <DxToolbarItem Enabled="@(!(btncontext.DataItem as Tag).UpdateByTime)" Click="@(()=>UpdateTagClicked(btncontext.DataItem))" IconCssClass="oi oi-loop"></DxToolbarItem>
-                                                                    *@
-                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem> 
+                                                                    <DxToolbarItem Click="@(()=>SetTagClicked(btncontext.DataItem))" IconCssClass="oi oi-location"></DxToolbarItem>
                                                                 </Items>
                                                             </DxToolbar>
                                                         </div>
@@ -105,7 +103,7 @@
         </Items>
     </DxGridLayout>
 
-    <DxPopup @bind-Visible="@setPopup" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="true">
+    <DxPopup @bind-Visible="@setPopup" CloseOnOutsideClick="false" ShowHeader="true">
         <HeaderTemplate>
             <div class="w-100 p-3 border border-bottom">
                 <DxToolbar>
@@ -116,44 +114,22 @@
             </div>
         </HeaderTemplate>
         <BodyContentTemplate Context="bodycontext">
-            <DxFormLayout>
-                @* @switch (targetTag?.DataType)
-                {
-                    case 1:
-                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
-                            <DxCheckBox @bind-Checked="@setVal_bool" CheckType="CheckType.Switch" />
-                        </DxFormLayoutItem>
-                        break;
-                    case 2:
-                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
-                            <DxSpinEdit @bind-Value="@setVal_ushort" />
-                        </DxFormLayoutItem>
-                        break;
-                    case 3:
-                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
-                            <DxSpinEdit @bind-Value="@setVal_float"></DxSpinEdit>
-                        </DxFormLayoutItem>
-                        break;
-                    case 4:
-                        <DxFormLayoutItem Caption="@($"{targetTag.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
-                            <DxTextBox @bind-Text="@setVal_string"></DxTextBox>
-                        </DxFormLayoutItem>
-                        break;
-                    default:
-                        break;
-                } *@
-                <DxFormLayoutItem Caption="@($"{targetTag?.Int1}")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
-                    <DxTextBox @bind-Text="@setVal_string"></DxTextBox>
-                </DxFormLayoutItem>
-            </DxFormLayout>
+            <EditForm Model="setMachineTagModel" OnValidSubmit="SetTagValue">
+                <DxFormLayout>
+                    <DxFormLayoutItem Caption="@($"Value string")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+                        <DxTextBox @bind-Text="@setMachineTagModel.ValueString"></DxTextBox>
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem ColSpanLg="12">
+                        <hr />
+                    </DxFormLayoutItem>
+                    <DxToolbar ItemRenderStyleMode="@ToolbarRenderStyleMode.Contained" SizeMode="SizeMode.Large">
+                        <Items>
+                            <DxToolbarItem RenderStyle="ButtonRenderStyle.Info" SubmitFormOnClick="true" IconCssClass="oi oi-data-transfer-download" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+                        </Items>
+                    </DxToolbar>
+                </DxFormLayout>
+            </EditForm>
         </BodyContentTemplate>
-        <FooterTemplate>
-            <DxToolbar ItemRenderStyleMode="@ToolbarRenderStyleMode.Contained" SizeMode="SizeMode.Large">
-                <Items>
-                    <DxToolbarItem RenderStyle="ButtonRenderStyle.Info" IconCssClass="oi oi-data-transfer-download" Click="@(async () => await SetTagValue(targetTag))" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
-                </Items>
-            </DxToolbar>
-        </FooterTemplate>
     </DxPopup>
 }
 
@@ -171,6 +147,8 @@
     private ushort setVal_ushort = 0;
     private float setVal_float = 0;
     private string setVal_string = string.Empty;
+
+    private SetMachineTagModel setMachineTagModel = new SetMachineTagModel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -233,18 +211,19 @@
                     break;
 
             }
+            setMachineTagModel = new SetMachineTagModel
+                {
+                    MachineName = machine.Name,
+                    TagName = targetTag.Name,
+                };
             ShowSetPopup();
         }
 
     }
 
-    private async Task SetTagValue(Object tagObj)
+    private async Task SetTagValue()
     {
-        Tag? targetTag = tagObj as Tag;
-        if (targetTag != null)
-        {
-            var setRes = await machineService.SetMachineTagByString(machine.Name, targetTag.Name, setVal_string);
-        }
+        var setRes = await machineService.SetMachineTagByString(setMachineTagModel.MachineName, setMachineTagModel.TagName, setMachineTagModel.ValueString);
         CloseSetPopup();
     }
 }

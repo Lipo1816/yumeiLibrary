@@ -114,7 +114,7 @@
             </div>
         </HeaderTemplate>
         <BodyContentTemplate Context="bodycontext">
-            <EditForm Model="setMachineTagModel" OnValidSubmit="SetTagValue">
+            <EditForm Model="setMachineTagModel" OnValidSubmit="SetTagValue" Context="editformcontext">
                 <DxFormLayout>
                     <DxFormLayoutItem Caption="@($"Value string")" CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
                         <DxTextBox @bind-Text="@setMachineTagModel.ValueString"></DxTextBox>

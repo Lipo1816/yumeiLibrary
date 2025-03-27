@@ -122,11 +122,13 @@
                     <DxFormLayoutItem ColSpanLg="12">
                         <hr />
                     </DxFormLayoutItem>
-                    <DxToolbar ItemRenderStyleMode="@ToolbarRenderStyleMode.Contained" SizeMode="SizeMode.Large">
-                        <Items>
-                            <DxToolbarItem RenderStyle="ButtonRenderStyle.Info" SubmitFormOnClick="true" IconCssClass="oi oi-data-transfer-download" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
-                        </Items>
-                    </DxToolbar>
+                    <DxFormLayoutItem>
+                        <DxToolbar ItemRenderStyleMode="@ToolbarRenderStyleMode.Contained" SizeMode="SizeMode.Large">
+                            <Items>
+                                <DxToolbarItem RenderStyle="ButtonRenderStyle.Info" SubmitFormOnClick="true" IconCssClass="oi oi-share" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+                            </Items>
+                        </DxToolbar>
+                    </DxFormLayoutItem>
                 </DxFormLayout>
             </EditForm>
         </BodyContentTemplate>

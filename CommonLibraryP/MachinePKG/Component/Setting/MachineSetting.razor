@@ -22,14 +22,14 @@
                 <div>@((ConnectType)((int)context.Value))</div>
             </CellDisplayTemplate>
         </DxGridDataColumn>
-        <DxGridDataColumn Caption="@($"{localizer["MaxRetryCount"]}")" FieldName="@nameof(Machine.MaxRetryCount)" />
+        <DxGridDataColumn Caption="@($"{localizer["Maxima Retry Count"]}")" FieldName="@nameof(Machine.MaxRetryCount)" />
 
         <DxGridDataColumn Caption="@($"{localizer["Enable"]}")" FieldName="@nameof(Machine.Enabled)">
             <CellDisplayTemplate>
                 <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
             </CellDisplayTemplate>
         </DxGridDataColumn>
-        <DxGridDataColumn Caption="@($"{localizer["UpdateDelay"]}({localizer["ms"]})")" FieldName="@nameof(Machine.UpdateDelay)" />
+        <DxGridDataColumn Caption="@($"{localizer["Update Delay"]}({localizer["ms"]})")" FieldName="@nameof(Machine.UpdateDelay)" />
     </Columns>
 </DxGrid>
 
@@ -59,7 +59,7 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Port"]}")" ColSpanLg="6">
                     <DxSpinEdit @bind-Value="@taregtMachine.Port" MinValue="0" MaxValue="65535" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["MaxRetryCount"]}")" ColSpanLg="6">
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Maxima Retry Count"]}")" ColSpanLg="6">
                     <DxSpinEdit @bind-Value="@taregtMachine.MaxRetryCount" MinValue="-1" MaxValue="10" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Connection Type"]}")" ColSpanLg="6">
@@ -68,7 +68,7 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Tag Category"]}")" ColSpanLg="6">
                     <DxComboBox Data="tagCategoriesWithFilter" @bind-Value="@taregtMachine.TagCategoryId" ValueFieldName="@nameof(TagCategory.Id)" TextFieldName="@nameof(TagCategory.Name)" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["UpdateDelay"]}({localizer["ms"]})")" ColSpanLg="6" BeginRow="true">
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Update Delay"]}({localizer["ms"]})")" ColSpanLg="6" BeginRow="true">
                     <DxSpinEdit @bind-Value="@taregtMachine.UpdateDelay" MinValue="100" MaxValue="65535" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Record Status Changed"]}")" Visible ColSpanLg="6">

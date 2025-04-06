@@ -23,7 +23,6 @@
 @if (hasStation)
 {
     <DxPopup HeaderText="Error Message" @bind-Visible="@showErrorMsg" CloseOnOutsideClick="false" />
-    @* main layout*@
     <div class="card shadow p-3 @sizeCss" style="border-color:@(statusStyle.ColorRGBString)">
         <DxGridLayout>
             <Rows>

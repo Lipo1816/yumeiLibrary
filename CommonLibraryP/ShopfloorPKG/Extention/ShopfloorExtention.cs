@@ -1,8 +1,9 @@
-﻿using CommonLibraryP.MachinePKG;
+﻿using CommonLibraryP.NotificationUtility;
 using CommonLibraryP.ShopfloorPKG.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace CommonLibraryP.ShopfloorPKG
             });
             builder.Services.AddSingleton<ShopfloorService>();
             builder.Services.AddHostedService<ShopfloorInitHostingService>();
+            builder.Services.TryAddScoped<NotificationService>();
             builder.Services.AddLocalization();
             return builder;
         }

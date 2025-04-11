@@ -1,8 +1,11 @@
 ﻿using CommonLibraryP.API;
 using CommonLibraryP.Data;
 using CommonLibraryP.MachinePKG;
+using DevExpress.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using static System.Collections.Specialized.BitVector32;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
@@ -130,6 +133,15 @@ namespace CommonLibraryP.ShopfloorPKG
         private List<Station> stations = new List<Station>();
         public List<Station> Stations => stations;
 
+        public async Task<List<Station>> GetAllStationConfigs()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
+                return await dbContext.Stations.AsNoTracking().ToListAsync();
+            }
+        }
+
         public virtual List<StationTypeWrapperClass> GetStationTypesWrapperClass()
         {
             return ShopfloorTypeEnumHelper.GetStationTypesWrapperClass().ToList();
@@ -228,7 +240,7 @@ namespace CommonLibraryP.ShopfloorPKG
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
-                var stationbases = await dbContext.Stations.Include(x=>x.Process).AsNoTracking().ToListAsync();
+                var stationbases = await dbContext.Stations.Include(x => x.Process).AsNoTracking().ToListAsync();
                 foreach (var stationbase in stationbases)
                 {
                     stations.Add(InitMachineToDerivesClass(stationbase));
@@ -240,6 +252,28 @@ namespace CommonLibraryP.ShopfloorPKG
         private Station? GetStationByName(string stationName)
         {
             return stations.FirstOrDefault(x => x.Name == stationName);
+        }
+
+        public async Task<RequestResult> DeployWorkorderToStation(Guid stationId, WorkorderIdModel WorkorderIdModel)
+        {
+            var workorder = await GetWorkorderById(WorkorderIdModel.WorkorderID);
+            var station = stations.FirstOrDefault(x => x.Id == stationId);
+            if (workorder is not null && station is not null)
+            {
+                station.SetWorkorder(workorder);
+                return new(2, $"Deploy workorder {workorder.WorkorderNo}-{workorder.Lot} to station {station.Name} success");
+            }
+            return new(4, $"Workorder or station not found");
+        }
+
+        public Task<RequestResult> RunStation(Guid id)
+        {
+            var target = stations.FirstOrDefault(x => x.Id == id);
+            if (target is not null)
+            {
+                return Task.FromResult<RequestResult>(target.Run());
+            }
+            return Task.FromResult<RequestResult>(new(3, "Station not found"));
         }
 
         public async Task<RequestResult> StationInByNameAndSerialNo(string stationName, string serialNo)
@@ -288,30 +322,37 @@ namespace CommonLibraryP.ShopfloorPKG
             bool isLast = await CheckStationIsLastInProcess(targetStation);
             switch (targetStation.StationType)
             {
-                case 0:
+                case 111:
                     try
                     {
-                        StationSingleWorkorderSingleSerial? stationSingleWorkorderSingleSerial = targetStation as StationSingleWorkorderSingleSerial;
-                        var item = stationSingleWorkorderSingleSerial?.WIPItemDetails.FirstOrDefault();
-                        stationSingleWorkorderSingleSerial?.RemoveItemDetail();
-
-                        var taskDetail = item?.TaskDetails.FirstOrDefault();
-                        taskDetail.FinishedTime = DateTime.Now;
-                        await UpsertTaskDetail(taskDetail);
-                        if (isLast)
+                        if (targetStation is StationSingleWorkorderSingleSerial stationSingleWorkorderSingleSerial)
                         {
-                            item.FinishedTime = DateTime.Now;
-                            if (pass)
+                            var item = stationSingleWorkorderSingleSerial?.WIPItemDetails.FirstOrDefault();
+                            stationSingleWorkorderSingleSerial?.RemoveItemDetail();
+
+                            var taskDetail = item?.TaskDetails.FirstOrDefault();
+                            taskDetail.FinishedTime = DateTime.Now;
+                            await UpsertTaskDetail(taskDetail);
+                            if (isLast)
                             {
-                                item.Okamount++;
+                                item.FinishedTime = DateTime.Now;
+                                if (pass)
+                                {
+                                    item.Okamount++;
+                                }
+                                else
+                                {
+                                    item.Ngamount++;
+                                }
+                                return await UpsertItemDetail(item);
                             }
-                            else
-                            {
-                                item.Ngamount++;
-                            }
-                            return await UpsertItemDetail(item);
+                            return new(2, $"Station {stationName} station out by FIFO success");
                         }
-                        return new(2, $"Station {stationName} station out by FIFO success");
+                        else
+                        {
+                            return new(4, $"Station {stationName} type downcasting error");
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -396,12 +437,28 @@ namespace CommonLibraryP.ShopfloorPKG
 
             }
         }
+        public async Task<Workorder?> GetWorkorderById(Guid id)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
+                return await dbContext.Workorders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+        public async Task<Workorder?> GetWorkorderByNoAndLot(string no, string lot)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
+                return await dbContext.Workorders.AsNoTracking().FirstOrDefaultAsync(x => x.WorkorderNo == no && x.Lot == lot);
+            }
+        }
         public async Task<List<Workorder>> GetRunningWorkordersByProcessID(Guid processId)
         {
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
-                return await dbContext.Workorders.Where(x=>x.ProcessId == processId && (Status)x.Status == Status.Running)
+                return await dbContext.Workorders.Where(x => x.ProcessId == processId && (Status)x.Status == Status.Running)
                     .AsNoTracking().ToListAsync();
             }
         }

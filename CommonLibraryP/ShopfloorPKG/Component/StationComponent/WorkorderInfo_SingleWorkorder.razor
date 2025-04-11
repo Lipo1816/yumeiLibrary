@@ -1,10 +1,12 @@
-﻿@inject IStringLocalizer<ShopfloorLanguage> localizer
+﻿@namespace CommonLibraryP.ShopfloorPKG.Component
+
+@inject IStringLocalizer<ShopfloorLanguage> localizer
 @inherits WorkorderInfoComponent
 
 @if (StationParamFromRoot.WorkorderAmountValid)
 {
     <DxFormLayout>
-        <DxFormLayoutItem Caption="@($"{localizer["Workorder no"]}")" CaptionPosition="CaptionPosition.Vertical">
+        <DxFormLayoutItem Caption="@($"{localizer["Workorder No"]}")" CaptionPosition="CaptionPosition.Vertical">
             <DxTextBox Text="@Workorder?.WorkorderNo" ReadOnly="true" />
         </DxFormLayoutItem>
         <DxFormLayoutItem Caption="@($"{localizer["Lot"]}")" CaptionPosition="CaptionPosition.Vertical">

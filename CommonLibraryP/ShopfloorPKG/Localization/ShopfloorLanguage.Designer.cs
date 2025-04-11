@@ -61,7 +61,16 @@ namespace CommonLibraryP.ShopfloorPKG.Localization {
         }
         
         /// <summary>
-        ///   查詢類似 批號 的當地語系化字串。
+        ///   查詢類似 Item Record 的當地語系化字串。
+        /// </summary>
+        internal static string Item_Record {
+            get {
+                return ResourceManager.GetString("Item Record", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Lot 的當地語系化字串。
         /// </summary>
         internal static string Lot {
             get {
@@ -70,7 +79,34 @@ namespace CommonLibraryP.ShopfloorPKG.Localization {
         }
         
         /// <summary>
-        ///   查詢類似 製程 的當地語系化字串。
+        ///   查詢類似 Name 的當地語系化字串。
+        /// </summary>
+        internal static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Ng 的當地語系化字串。
+        /// </summary>
+        internal static string Ng {
+            get {
+                return ResourceManager.GetString("Ng", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Ok 的當地語系化字串。
+        /// </summary>
+        internal static string Ok {
+            get {
+                return ResourceManager.GetString("Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Process 的當地語系化字串。
         /// </summary>
         internal static string Process {
             get {
@@ -79,7 +115,7 @@ namespace CommonLibraryP.ShopfloorPKG.Localization {
         }
         
         /// <summary>
-        ///   查詢類似 序號 的當地語系化字串。
+        ///   查詢類似 Serial no 的當地語系化字串。
         /// </summary>
         internal static string Serial_no {
             get {
@@ -88,7 +124,7 @@ namespace CommonLibraryP.ShopfloorPKG.Localization {
         }
         
         /// <summary>
-        ///   查詢類似 開始時間 的當地語系化字串。
+        ///   查詢類似 Start time 的當地語系化字串。
         /// </summary>
         internal static string Start_time {
             get {
@@ -97,11 +133,38 @@ namespace CommonLibraryP.ShopfloorPKG.Localization {
         }
         
         /// <summary>
-        ///   查詢類似 工單號 的當地語系化字串。
+        ///   查詢類似 Station In 的當地語系化字串。
         /// </summary>
-        internal static string Workorder_no {
+        internal static string Station_In {
             get {
-                return ResourceManager.GetString("Workorder no", resourceCulture);
+                return ResourceManager.GetString("Station In", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Station Out 的當地語系化字串。
+        /// </summary>
+        internal static string Station_Out {
+            get {
+                return ResourceManager.GetString("Station Out", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Workorder Deploy 的當地語系化字串。
+        /// </summary>
+        internal static string Workorder_Deploy {
+            get {
+                return ResourceManager.GetString("Workorder Deploy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Workorder no 的當地語系化字串。
+        /// </summary>
+        internal static string Workorder_No {
+            get {
+                return ResourceManager.GetString("Workorder No", resourceCulture);
             }
         }
     }

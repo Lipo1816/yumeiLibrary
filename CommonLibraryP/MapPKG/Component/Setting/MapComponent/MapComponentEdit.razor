@@ -1,0 +1,170 @@
+﻿@namespace CommonLibraryP.MapPKG.Component
+@inherits MapEditComponentBase
+
+@rendermode RenderMode.InteractiveServer
+@inject MapService mapService
+
+<style>
+    .mapcomponent {
+        position: absolute;
+        background-color: rgb(79, 79, 79, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .mapicon {
+        display:block;
+        height:100%;
+        width:100%;
+        font-size: 100%;
+        z-index:0;
+    }
+
+    .resizerotate {
+        transform: rotate(90deg);
+    }
+
+    .focus {
+        outline-style: solid;
+        outline-color: rgb(0, 255, 255);
+    }
+
+    .movearea {
+        width: 100%;
+        height: 100%;
+        cursor: move;
+        z-index: 1;
+    }
+
+    .resize-top,
+    .resize-right,
+    .resize-bottom,
+    .resize-left,
+    .resize-corner {
+        position: absolute;
+        z-index: 2; /* 優先於移動區域 */
+    }
+
+    .resize-top {
+        top: -5px;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        cursor: ns-resize;
+    }
+
+    .resize-right {
+        top: 0;
+        right: -5px;
+        width: 10px;
+        height: 100%;
+        cursor: ew-resize;
+    }
+
+    .resize-bottom {
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        cursor: ns-resize;
+    }
+
+    .resize-left {
+        top: 0;
+        left: -5px;
+        width: 10px;
+        height: 100%;
+        cursor: ew-resize;
+    }
+
+    .resize-corner {
+        bottom: -5px;
+        right: -5px;
+        width: 10px;
+        height: 10px;
+        cursor: nwse-resize;
+    }
+
+</style>
+
+<div class=@($"mapcomponent rounded {IsFocusCss} oi oi-monitor")
+     style="@($"{shapeCss}")"
+     @onclick="@OnComponentClicked" @onclick:stopPropagation="@true"
+     @onmouseup="@StopAction"
+     @oncontextmenu="@OnContextMenu" @oncontextmenu:preventDefault>
+    @if (IsFocus)
+    {
+        <div class="movearea" @ondragstart="@StartMove"></div>
+        @* <div class="resize-top" @ondragstart="StartResizeTop"></div>
+        <div class="resize-right" @ondragstart="StartResizeRight"></div>
+        <div class="resize-bottom" @ondragstart="StartResizeBottom"></div>
+        <div class="resize-left" @ondragstart="StartResizeLeft"></div> *@
+        <div class="resize-corner" @ondragstart="StartResizeCorner"></div>
+    }
+
+
+</div>
+
+<DxContextMenu @ref="@ContextMenu">
+    <Items>
+        <DxContextMenuItem IconCssClass="oi oi-info" Text="Detail" Click="DetailModeClick" />
+    </Items>
+</DxContextMenu>
+
+@code {
+
+    private bool isDragging = false;
+
+
+    DxContextMenu ContextMenu { get; set; } = null!;
+
+    private async Task OnContextMenu(MouseEventArgs args)
+    {
+        if (IsFocus)
+        {
+            await ContextMenu.ShowAsync(args);
+        }
+    }
+
+    private async Task DetailModeClick()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StartResizeTop(MouseEventArgs e) => await StartResize(e, MapComponentEditMode.ResizeTop);
+    private async Task StartResizeRight(MouseEventArgs e) => await StartResize(e, MapComponentEditMode.ResizeRight);
+    private async Task StartResizeBottom(MouseEventArgs e) => await StartResize(e, MapComponentEditMode.ResizeBottom);
+    private async Task StartResizeLeft(MouseEventArgs e) => await StartResize(e, MapComponentEditMode.ResizeLeft);
+    private async Task StartResizeCorner(MouseEventArgs e) => await StartResize(e, MapComponentEditMode.ResizeCorner);
+
+    private async Task StartResize(MouseEventArgs e, MapComponentEditMode mapComponentEditMode)
+    {
+        await StartAction(mapComponentEditMode, e);
+    }
+
+    private async Task StartMove(MouseEventArgs e)
+    {
+        await StartAction(MapComponentEditMode.Move, e);
+        isDragging = true;
+    }
+
+    private async Task StartAction(MapComponentEditMode mapComponentEditMode, MouseEventArgs e)
+    {
+        isDragging = true;
+        Console.WriteLine(mapComponentEditMode.ToString());
+        ComponentMouseEventStartArgsCallback?.Invoke(mapComponentEditMode, e);
+        await Task.CompletedTask;
+    }
+
+    private async Task StopAction(MouseEventArgs e)
+    {
+        ComponentMouseEventStartArgsCallback?.Invoke(MapComponentEditMode.None, e);
+        isDragging = false;
+        await Task.CompletedTask;
+    }
+
+
+    private async Task OnComponentClicked(MouseEventArgs e)
+    {
+        await ComponentClickCallback.InvokeAsync(MapComponentParam.Id);
+    }
+}

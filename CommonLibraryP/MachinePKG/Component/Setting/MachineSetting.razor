@@ -3,6 +3,7 @@
 @rendermode RenderMode.InteractiveServer
 @inject IStringLocalizer<MachineLanguage> localizer
 @inject MachineService machineService
+@inject NotificationService notificationService
 
 <DxGrid @ref="grid" Data="@machines" FocusedRowEnabled="true" FocusedRowChanged="MachineSelected" DataItemDeleting="DeleteMachine" HighlightRowOnHover="true">
     <ToolbarTemplate>
@@ -149,7 +150,7 @@
         var res = await machineService.UpsertMachineConfig(taregtMachine);
         CloseMachinePopup();
         await ActionCallback.InvokeAsync(res);
-        //uiService.ShowToast(res);
+        notificationService.ShowToast(res);
     }
 
     private void ShowDelete()

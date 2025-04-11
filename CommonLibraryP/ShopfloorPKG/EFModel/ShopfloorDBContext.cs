@@ -10,12 +10,6 @@ namespace CommonLibraryP.ShopfloorPKG
         {
         }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.AddInterceptors(new CommandInterceptor());
-        //    base.OnConfiguring(optionsBuilder);
-        //}
-
         #region process
         public virtual DbSet<Process> Processes { get; set; }
         public virtual DbSet<ProcessMachineRelation> ProcessMachineRelations { get; set; }
@@ -131,9 +125,9 @@ namespace CommonLibraryP.ShopfloorPKG
                     .HasForeignKey(d => d.WorkorderRecordCategoryId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.RecipeCategory).WithMany(p => p.Workorders)
-                    .HasForeignKey(d => d.RecipeCategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                //entity.HasOne(d => d.RecipeCategory).WithMany(p => p.Workorders)
+                //    .HasForeignKey(d => d.RecipeCategoryId)
+                //    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.ItemRecordsCategory).WithMany(p => p.Workorders)
                     .HasForeignKey(d => d.ItemRecordsCategoryId)

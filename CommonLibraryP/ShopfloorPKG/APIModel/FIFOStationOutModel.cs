@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
-    public class SetWorkorderID
+    public class FIFOStationOutModel
     {
         [Required]
-        public Guid WorkorderID { get; set; }
+        public bool Pass { get; set; }
     }
 }

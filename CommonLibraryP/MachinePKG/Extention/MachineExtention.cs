@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using CommonLibraryP.MachinePKG.Service;
+using CommonLibraryP.NotificationUtility;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -23,6 +20,7 @@ namespace CommonLibraryP.MachinePKG
             builder.Services.AddSingleton<MachineService>();
             builder.Services.AddHostedService<MachineInitHostingService>();
             builder.Services.AddHostedService<ConditionHostService>();
+            builder.Services.TryAddScoped<NotificationService>();
             builder.Services.AddLocalization();
             return builder;
         }

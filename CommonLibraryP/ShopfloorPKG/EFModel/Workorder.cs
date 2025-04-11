@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
-    public class Workorder
+    public partial class Workorder
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -38,7 +38,7 @@ namespace CommonLibraryP.ShopfloorPKG
 
         public virtual Process Process { get; set; } = null!;
 
-        public virtual WorkorderRecipeConfig? RecipeCategory { get; set; }
+        //public virtual WorkorderRecipeConfig? RecipeCategory { get; set; }
 
         public virtual TaskRecordConfig? TaskRecordCategory { get; set; }
 

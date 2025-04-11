@@ -23,13 +23,13 @@
                                 <Items>
                                     <DxToolbarItem IconCssClass="oi oi-plus" Click="NewProcess" BeginGroup="true" />
                                     <DxToolbarItem IconCssClass="oi oi-pencil" Click="ShowProcessPopup" Enabled="@(processSelected)" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
-                                    <DxToolbarItem IconCssClass="oi oi-magnifying-glass" Enabled="@(processSelected)" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" />
+                                    @* <DxToolbarItem IconCssClass="oi oi-magnifying-glass" Enabled="@(processSelected)" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" /> *@
                                     <DxToolbarItem IconCssClass="oi oi-trash" Click="ShowProcessDelete" Enabled="@(processSelected)" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
                                 </Items>
                             </DxToolbar>
                         </ToolbarTemplate>
                         <Columns>
-                            <DxGridDataColumn FieldName="@nameof(Process.Name)"></DxGridDataColumn>
+                            <DxGridDataColumn Caption="@($"{localizer["Name"]}")" FieldName="@nameof(Process.Name)"></DxGridDataColumn>
                         </Columns>
                     </DxGrid>
 
@@ -65,14 +65,14 @@
                                 <ToolbarTemplate>
                                     <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
                                         <Items>
-                                            <DxToolbarItem IconCssClass="oi oi-plus" Click="NewStation"  BeginGroup="true" />
+                                            <DxToolbarItem IconCssClass="oi oi-plus" Click="NewStation" Enabled="@(processSelected)" BeginGroup="true" />
                                             <DxToolbarItem IconCssClass="oi oi-pencil" Click="ShowStationPopup" Enabled="@(stationSelected)" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
                                             <DxToolbarItem IconCssClass="oi oi-trash" Click="ShowStationDelete" Alignment="ToolbarItemAlignment.Right" Enabled="@(stationSelected)" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" />
                                         </Items>
                                     </DxToolbar>
                                 </ToolbarTemplate>
                                 <Columns>
-                                    <DxGridDataColumn FieldName="@nameof(Station.Name)"></DxGridDataColumn>
+                                    <DxGridDataColumn Caption="@($"{localizer["Name"]}")" FieldName="@nameof(Station.Name)"></DxGridDataColumn>
                                     <DxGridDataColumn FieldName="@nameof(Station.ProcessIndex)">
                                     </DxGridDataColumn>
                                     <DxGridDataColumn FieldName="@nameof(Station.StationType)">
@@ -80,7 +80,7 @@
                                             <div>@((StationType)((int)context.Value))</div>
                                         </CellDisplayTemplate>
                                     </DxGridDataColumn>
-                                    <DxGridDataColumn FieldName="@nameof(Station.Enable)">
+                                    <DxGridDataColumn Caption="@($"{localizer["Enable"]}")" FieldName="@nameof(Station.Enable)">
                                         <CellDisplayTemplate>
                                             <DxCheckBox Checked="@((bool)context.Value)" CheckType="CheckType.Switch" ReadOnly="true"></DxCheckBox>
                                         </CellDisplayTemplate>
@@ -111,6 +111,9 @@
             <DxFormLayout>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Name"]}")" ColSpanLg="6" BeginRow="true">
                     <DxTextBox @bind-Text="@targetProcess.Name" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
                     <DxToolbar>
@@ -149,6 +152,9 @@
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Enable"]}")" ColSpanLg="6">
                     <DxCheckBox @bind-Checked="@targetStation.Enable" CheckType="CheckType.Switch" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanLg="12">
+                    <hr />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
                     <DxToolbar>
@@ -191,14 +197,16 @@
     }
 
     private void ShowProcessPopup() => processPopupVisible = true;
-    private async void CloseProcessPopup()
+    private async Task CloseProcessPopup()
     {
-        await InitParam();
         processPopupVisible = false;
+        await Task.Delay(1);
+        targetProcess = null;
+        await InitParam();
     }
 
     private void ShowStationPopup() => stationPopupVisible = true;
-    private async void CloseStationPopup()
+    private async Task CloseStationPopup()
     {
         await InitParam();
         stationPopupVisible = false;
@@ -206,7 +214,7 @@
 
     private int maxIndex => targetProcess.Stations.Any() ? targetProcess.Stations.Max(x => x.ProcessIndex) + 1 : 0;
 
-    private async void ProcessSelected(GridFocusedRowChangedEventArgs args)
+    private void ProcessSelected(GridFocusedRowChangedEventArgs args)
     {
         targetProcess = args.DataItem as Process;
         //ProcessMachineRelations = await shopfloorService.GetProcessMachineRelationByID(targetProcess?.Id);
@@ -233,7 +241,7 @@
     {
         var res = await shopfloorService.UpsertProcess(targetProcess);
         //uiService.ShowToast(res);
-        CloseProcessPopup();
+        await CloseProcessPopup();
     }
 
     private async Task DeleteProcess()
@@ -247,7 +255,7 @@
     {
         var res = await shopfloorService.UpsertStation(targetStation);
         //uiService.ShowToast(res);
-        CloseStationPopup();
+        await CloseStationPopup();
     }
 
     private async Task DeleteStation()

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
-    
+
     public partial class Station
     {
         public Station() { }
@@ -69,39 +69,42 @@ namespace CommonLibraryP.ShopfloorPKG
             UIUpdate();
         }
 
+        #region workorder
         protected List<Workorder> workorders = new();
         [NotMapped]
         public List<Workorder> Workorders => workorders;
         public virtual int WorkorderAmount => throw new NotImplementedException();
         public virtual bool WorkorderAmountValid => throw new NotImplementedException();
+        public virtual bool CanDeployWorkorder => throw new NotImplementedException();
         public virtual bool Canrun => throw new NotImplementedException();
-        protected List<ItemDetail> wipItemDetails = new();
-        [NotMapped]
-        public List<ItemDetail> WIPItemDetails => wipItemDetails;
-        protected int ItemAmount => wipItemDetails.Count;
-        public virtual bool ItemAmountValid => throw new NotImplementedException();
-        public int TaskAmount => wipItemDetails.SelectMany(x=>x.TaskDetails).Count();
-        public bool TaskAmountValid => wipItemDetails.TrueForAll(x => x.OneTaskValid);
+        #endregion
 
+        #region workorder operation
         public virtual RequestResult SetWorkorder(Workorder wo)
         {
             return new(4, "not implement yet");
         }
-
         public virtual RequestResult ClearWorkorder()
         {
             return new(4, "not implement yet");
         }
 
-        public virtual RequestResult Run()
-        {
-            return new(4, "not implement yet");
-        }
+        #endregion
 
+        #region item
+        protected List<ItemDetail> wipItemDetails = new();
+        [NotMapped]
+        public List<ItemDetail> WIPItemDetails => wipItemDetails;
+        protected int ItemAmount => wipItemDetails.Count;
+        public virtual bool ItemAmountValid => throw new NotImplementedException();
+        #endregion
+
+        #region item operation
         public virtual RequestResult CheckCanAddItem()
         {
             return new(4, "not implement yet");
         }
+        public bool CanStationIn => CheckCanAddItem().IsSuccess;
 
         public virtual RequestResult AddItemDetail(ItemDetail itemDetail)
         {
@@ -112,11 +115,25 @@ namespace CommonLibraryP.ShopfloorPKG
         {
             return new(4, "not implement yet");
         }
-
+        public bool CanStationOut => CheckCanRemoveItem().IsSuccess;
         public virtual RequestResult RemoveItemDetail()
         {
             return new(4, "not implement yet");
         }
+        #endregion
+
+        #region task
+        public int TaskAmount => wipItemDetails.SelectMany(x => x.TaskDetails).Count();
+        public bool TaskAmountValid => wipItemDetails.TrueForAll(x => x.OneTaskValid);
+        #endregion
+
+        #region station status
+        public virtual RequestResult Run()
+        {
+            return new(4, "not implement yet");
+        }
+
+
 
         public virtual RequestResult Pause()
         {
@@ -134,5 +151,6 @@ namespace CommonLibraryP.ShopfloorPKG
             SetErrorMsg(s);
             UIUpdate();
         }
+        #endregion
     }
 }

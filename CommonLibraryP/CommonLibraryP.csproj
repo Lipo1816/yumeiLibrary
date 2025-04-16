@@ -9,6 +9,16 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="ShopfloorPKG\EFModel\RecipeItem.cs" />
+    <Compile Remove="ShopfloorPKG\EFModel\WorkorderRecipeConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ShopfloorPKG\EFModel\RecipeItem.cs" />
+    <None Include="ShopfloorPKG\EFModel\WorkorderRecipeConfig.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -29,6 +39,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
+    <PackageReference Include="Z.Blazor.Diagrams" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +65,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ShopfloorLanguage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MapPKG\EFPartialModel\" />
+    <Folder Include="ShopfloorPKG\Component\StationComponent\ItemRecordInfo\" />
+    <Folder Include="ShopfloorPKG\Component\StationComponent\WorkorderInfo\" />
   </ItemGroup>
 
 </Project>

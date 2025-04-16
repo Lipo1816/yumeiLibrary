@@ -227,7 +227,7 @@ namespace CommonLibraryP.MachinePKG
                                 await master.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, tmp);
                             }
                             ushort ushort_valres = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            var res_str = tag.SetValue(ushort_valres);
+                            var res_str = tag.SetValue(Convert.ToChar(ushort_valres).ToString());
                             TagsStatechange();
                             return res_str;
                         }

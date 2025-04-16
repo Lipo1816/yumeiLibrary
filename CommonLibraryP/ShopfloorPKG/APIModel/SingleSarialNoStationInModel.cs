@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CommonLibraryP.ShopfloorPKG
 {
-    public class SingleSarialNo
+    public class SingleSarialNoStationInModel
     {
         [Required]
         public string serialNo { get; set; } = string.Empty;

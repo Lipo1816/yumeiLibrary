@@ -98,23 +98,45 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Process" xml:space="preserve">
-    <value>製程</value>
+    <value>Process</value>
     <comment>Process</comment>
   </data>
-  <data name="Workorder no" xml:space="preserve">
-    <value>工單號</value>
+  <data name="Workorder No" xml:space="preserve">
+    <value>Workorder no</value>
     <comment>Workorder no</comment>
   </data>
   <data name="Lot" xml:space="preserve">
-    <value>批號</value>
+    <value>Lot</value>
     <comment>Lot</comment>
   </data>
   <data name="Serial no" xml:space="preserve">
-    <value>序號</value>
+    <value>Serial no</value>
     <comment>Serial no</comment>
   </data>
   <data name="Start time" xml:space="preserve">
-    <value>開始時間</value>
+    <value>Start time</value>
     <comment>Start time</comment>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+    <comment>Name</comment>
+  </data>
+  <data name="Station In" xml:space="preserve">
+    <value>Station In</value>
+  </data>
+  <data name="Station Out" xml:space="preserve">
+    <value>Station Out</value>
+  </data>
+  <data name="Item Record" xml:space="preserve">
+    <value>Item Record</value>
+  </data>
+  <data name="Workorder Deploy" xml:space="preserve">
+    <value>Workorder Deploy</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="Ng" xml:space="preserve">
+    <value>Ng</value>
   </data>
 </root>

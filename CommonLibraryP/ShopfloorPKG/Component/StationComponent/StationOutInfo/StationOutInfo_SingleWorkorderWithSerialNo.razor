@@ -1,0 +1,41 @@
+﻿@namespace CommonLibraryP.ShopfloorPKG.Component
+
+@rendermode RenderMode.InteractiveServer
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+
+<EditForm Model="@fifoStationOutModel" OnValidSubmit="StationOut" Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout>
+        <DxFormLayoutItem Caption="@($"{localizer["Ok"]}")" CaptionPosition="CaptionPosition.Vertical">
+            <DxCheckBox @bind-Checked="@fifoStationOutModel.Pass" CheckType="CheckType.Switch"/>
+        </DxFormLayoutItem>
+        <DxFormLayoutItem ColSpanLg="12">
+            <hr />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </DxFormLayoutItem>
+    </DxFormLayout>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public EventCallback<bool> StationOutCallback { get; set; }
+    private FIFOStationOutModel fifoStationOutModel = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        fifoStationOutModel = new();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task StationOut()
+    {
+        await StationOutCallback.InvokeAsync(fifoStationOutModel.Pass);
+    }
+}

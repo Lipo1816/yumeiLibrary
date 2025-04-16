@@ -1,10 +1,14 @@
-﻿@inherits WorkorderInfoComponent
-@inject IStringLocalizer<ShopfloorLanguage> localizer
-@inject ShopfloorService shopfloorService  
+﻿@namespace CommonLibraryP.ShopfloorPKG.Component
 
-<EditForm OnValidSubmit="SetWorkorder" Context="EditFormContext">
+@rendermode RenderMode.InteractiveServer
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+
+<EditForm Model="@singleSarialNo" OnValidSubmit="StationIn" Context="EditFormContext">
     <DataAnnotationsValidator />
     <DxFormLayout>
+        <DxFormLayoutItem Caption="@($"{localizer["Serial no"]}")" CaptionPosition="CaptionPosition.Vertical">
+            <DxTextBox @bind-Text="@singleSarialNo.serialNo" />
+        </DxFormLayoutItem>
         <DxFormLayoutItem ColSpanLg="12">
             <hr />
         </DxFormLayoutItem>
@@ -17,15 +21,15 @@
         </DxFormLayoutItem>
     </DxFormLayout>
 </EditForm>
-
-
 @code {
-    private IEnumerable<Workorder> Workorders = new List<Workorder>();
 
-    private SetWorkorderID workorderID = new();
+    [Parameter]
+    public EventCallback<string> StationInCallback { get; set; }
 
-    private async Task SetWorkorder()
+    private SingleSarialNoStationInModel singleSarialNo = new();
+
+    private async void StationIn()
     {
-        
+        await StationInCallback.InvokeAsync(singleSarialNo.serialNo);
     }
 }

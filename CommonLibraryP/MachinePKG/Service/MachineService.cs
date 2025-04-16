@@ -891,7 +891,6 @@ namespace CommonLibraryP.MachinePKG
             {
                 try
                 {
-
                     var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
                     var existingNode = await dbContext.Set<T>().FirstOrDefaultAsync(x => x.Id == conditionNode.Id);
                     if (existingNode is not null)

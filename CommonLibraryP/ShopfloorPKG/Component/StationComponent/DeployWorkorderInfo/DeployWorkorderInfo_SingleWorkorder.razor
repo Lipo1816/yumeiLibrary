@@ -1,0 +1,44 @@
+﻿@namespace CommonLibraryP.ShopfloorPKG.Component
+
+@inherits WorkorderInfoComponent
+@inject IStringLocalizer<ShopfloorLanguage> localizer
+@inject ShopfloorService shopfloorService
+
+<EditForm Model="@workorderIdModel" OnValidSubmit="SetWorkorder" Context="EditFormContext">
+    <DataAnnotationsValidator />
+    <DxFormLayout>
+        <DxFormLayoutItem ColSpanLg="12" Caption="@($"{localizer["Workorder No"]}-{localizer["Lot"]}")" CaptionPosition="CaptionPosition.Vertical">
+            <DxComboBox Data="@Workorders" @bind-Value="@workorderIdModel.WorkorderID" ValueFieldName="@nameof(Workorder.Id)" TextFieldName="@nameof(Workorder.WorkorderNoAndLot)"></DxComboBox>
+        </DxFormLayoutItem>
+        <DxFormLayoutItem ColSpanLg="12">
+            <hr />
+        </DxFormLayoutItem>
+        <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" ColSpanLg="12">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-check" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </DxFormLayoutItem>
+    </DxFormLayout>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public EventCallback<WorkorderIdModel> WorkorderIdModelCallback { get; set; }
+
+    private IEnumerable<Workorder> Workorders = new List<Workorder>();
+    private WorkorderIdModel workorderIdModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        workorderIdModel = new ();
+        Workorders = await shopfloorService.GetAllWorkordersConfig();
+    }
+
+    private async Task SetWorkorder()
+    {
+        await WorkorderIdModelCallback.InvokeAsync(workorderIdModel);
+    }
+}

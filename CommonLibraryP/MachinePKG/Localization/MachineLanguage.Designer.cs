@@ -59,5 +59,95 @@ namespace CommonLibraryP.MachinePKG.Localization {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   查詢類似 Connection Type 的當地語系化字串。
+        /// </summary>
+        internal static string Connection_Type {
+            get {
+                return ResourceManager.GetString("Connection Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Data Type 的當地語系化字串。
+        /// </summary>
+        internal static string Data_Type {
+            get {
+                return ResourceManager.GetString("Data Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Enable 的當地語系化字串。
+        /// </summary>
+        internal static string Enable {
+            get {
+                return ResourceManager.GetString("Enable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 IP 的當地語系化字串。
+        /// </summary>
+        internal static string IP {
+            get {
+                return ResourceManager.GetString("IP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 MaxRetryCount 的當地語系化字串。
+        /// </summary>
+        internal static string Maxima_Retry_Count {
+            get {
+                return ResourceManager.GetString("Maxima Retry Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Name 的當地語系化字串。
+        /// </summary>
+        internal static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Port 的當地語系化字串。
+        /// </summary>
+        internal static string Port {
+            get {
+                return ResourceManager.GetString("Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Tag Count 的當地語系化字串。
+        /// </summary>
+        internal static string Tag_Count {
+            get {
+                return ResourceManager.GetString("Tag Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 Update By Time 的當地語系化字串。
+        /// </summary>
+        internal static string Update_By_Time {
+            get {
+                return ResourceManager.GetString("Update By Time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類似 UpdateDelay 的當地語系化字串。
+        /// </summary>
+        internal static string Update_Delay {
+            get {
+                return ResourceManager.GetString("Update Delay", resourceCulture);
+            }
+        }
     }
 }

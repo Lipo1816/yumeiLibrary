@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonLibraryP.ShopfloorPKG.Component.StationComponent
+namespace CommonLibraryP.ShopfloorPKG.Component
 {
     public abstract class WorkorderInfoComponent : ComponentBase
     {

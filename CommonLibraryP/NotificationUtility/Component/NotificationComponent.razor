@@ -1,0 +1,28 @@
+﻿@namespace CommonLibraryP.NotificationUtility
+@rendermode RenderMode.InteractiveServer
+@inject IToastNotificationService toastSetvice
+@inject NotificationService uiService
+
+<DxToastProvider
+    VerticalAlignment="VerticalEdge.Bottom"
+    ThemeMode="ToastThemeMode.Auto"
+    AnimationType="ToastAnimationType.SlideAndFade"/>
+
+@code {
+
+
+    protected override void OnInitialized()
+    {
+        uiService.ToastAction += GetToastRequest;
+    }
+
+    private Task GetToastRequest(RequestResult req)
+    {
+        toastSetvice.ShowToast(new ToastOptions()
+            {
+                RenderStyle = (ToastRenderStyle)((int)req.ReturnCode),
+                Text = req.Msg,
+            });
+        return Task.CompletedTask;
+    }
+}

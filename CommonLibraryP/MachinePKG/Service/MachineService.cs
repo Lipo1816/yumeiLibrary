@@ -609,7 +609,7 @@ namespace CommonLibraryP.MachinePKG
         }
 
         //main set function
-        public async Task<RequestResult> SetMachineTag(string machineName, string tagName, object val)
+        private async Task<RequestResult> SetMachineTag(string machineName, string tagName, object val)
         {
             Machine? targetMachine = await GetMachineByName(machineName);
             if (targetMachine != null)

@@ -170,9 +170,9 @@ namespace CommonLibraryP.MachinePKG
             {
                 //bool
                 case 1:
-                    if (val is bool)
+                    if (val is bool bool_val)
                     {
-                        bool bool_val = (bool)val;
+                        //bool bool_val = (bool)val;
                         if (tag.Bool1)
                         {
                             await master.WriteSingleCoilAsync((byte)station, (ushort)startIndex, bool_val);
@@ -192,9 +192,9 @@ namespace CommonLibraryP.MachinePKG
                     }
                 //ushort
                 case 2:
-                    if (val is ushort)
+                    if (val is ushort ushort_val)
                     {
-                        ushort ushort_val = (ushort)val;
+                        //ushort ushort_val = (ushort)val;
                         if (tag.Bool1)
                         {
                             //var a = await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (byte)offset);
@@ -214,9 +214,9 @@ namespace CommonLibraryP.MachinePKG
                         return new(4, "Data is not ushort type");
                     }
                 case 4:
-                    if (val is string)
+                    if (val is string string_val)
                     {
-                        string string_val = (string)val;
+                        //string string_val = (string)val;
                         if (tag.Bool1)
                         {
                             ushort[] reset = Enumerable.Repeat((ushort)0, offset).ToArray();

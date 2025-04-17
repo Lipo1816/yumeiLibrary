@@ -220,7 +220,7 @@ namespace CommonLibraryP.MachinePKG
                         if (tag.Bool1)
                         {
                             ushort[] reset = Enumerable.Repeat((ushort)0, offset).ToArray();
-                            await master.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, reset);
+                            await master?.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, reset);
                             if (!string.IsNullOrEmpty(string_val))
                             {
                                 var tmp = StringToByte(string_val, tag.Bool2);

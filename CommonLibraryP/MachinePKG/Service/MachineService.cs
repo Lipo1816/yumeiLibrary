@@ -612,8 +612,13 @@ namespace CommonLibraryP.MachinePKG
         private async Task<RequestResult> SetMachineTag(string machineName, string tagName, object val)
         {
             Machine? targetMachine = await GetMachineByName(machineName);
+
             if (targetMachine != null)
             {
+                if (targetMachine.RunFlag)
+                {
+                    return new(4, $"Machine {machineName} status {targetMachine.StatusStr} is not avaulable now");
+                }
                 if (targetMachine.hasCategory)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
@@ -642,6 +647,10 @@ namespace CommonLibraryP.MachinePKG
             Machine? targetMachine = await GetMachineByName(machineName);
             if (targetMachine != null)
             {
+                if (targetMachine.RunFlag)
+                {
+                    return new(4, $"Machine {machineName} status {targetMachine.StatusStr} is not avaulable now");
+                }
                 if (targetMachine.hasCategory)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);

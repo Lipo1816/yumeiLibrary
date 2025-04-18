@@ -647,7 +647,7 @@ namespace CommonLibraryP.MachinePKG
             Machine? targetMachine = await GetMachineByName(machineName);
             if (targetMachine != null)
             {
-                if (targetMachine.RunFlag)
+                if (!targetMachine.RunFlag)
                 {
                     return new(4, $"Machine {machineName} status {targetMachine.StatusStr} is not avaulable now");
                 }

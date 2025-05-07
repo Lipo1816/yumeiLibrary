@@ -19,8 +19,8 @@ namespace CommonLibraryP.MachinePKG
             });
             builder.Services.AddSingleton<MachineService>();
             builder.Services.AddHostedService<MachineInitHostingService>();
-            builder.Services.AddHostedService<ConditionHostService>();
-            builder.Services.TryAddScoped<NotificationService>();
+            //builder.Services.AddHostedService<ConditionHostService>();
+            //builder.Services.TryAddScoped<NotificationService>();
             builder.Services.AddLocalization();
             return builder;
         }
@@ -34,7 +34,7 @@ namespace CommonLibraryP.MachinePKG
             });
             builder.Services.AddSingleton<MachineService, MachineServiceImplementation>();
             builder.Services.AddHostedService<MachineInitHostingService>();
-            builder.Services.AddHostedService<ConditionHostService>();
+            //builder.Services.AddHostedService<ConditionHostService>();
             builder.Services.AddLocalization();
             return builder;
         }

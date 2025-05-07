@@ -1,17 +1,18 @@
 ﻿@namespace CommonLibraryP.MachinePKG.Component
 
 @rendermode RenderMode.InteractiveServer
+
 @inject IStringLocalizer<MachineLanguage> localizer
 @inject MachineService machineService
 @inject NotificationService notificationService
 
-<DxGrid @ref="grid" Data="@machines" FocusedRowEnabled="true" FocusedRowChanged="MachineSelected" DataItemDeleting="DeleteMachine" HighlightRowOnHover="true">
+<DxGrid @ref="grid" Data="@machines" @bind-SelectedDataItem="@taregtMachineObj" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" DataItemDeleting="DeleteMachine" HighlightRowOnHover="true">
     <ToolbarTemplate>
         <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
             <DxToolbarItem IconCssClass="oi oi-plus" Click="NewMachineClicked" BeginGroup="true" />
             <DxToolbarItem Enabled="@machineSelected" Click="ShowMachinePopup" IconCssClass="oi oi-pencil" RenderStyle="ButtonRenderStyle.Info" BeginGroup="true" />
-            <DxToolbarItem Enabled="@machineSelected" Click="NavToMachine" IconCssClass="oi oi-magnifying-glass" RenderStyle="ButtonRenderStyle.Primary" BeginGroup="true" />
             <DxToolbarItem Enabled="@machineSelected" Click="ShowDelete" IconCssClass="oi oi-trash" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right"/>
+            <DxToolbarItem Click="ShowMachineTree" IconCssClass="oi oi-info" RenderStyle="ButtonRenderStyle.Link" BeginGroup="true" Alignment="ToolbarItemAlignment.Right"/>
         </DxToolbar>
     </ToolbarTemplate>
     <Columns>
@@ -23,8 +24,7 @@
                 <div>@((ConnectType)((int)context.Value))</div>
             </CellDisplayTemplate>
         </DxGridDataColumn>
-        <DxGridDataColumn Caption="@($"{localizer["Maxima Retry Count"]}")" FieldName="@nameof(Machine.MaxRetryCount)" />
-
+        <DxGridDataColumn Caption="@($"{localizer["Maximal Retry Count"]}")" FieldName="@nameof(Machine.MaxRetryCount)" />
         <DxGridDataColumn Caption="@($"{localizer["Enable"]}")" FieldName="@nameof(Machine.Enabled)">
             <CellDisplayTemplate>
                 <DxCheckBox CheckType="CheckType.Switch" ReadOnly="true" Checked="@((bool)context.Value)" />
@@ -51,6 +51,9 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Name"]}")" ColSpanLg="6" BeginRow="true">
                     <DxTextBox @bind-Text="@taregtMachine.Name" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Enable"]}")" ColSpanLg="6">
+                    <DxCheckBox CheckType="CheckType.Switch" @bind-Checked="@taregtMachine.Enabled" />
+                </DxFormLayoutItem>
                 @* <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Process"]}")" ColSpanLg="6">
                     <DxComboBox Data="processes" @bind-Value="@taregtMachine.ProcessId" ValueFieldName="@nameof(Process.Id)" TextFieldName="@nameof(Process.Name)"></DxComboBox>
                 </DxFormLayoutItem> *@
@@ -60,14 +63,14 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Port"]}")" ColSpanLg="6">
                     <DxSpinEdit @bind-Value="@taregtMachine.Port" MinValue="0" MaxValue="65535" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Maxima Retry Count"]}")" ColSpanLg="6">
+                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Maximal Retry Count"]}")" ColSpanLg="6" BeginRow="true">
                     <DxSpinEdit @bind-Value="@taregtMachine.MaxRetryCount" MinValue="-1" MaxValue="10" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Connection Type"]}")" ColSpanLg="6">
                     <DxComboBox Data="@ConnectTypes" @bind-Value="@taregtMachine.ConnectionType" ValueFieldName="@(nameof(ConnectionTypeWrapperClass.Index))" TextFieldName="@(nameof(ConnectionTypeWrapperClass.DisplayName))" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Tag Category"]}")" ColSpanLg="6">
-                    <DxComboBox Data="tagCategoriesWithFilter" @bind-Value="@taregtMachine.TagCategoryId" ValueFieldName="@nameof(TagCategory.Id)" TextFieldName="@nameof(TagCategory.Name)" />
+                    <DxComboBox Data="tagCategories" @bind-Value="@taregtMachine.TagCategoryId" ValueFieldName="@nameof(TagCategory.Id)" TextFieldName="@nameof(TagCategory.Name)" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Update Delay"]}({localizer["ms"]})")" ColSpanLg="6" BeginRow="true">
                     <DxSpinEdit @bind-Value="@taregtMachine.UpdateDelay" MinValue="100" MaxValue="65535" />
@@ -75,9 +78,7 @@
                 <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Record Status Changed"]}")" Visible ColSpanLg="6">
                     <DxCheckBox CheckType="CheckType.Switch" @bind-Checked="@taregtMachine.RecordStatusChanged" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem CaptionPosition="CaptionPosition.Vertical" Caption="@($"{localizer["Enable"]}")" ColSpanLg="6">
-                    <DxCheckBox CheckType="CheckType.Switch" @bind-Checked="@taregtMachine.Enabled" />
-                </DxFormLayoutItem>
+
                 <DxFormLayoutItem ColSpanLg="12">
                     <hr />
                 </DxFormLayoutItem>
@@ -94,23 +95,45 @@
     </BodyContentTemplate>
 </DxPopup>
 
-@code {
-    [Parameter]
-    public EventCallback<RequestResult> ActionCallback { get; set; }
-    [Parameter]
-    public EventCallback<Guid> MachineNavCallback { get; set; }
+<DxPopup @bind-Visible="@machineTreePopupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
+    <HeaderTemplate>
+        <div class="w-100 p-3 border border-bottom">
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem IconCssClass="oi oi-x" Click="CloseMachineTree" RenderStyle="ButtonRenderStyle.Danger" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" RenderStyleMode="ToolbarItemRenderStyleMode.Contained" />
+                </Items>
+            </DxToolbar>
+        </div>
+    </HeaderTemplate>
+    <BodyContentTemplate Context="bodycontext">
+        <DxTreeView @ref="@dxTreeView" Data="@(MachineTypeEnumHelper.GetConnectionTypeWrapperClasses())"
+        AnimationType="LayoutAnimationType.Slide">
+            <DataMappings>
+                <DxTreeViewDataMapping Text="@nameof(ConnectionTypeWrapperClass.DisplayName)"
+                Key="@nameof(ConnectionTypeWrapperClass.Index)"
+                ParentKey="@nameof(ConnectionTypeWrapperClass.ParentIndex)" />
+            </DataMappings>
+        </DxTreeView>
+    </BodyContentTemplate>
+</DxPopup>
 
-    private IEnumerable<ConnectionTypeWrapperClass> ConnectTypes => MachineTypeEnumHelper.GetConnectTypesWrapperClass();
+@code {
+
+    private IEnumerable<ConnectionTypeWrapperClass> ConnectTypes => MachineTypeEnumHelper.GetConnectionTypeWrapperClasses();
 
 
     IGrid? grid { get; set; }
     private IEnumerable<Machine> machines;
-    private Machine? taregtMachine;
+    private Object? taregtMachineObj;
+    private Machine? taregtMachine => taregtMachineObj as Machine;
     private bool machineSelected => taregtMachine != null;
     private bool popupVisible;
 
     private IEnumerable<TagCategory> tagCategories;
-    private IEnumerable<TagCategory> tagCategoriesWithFilter => machineSelected ? tagCategories.Where(x => x.ConnectionType == taregtMachine.ConnectionType) : new List<TagCategory>();
+    //private IEnumerable<TagCategory> tagCategoriesWithFilter => machineSelected ? tagCategories.Where(x => x.ConnectionType == taregtMachine.ConnectionType) : new List<TagCategory>();
+
+    private DxTreeView? dxTreeView { get; set; }
+    private bool machineTreePopupVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,20 +143,23 @@
     private async Task InitParam()
     {
         machines = await machineService.GetAllMachinesConfig();
-        tagCategories = await machineService.GetAllTagCategories();
+        await GetTagCategory();
+        taregtMachineObj = machines.FirstOrDefault();
     }
 
-    private void MachineSelected(GridFocusedRowChangedEventArgs args)
+    private async Task GetTagCategory()
     {
-        taregtMachine = args.DataItem as Machine;
-    }
+        tagCategories = machineSelected ? await machineService.GetAllSuitableTags(taregtMachine.ConnectionType) : new List<TagCategory> { };
 
-    private void ShowMachinePopup()
+    } 
+
+    private async Task ShowMachinePopup()
     {
+        await GetTagCategory();
         popupVisible = true;
     }
 
-    private async void CloseMachinePopup()
+    private async Task CloseMachinePopup()
     {
         popupVisible = false;
         await InitParam();
@@ -141,7 +167,7 @@
 
     private void NewMachineClicked()
     {
-        taregtMachine = new(Guid.NewGuid());
+        taregtMachineObj = new Machine(Guid.NewGuid());
         ShowMachinePopup();
     }
 
@@ -149,7 +175,6 @@
     {
         var res = await machineService.UpsertMachineConfig(taregtMachine);
         CloseMachinePopup();
-        await ActionCallback.InvokeAsync(res);
         notificationService.ShowToast(res);
     }
 
@@ -162,14 +187,11 @@
     {
         var res = await machineService.DeleteMachine(taregtMachine);
         await InitParam();
-        await ActionCallback.InvokeAsync(res);
+        notificationService.ShowToast(res);
         //uiService.ShowToast(res);
     }
 
-    private void NavToMachine()
-    {
-        MachineNavCallback.InvokeAsync(taregtMachine.Id);
-        //nav.NavigateTo($"/Machine/{taregtMachine.Id}");
-    }
+    private void ShowMachineTree() => machineTreePopupVisible = true;
+    private void CloseMachineTree() => machineTreePopupVisible = false;
 }
 

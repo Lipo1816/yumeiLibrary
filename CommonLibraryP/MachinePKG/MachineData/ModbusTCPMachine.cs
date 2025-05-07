@@ -11,7 +11,7 @@ using CommonLibraryP.Data;
 
 namespace CommonLibraryP.MachinePKG
 {
-    public class ModbusTCPMachine: Machine
+    public class ModbusTCPMachine : Machine
     {
         private TcpClient tcpClient;
         private IModbusFactory modbusFactory;
@@ -48,94 +48,104 @@ namespace CommonLibraryP.MachinePKG
         {
             try
             {
-                if (MachineStatus != Status.Disconnect && MachineStatus != Status.TryConnecting)
+                if (tag is ModbusTCPTag modbusTCPTag)
                 {
-                    int station = tag.Int1;
-                    int startIndex = tag.Int2;
-                    int offset = tag.Int3;
-                    switch (tag.DataType)
+                    if (MachineStatus != Status.Disconnect && MachineStatus != Status.TryConnecting)
                     {
-                        //bool
-                        case 1:
-                            bool res_bool = false;
-                            if (tag.Bool2)
-                            {
-                                res_bool = (await master?.ReadInputsAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-
-                            }
-                            else
-                            {
-                                res_bool = (await master?.ReadCoilsAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            }
-                            return tag.SetValue(res_bool);
-                        //ushort
-                        case 2:
-                            ushort res_ushort = 0;
-                            if (!tag.Bool1)
-                            {
-                                res_ushort = (await master?.ReadInputRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-
-                            }
-                            else
-                            {
-                                res_ushort = (await master?.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            }
-                            return tag.SetValue(res_ushort);
-                        case 4:
-                            ushort[] tmp_ushort = new ushort[offset];
-                            if (!tag.Bool1)
-                            {
-                                tmp_ushort = (await master?.ReadInputRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset));
-
-                            }
-                            else
-                            {
-                                tmp_ushort = (await master?.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset));
-                            }
-                            string strList = string.Empty;
-                            bool b = BitConverter.IsLittleEndian;
-                            foreach (var twoUshort in tmp_ushort)
-                            {
-                                var byteArray = BitConverter.GetBytes(twoUshort);
-                                if (tag.Bool2)
+                        bool output = modbusTCPTag.InputOrOutput;
+                        
+                        byte station = (byte)modbusTCPTag.Station;
+                        ushort startIndex = (ushort)modbusTCPTag.StartIndex;
+                        ushort offset = (ushort)modbusTCPTag.Offset;
+                        switch (tag.DataType)
+                        {
+                            //bool
+                            case 1:
+                                bool res_bool = false;
+                                if (!output)
                                 {
-                                    byteArray = byteArray.Reverse().ToArray();
+                                    res_bool = (await master?.ReadInputsAsync(station, startIndex, offset)).FirstOrDefault();
+
                                 }
-                                string s = Encoding.ASCII.GetString(byteArray.TakeWhile(x => x != 0).ToArray());
-                                strList += s;
-                            }
-                            return tag.SetValue(strList);
-                        case 11:
-                            List<bool> res_boolList = Enumerable.Repeat(false, offset).ToList();
-                            if (!tag.Bool1)
-                            {
-                                res_boolList = (await master.ReadInputsAsync((byte)station, (ushort)startIndex, (ushort)offset)).ToList();
+                                else
+                                {
+                                    res_bool = (await master?.ReadCoilsAsync(station, startIndex, offset)).FirstOrDefault();
+                                }
+                                return tag.SetValue(res_bool);
+                            //ushort
+                            case 2:
+                                ushort res_ushort = 0;
+                                if (!output)
+                                {
+                                    res_ushort = (await master?.ReadInputRegistersAsync(station, startIndex, offset)).FirstOrDefault();
 
-                            }
-                            else
-                            {
-                                res_boolList = (await master.ReadCoilsAsync((byte)station, (ushort)startIndex, (ushort)offset)).ToList();
-                            }
-                            return tag.SetValue(res_boolList);
-                        case 22:
-                            List<ushort> res_ushortList = Enumerable.Repeat((ushort)0, offset).ToList();
-                            if (!tag.Bool1)
-                            {
-                                res_ushortList = (await master.ReadInputRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).ToList();
+                                }
+                                else
+                                {
+                                    res_ushort = (await master?.ReadHoldingRegistersAsync(station, startIndex, offset)).FirstOrDefault();
+                                }
+                                return tag.SetValue(res_ushort);
+                            case 4:
+                                bool stringReverse = modbusTCPTag.StringReverse;
+                                ushort[] tmp_ushort = new ushort[modbusTCPTag.Offset];
+                                if (!output)
+                                {
+                                    tmp_ushort = (await master?.ReadInputRegistersAsync(station, startIndex, offset));
 
-                            }
-                            else
-                            {
-                                res_ushortList = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).ToList();
-                            }
-                            return tag.SetValue(res_ushortList);
-                        default:
-                            return new(4, "Not implement yet");
+                                }
+                                else
+                                {
+                                    tmp_ushort = (await master?.ReadHoldingRegistersAsync(station, startIndex, offset));
+                                }
+                                string strList = string.Empty;
+                                bool b = BitConverter.IsLittleEndian;
+                                foreach (var twoUshort in tmp_ushort)
+                                {
+                                    var byteArray = BitConverter.GetBytes(twoUshort);
+                                    if (stringReverse)
+                                    {
+                                        byteArray = byteArray.Reverse().ToArray();
+                                    }
+                                    string s = Encoding.ASCII.GetString(byteArray.TakeWhile(x => x != 0).ToArray());
+                                    strList += s;
+                                }
+                                return tag.SetValue(strList);
+                            case 11:
+                                var res_boolArray = Enumerable.Repeat(false, modbusTCPTag.Offset).ToArray();
+                                if (!output)
+                                {
+                                    res_boolArray = await master.ReadInputsAsync(station, startIndex, offset);
+
+                                }
+                                else
+                                {
+                                    res_boolArray = await master.ReadCoilsAsync(station, startIndex, offset);
+                                }
+                                return tag.SetValue(res_boolArray);
+                            case 22:
+                                var res_ushortArray = Enumerable.Repeat((ushort)0, modbusTCPTag.Offset).ToArray();
+                                if (!output)
+                                {
+                                    res_ushortArray = await master.ReadInputRegistersAsync(station, startIndex, offset);
+
+                                }
+                                else
+                                {
+                                    res_ushortArray = await master.ReadHoldingRegistersAsync(station, startIndex, offset);
+                                }
+                                return tag.SetValue(res_ushortArray);
+                            default:
+                                return new(4, "Not implement yet");
+                        }
+                    }
+                    else
+                    {
+                        return new(1, $"Machine status {Status.Disconnect} or {Status.TryConnecting} is not allow to update tag");
                     }
                 }
                 else
                 {
-                    return new(1, $"Machine status {Status.Disconnect} or {Status.TryConnecting} is not allow to update tag");
+                    return new(1, $"Tag type error");
                 }
             }
             catch (IOException e)
@@ -163,91 +173,142 @@ namespace CommonLibraryP.MachinePKG
 
         public override async Task<RequestResult> SetTag(Tag tag, object val)
         {
-            int station = tag.Int1;
-            int startIndex = tag.Int2;
-            int offset = tag.Int3;
-            switch (tag.DataType)
+            if (tag is ModbusTCPTag modbusTCPTag)
             {
-                //bool
-                case 1:
-                    if (val is bool bool_val)
-                    {
-                        //bool bool_val = (bool)val;
-                        if (tag.Bool1)
+                bool output = modbusTCPTag.InputOrOutput;
+                bool stringReverse = modbusTCPTag.StringReverse;
+                byte station = (byte)modbusTCPTag.Station;
+                ushort startIndex = (ushort)modbusTCPTag.StartIndex;
+                ushort offset = (ushort)modbusTCPTag.Offset;
+                switch (tag.DataType)
+                {
+                    //bool
+                    case 1:
+                        if (val is bool bool_val)
                         {
-                            await master.WriteSingleCoilAsync((byte)station, (ushort)startIndex, bool_val);
-                            bool bool_res = (await master.ReadCoilsAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            var res_bool = tag.SetValue(bool_res);
-                            TagsStatechange();
-                            return res_bool;
-                        }
-                        else
-                        {
-                            return new(4, "Input is not allow to set");
-                        }
-                    }
-                    else
-                    {
-                        return new(4, "Data is not boolean type");
-                    }
-                //ushort
-                case 2:
-                    if (val is ushort ushort_val)
-                    {
-                        //ushort ushort_val = (ushort)val;
-                        if (tag.Bool1)
-                        {
-                            //var a = await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (byte)offset);
-                            await master.WriteSingleRegisterAsync((byte)station, (ushort)startIndex, ushort_val);
-                            ushort ushort_res = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            var res_ushort = tag.SetValue(ushort_res);
-                            TagsStatechange();
-                            return res_ushort;
-                        }
-                        else
-                        {
-                            return new(4, "Input is not allow to set");
-                        }
-                    }
-                    else
-                    {
-                        return new(4, "Data is not ushort type");
-                    }
-                case 4:
-                    if (val is string string_val)
-                    {
-                        //string string_val = (string)val;
-                        if (tag.Bool1)
-                        {
-                            ushort[] reset = Enumerable.Repeat((ushort)0, offset).ToArray();
-                            await master?.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, reset);
-                            if (!string.IsNullOrEmpty(string_val))
+                            //bool bool_val = (bool)val;
+                            if (output)
                             {
-                                var tmp = StringToByte(string_val, tag.Bool2);
-                                await master.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, tmp);
+                                await master.WriteSingleCoilAsync((byte)station, (ushort)startIndex, bool_val);
+                                bool bool_res = (await master.ReadCoilsAsync(station, startIndex, offset)).FirstOrDefault();
+                                var res_bool = tag.SetValue(bool_res);
+                                TagsStatechange();
+                                return res_bool;
                             }
-                            ushort ushort_valres = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
-                            var res_str = tag.SetValue(Convert.ToChar(ushort_valres).ToString());
-                            TagsStatechange();
-                            return res_str;
+                            else
+                            {
+                                return new(4, "Input is not allow to set");
+                            }
                         }
                         else
                         {
-                            return new(4, "Input is not allow to set");
+                            return new(4, "Data is not boolean type");
                         }
-                    }
-                    else
-                    {
-                        return new(4, "Data is not string type");
-                    }
-                case 11:
-                    return new(3, "Not implement yet");
-                case 22:
-                    return new(3, "Not implement yet");
-                case 33:
-                    return new(3, "Not implement yet");
-                default:
-                    return new(3, "Not implement yet");
+                    //ushort
+                    case 2:
+                        if (val is ushort ushort_val)
+                        {
+                            //ushort ushort_val = (ushort)val;
+                            if (!output)
+                            {
+                                //var a = await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (byte)offset);
+                                await master.WriteSingleRegisterAsync(station, startIndex, ushort_val);
+                                ushort ushort_res = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
+                                var res_ushort = tag.SetValue(ushort_res);
+                                TagsStatechange();
+                                return res_ushort;
+                            }
+                            else
+                            {
+                                return new(4, "Input is not allow to set");
+                            }
+                        }
+                        else
+                        {
+                            return new(4, "Data is not ushort type");
+                        }
+                    case 4:
+                        if (val is string string_val)
+                        {
+                            //string string_val = (string)val;
+                            if (output)
+                            {
+                                ushort[] reset = Enumerable.Repeat((ushort)0, offset).ToArray();
+                                await master?.WriteMultipleRegistersAsync(station, startIndex, reset);
+                                if (!string.IsNullOrEmpty(string_val))
+                                {
+                                    var tmp = StringToByte(string_val, stringReverse);
+                                    await master.WriteMultipleRegistersAsync(station, startIndex, tmp);
+                                }
+                                ushort ushort_valres = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
+                                var res_str = tag.SetValue(Convert.ToChar(ushort_valres).ToString());
+                                TagsStatechange();
+                                return res_str;
+                            }
+                            else
+                            {
+                                return new(4, "Input is not allow to set");
+                            }
+                        }
+                        else
+                        {
+                            return new(4, "Data is not string type");
+                        }
+                    case 11:
+                        if (val is bool[] boolArr_val)
+                        {
+                            if (output)
+                            {
+                                if (boolArr_val.Length != offset)
+                                {
+                                    return new(4, $"Boolean array length {boolArr_val.Length} and offset {offset} not match");
+                                }
+                                await master.WriteMultipleCoilsAsync((byte)station, (ushort)startIndex, boolArr_val);
+                                bool[] boolArr_res = await master.ReadCoilsAsync(station, startIndex, offset);
+                                var res_boolArr = tag.SetValue(boolArr_res);
+                                TagsStatechange();
+                                return res_boolArr;
+                            }
+                            else
+                            {
+                                return new(4, "Input is not allow to set");
+                            }
+                        }
+                        else
+                        {
+                            return new(4, "Data is not boolean type");
+                        }
+                    case 22:
+                        if (val is ushort[] ushortArr_val)
+                        {
+                            if (output)
+                            {
+                                if (ushortArr_val.Length != offset)
+                                {
+                                    return new(4, $"Ushort array length {ushortArr_val.Length} and offset {offset} not match");
+                                }
+                                await master.WriteMultipleRegistersAsync((byte)station, (ushort)startIndex, ushortArr_val);
+                                ushort[] ushortArr_res = await master.ReadHoldingRegistersAsync(station, startIndex, offset);
+                                var res_ushortArr = tag.SetValue(ushortArr_res);
+                                TagsStatechange();
+                                return res_ushortArr;
+                            }
+                            else
+                            {
+                                return new(4, "Input is not allow to set");
+                            }
+                        }
+                        else
+                        {
+                            return new(4, "Data is not boolean type");
+                        }
+                    default:
+                        return new(3, "Not implement yet");
+                }
+            }
+            else
+            {
+                return new(4, "casing fail");
             }
         }
 

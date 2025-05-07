@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="MachinePKG\Component\Setting\ConditionSetting.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="ShopfloorPKG\EFModel\RecipeItem.cs" />
     <None Include="ShopfloorPKG\EFModel\WorkorderRecipeConfig.cs" />
   </ItemGroup>
@@ -71,6 +75,10 @@
     <Folder Include="MapPKG\EFPartialModel\" />
     <Folder Include="ShopfloorPKG\Component\StationComponent\ItemRecordInfo\" />
     <Folder Include="ShopfloorPKG\Component\StationComponent\WorkorderInfo\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="MachinePKG\Component\Setting\ConditionSetting.razor" />
   </ItemGroup>
 
 </Project>

@@ -34,7 +34,7 @@
                             <DxGridDataColumn Caption="@($"{localizer["Name"]}")" FieldName="@nameof(TagCategory.Name)"></DxGridDataColumn>
                             <DxGridDataColumn Caption="@($"{localizer["Connection Type"]}")" FieldName="@nameof(TagCategory.ConnectionType)">
                                 <CellDisplayTemplate>
-                                    <div>@((ConnectType)((int)context.Value))</div>
+                                    <div>@(MachineTypeEnumHelper.GetConnectionTypeWrapperClassByIndex((int)context.Value)?.DisplayName)</div>
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
                             <DxGridDataColumn Caption="@($"{localizer["Tag Count"]}")" FieldName="@nameof(TagCategory.TagCount)"></DxGridDataColumn>

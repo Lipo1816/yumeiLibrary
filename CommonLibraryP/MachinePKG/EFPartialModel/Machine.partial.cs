@@ -13,65 +13,41 @@ namespace CommonLibraryP.MachinePKG
 
         public bool isAutoRetry => retryCount < MaxRetryCount;
 
-        private PeriodicTimer periodicTimer;
-        private CancellationToken _cts;
+        //private PeriodicTimer periodicTimer;
+        //private CancellationToken _cts;
         public Machine() { }
 
-        public Machine(Machine machine)
-        {
-            Id = machine.Id;
-            //ProcessId = machine.ProcessId;
-            Name = machine.Name;
-            Ip = machine.Ip;
-            Port = machine.Port;
-            ConnectionType = machine.ConnectionType;
-            MaxRetryCount = machine.MaxRetryCount;
-            Enabled = machine.Enabled;
-            TagCategoryId = machine.TagCategoryId;
-            UpdateDelay = machine.UpdateDelay;
-            RecordStatusChanged = machine.RecordStatusChanged;
+        //public Machine(Machine machine)
+        //{
+        //    Id = machine.Id;
+        //    //ProcessId = machine.ProcessId;
+        //    Name = machine.Name;
+        //    Ip = machine.Ip;
+        //    Port = machine.Port;
+        //    ConnectionType = machine.ConnectionType;
+        //    MaxRetryCount = machine.MaxRetryCount;
+        //    Enabled = machine.Enabled;
+        //    TagCategoryId = machine.TagCategoryId;
+        //    UpdateDelay = machine.UpdateDelay;
+        //    RecordStatusChanged = machine.RecordStatusChanged;
 
-            if (machine.hasCategory)
-            {
-                TagCategory = new TagCategory
-                {
-                    Id = machine.TagCategory.Id,
-                    Name = machine.TagCategory.Name,
-                    ConnectionType = machine.ConnectionType,
+        //    if (machine.hasCategory)
+        //    {
+        //        TagCategory = new TagCategory
+        //        {
+        //            Id = machine.TagCategory.Id,
+        //            Name = machine.TagCategory.Name,
+        //            ConnectionType = machine.ConnectionType,
 
-                    Tags = machine.TagCategory.Tags,
-                };
-            }
+        //            Tags = machine.TagCategory.Tags,
+        //        };
+        //    }
+        //}
 
-            //if (machine.hasCustomStatusCategory)
-            //{
-            //    LogicStatusCategory = new LogicStatusCategory
-            //    {
-            //        Id = machine.LogicStatusCategoryId,
-            //        Name = machine.LogicStatusCategory.Name,
-            //        DataType = machine.LogicStatusCategory.DataType,
-
-            //        LogicStatusConditions = machine.LogicStatusCategory.LogicStatusConditions,
-            //    };
-            //}
-
-            //if (machine.hasErrorCodeCategory)
-            //{
-            //    ErrorCodeCategory = new ErrorCodeCategory
-            //    {
-            //        Id = machine.ErrorCodeCategoryId,
-            //        Name = machine.ErrorCodeCategory.Name,
-            //        DataType = machine.ErrorCodeCategory.DataType,
-
-            //        ErrorCodeMappings = machine.ErrorCodeCategory.ErrorCodeMappings,
-            //    };
-            //}
-        }
-
-        public Machine(Guid id)
-        {
-            this.Id = id;
-        }
+        //public Machine(Guid id)
+        //{
+        //    this.Id = id;
+        //}
         public bool hasCategory => TagCategory != null;
         public bool hasTags => hasCategory && TagCategory?.Tags.Count > 0;
         public bool hasTagsUpdateByTime => hasTags && TagCategory.Tags.Any(x => x.UpdateByTime);

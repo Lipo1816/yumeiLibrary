@@ -230,20 +230,34 @@ namespace CommonLibraryP.MachinePKG
 
         public virtual Machine InitMachineToDerivesClass(Machine machine)
         {
-            Machine res;
-            switch (machine.ConnectionType)
+            var targetMachineType = MachineTypeEnumHelper.GetConnectionTypeWrapperClassByIndex(machine.ConnectionType);
+            if (targetMachineType is not null)
             {
-                case 0:
-                    res = new ModbusTCPMachine(machine);
-                    break;
-                case 1:
-                    res = new TMRobotModbusTCP(machine);
-                    break;
-                default:
-                    throw new NotImplementedException();
+                Machine res = Activator.CreateInstance(targetMachineType.Type) as Machine;
+                if (res is not null)
+                {
+                    CopyMachineAttributes(res, machine);
+                    res.MachineStatechangedRecordAct += MachineStatusChangedRecord;
+                    return res;
+                }
+                else
+                {
+                    throw new Exception($"Machine type error");
+                }
             }
-            res.MachineStatechangedRecordAct += MachineStatusChangedRecord;
-            return res;
+            throw new Exception($"Machine type not insert");
+        }
+
+        private void CopyMachineAttributes(Machine childMachine, Machine parentMachine)
+        {
+            foreach (var prop in typeof(Machine).GetProperties())
+            {
+                if (prop.CanRead && prop.CanWrite)
+                {
+                    prop.SetValue(childMachine, prop.GetValue(parentMachine));
+                }
+            }
+
         }
 
         public void MachineConfigChanged(Guid id, DataEditMode mode)
@@ -408,8 +422,8 @@ namespace CommonLibraryP.MachinePKG
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                var tmp =  await dbContext.TagCategories.AsNoTracking().ToListAsync();
-                var res =  tmp.Where(x => suitableCat.Exists(y => y.Index == x.ConnectionType)).ToList();
+                var tmp = await dbContext.TagCategories.AsNoTracking().ToListAsync();
+                var res = tmp.Where(x => suitableCat.Exists(y => y.Index == x.ConnectionType)).ToList();
                 return res;
             }
         }

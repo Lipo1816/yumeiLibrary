@@ -16,7 +16,7 @@ namespace CommonLibraryP.MachinePKG
         private TcpClient tcpClient;
         private IModbusFactory modbusFactory;
         public IModbusMaster? master;
-        public ModbusTCPMachine(Machine machine) : base(machine)
+        public ModbusTCPMachine() : base()
         {
             tcpClient = new();
             modbusFactory = new ModbusFactory();

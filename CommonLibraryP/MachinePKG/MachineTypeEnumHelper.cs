@@ -18,22 +18,20 @@ namespace CommonLibraryP.MachinePKG
         public static List<ConnectionTypeWrapperClass> GetConnectionTypeWrapperClasses() => connectionTypeWrapperClasses;
         private static List<ConnectionTypeWrapperClass> connectionTypeWrapperClasses = new()
         {
-            new(0, -1, "ModbusTCP"),
-            new(1, 0, "TMRobot"),
-
+            new(0, typeof(ModbusTCPMachine)),
+            new(1, typeof(TMRobotModbusTCP)),
         };
 
-        public static IEnumerable<ConnectionTypeWrapperClass> GetSuitableConnectionTypeWrapperClasses(int currentIndex)
+        public static List<ConnectionTypeWrapperClass> GetSuitableConnectionTypeWrapperClasses(int currentIndex)
         {
-            int tmp = currentIndex;
-            while (GetConnectionTypeWrapperClassByIndex(tmp) is not null)
+            //int tmp = currentIndex;
+            var target = GetConnectionTypeWrapperClassByIndex(currentIndex);
+            foreach (var a in connectionTypeWrapperClasses)
             {
-                var res = GetConnectionTypeWrapperClassByIndex(tmp);
-                tmp = res.ParentIndex;
-                yield return res;
+                var x = a.Type.GetType();
+                var r = x.IsAssignableFrom(target?.Type);
             }
-
-
+            return connectionTypeWrapperClasses.Where(x => x.Type.IsAssignableFrom(target?.Type)).ToList();
         }
 
         public static ConnectionTypeWrapperClass? GetConnectionTypeWrapperClassByIndex(int index)
@@ -41,11 +39,11 @@ namespace CommonLibraryP.MachinePKG
             return connectionTypeWrapperClasses.FirstOrDefault(x => x.Index == index);
         }
 
-        public static void AddCustomConnection(ConnectionTypeWrapperClass customConnectionTypeWrapperClass)
+        public static void AddCustomConnection<T>(int index) where T : Machine
         {
-            if (!connectionTypeWrapperClasses.Any(x => x.Index == customConnectionTypeWrapperClass.Index))
+            if (!connectionTypeWrapperClasses.Any(x => x.Index == index))
             {
-                connectionTypeWrapperClasses.Add(customConnectionTypeWrapperClass);
+                connectionTypeWrapperClasses.Add(new(index, typeof(T)));
             }
         }
 
@@ -123,7 +121,7 @@ namespace CommonLibraryP.MachinePKG
             }
         }
 
-        public static bool VerifyValueStringWithDatatype(int datatype ,string valString)
+        public static bool VerifyValueStringWithDatatype(int datatype, string valString)
         {
             try
             {
@@ -249,25 +247,16 @@ namespace CommonLibraryP.MachinePKG
     #region connection type
     public class ConnectionTypeWrapperClass : EnumWrapper
     {
-        public ConnectionTypeWrapperClass(int index, int parentIndex, string name)
+        public ConnectionTypeWrapperClass(int index, Type type)
         {
             this.index = index;
-            this.ParentIndex = parentIndex;
-            displayName = name;
+            this.type = type;
+            displayName = type.Name.Split(".").LastOrDefault();
         }
         //public ConnectType Type { get; init; }
-        public int ParentIndex { get; init; }
-    }
-    public enum ConnectType
-    {
-        ModbusTCP = 0,
-        TMRobot = 1,
-        //ModbusTCPother = 2,
-        //WebAPI = 10,
-        //ConveyorMachine = 20,
-        //WrappingMachine = 21,
-        //RobotOther = 22,
-        //RegalscanRFID = 78,
+        //public int ParentIndex { get; init; }
+        private Type type;
+        public Type Type => type;
     }
     #endregion
 
@@ -330,23 +319,6 @@ namespace CommonLibraryP.MachinePKG
     //    CustomStatus,
     //    DetailCode,
     //}
-    #endregion
-
-    #region tag parameter
-
-    public class TagParameter
-    {
-        public TagParameter(ConnectType connectType, string variableName, string parameterName)
-        {
-            this.connectType = connectType;
-            this.variableName = variableName;
-            this.parameterName = parameterName;
-        }
-        public ConnectType connectType { get; init; }
-        public string variableName { get; init; } = null!;
-        public string parameterName { get; init; } = null!;
-    }
-
     #endregion
 
     #region logical operations

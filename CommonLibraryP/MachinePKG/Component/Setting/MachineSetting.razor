@@ -21,7 +21,7 @@
         <DxGridDataColumn Caption="@($"{localizer["Port"]}")" FieldName="@nameof(Machine.Port)" />
         <DxGridDataColumn Caption="@($"{localizer["Connection Type"]}")" FieldName="@nameof(Machine.ConnectionType)">
             <CellDisplayTemplate>
-                <div>@((ConnectType)((int)context.Value))</div>
+                <div>@(MachineTypeEnumHelper.GetConnectionTypeWrapperClassByIndex((int)context.Value)?.DisplayName)</div>
             </CellDisplayTemplate>
         </DxGridDataColumn>
         <DxGridDataColumn Caption="@($"{localizer["Maximal Retry Count"]}")" FieldName="@nameof(Machine.MaxRetryCount)" />
@@ -106,14 +106,14 @@
         </div>
     </HeaderTemplate>
     <BodyContentTemplate Context="bodycontext">
-        <DxTreeView @ref="@dxTreeView" Data="@(MachineTypeEnumHelper.GetConnectionTypeWrapperClasses())"
+        @* <DxTreeView @ref="@dxTreeView" Data="@(MachineTypeEnumHelper.GetConnectionTypeWrapperClasses())"
         AnimationType="LayoutAnimationType.Slide">
             <DataMappings>
                 <DxTreeViewDataMapping Text="@nameof(ConnectionTypeWrapperClass.DisplayName)"
                 Key="@nameof(ConnectionTypeWrapperClass.Index)"
                 ParentKey="@nameof(ConnectionTypeWrapperClass.ParentIndex)" />
             </DataMappings>
-        </DxTreeView>
+        </DxTreeView> *@
     </BodyContentTemplate>
 </DxPopup>
 
@@ -150,7 +150,6 @@
     private async Task GetTagCategory()
     {
         tagCategories = machineSelected ? await machineService.GetAllSuitableTags(taregtMachine.ConnectionType) : new List<TagCategory> { };
-
     } 
 
     private async Task ShowMachinePopup()
@@ -165,16 +164,16 @@
         await InitParam();
     }
 
-    private void NewMachineClicked()
+    private async Task NewMachineClicked()
     {
-        taregtMachineObj = new Machine(Guid.NewGuid());
-        ShowMachinePopup();
+        taregtMachineObj = new Machine();
+        await ShowMachinePopup();
     }
 
     private async Task UpsertMachine()
     {
         var res = await machineService.UpsertMachineConfig(taregtMachine);
-        CloseMachinePopup();
+        await CloseMachinePopup();
         notificationService.ShowToast(res);
     }
 

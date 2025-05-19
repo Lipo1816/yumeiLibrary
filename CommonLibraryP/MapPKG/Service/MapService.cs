@@ -142,7 +142,7 @@ namespace CommonLibraryP.MapPKG
             }
         }
 
-        public async Task<RequestResult> DeleteMapComponentTCP(MapComponent mapComponent)
+        public async Task<RequestResult> DeleteMapComponentTPC(MapComponent mapComponent)
         {
             using (var scope = scopeFactory.CreateScope())
             {

@@ -22,7 +22,7 @@ namespace CommonLibraryP.MachinePKG
             modbusFactory = new ModbusFactory();
         }
 
-        public override async Task ConnectAsync()
+        public sealed override async Task ConnectAsync()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace CommonLibraryP.MachinePKG
                 tcpClient = new TcpClient();
                 await tcpClient.ConnectAsync(Ip, Port);
                 master = modbusFactory.CreateMaster(tcpClient);
-                Running();
+                FetchingData();
                 retryCount = 0;
             }
             catch (SocketException e)
@@ -44,19 +44,19 @@ namespace CommonLibraryP.MachinePKG
                 Error(e.Message);
             }
         }
-        public override async Task<RequestResult> UpdateTag(Tag tag)
+        public sealed override async Task<RequestResult> UpdateTag(Tag tag)
         {
             try
             {
                 if (tag is ModbusTCPTag modbusTCPTag)
                 {
-                    if (MachineStatus != Status.Disconnect && MachineStatus != Status.TryConnecting)
+                    if (RunFlag)
                     {
                         bool output = modbusTCPTag.InputOrOutput;
                         
-                        byte station = (byte)modbusTCPTag.Station;
-                        ushort startIndex = (ushort)modbusTCPTag.StartIndex;
-                        ushort offset = (ushort)modbusTCPTag.Offset;
+                        var station = modbusTCPTag.Station;
+                        var startIndex = modbusTCPTag.StartIndex;
+                        var offset = modbusTCPTag.Offset;
                         switch (tag.DataType)
                         {
                             //bool
@@ -106,6 +106,7 @@ namespace CommonLibraryP.MachinePKG
                                     {
                                         byteArray = byteArray.Reverse().ToArray();
                                     }
+
                                     string s = Encoding.ASCII.GetString(byteArray.TakeWhile(x => x != 0).ToArray());
                                     strList += s;
                                 }
@@ -140,7 +141,7 @@ namespace CommonLibraryP.MachinePKG
                     }
                     else
                     {
-                        return new(1, $"Machine status {Status.Disconnect} or {Status.TryConnecting} is not allow to update tag");
+                        return new(1, $"Machine status {CommonEnumHelper.GetStatusDetail(StatusCode)} is not allow to update tag");
                     }
                 }
                 else
@@ -165,21 +166,20 @@ namespace CommonLibraryP.MachinePKG
             }
             catch (Exception e)
             {
-                var a = e.GetType();
                 Error(e.Message);
                 return new(4, $"Update tags fail({e.Message})");
             }
         }
 
-        public override async Task<RequestResult> SetTag(Tag tag, object val)
+        public sealed override async Task<RequestResult> SetTag(Tag tag, object val)
         {
             if (tag is ModbusTCPTag modbusTCPTag)
             {
-                bool output = modbusTCPTag.InputOrOutput;
-                bool stringReverse = modbusTCPTag.StringReverse;
-                byte station = (byte)modbusTCPTag.Station;
-                ushort startIndex = (ushort)modbusTCPTag.StartIndex;
-                ushort offset = (ushort)modbusTCPTag.Offset;
+                var output = modbusTCPTag.InputOrOutput;
+                var stringReverse = modbusTCPTag.StringReverse;
+                var station = modbusTCPTag.Station;
+                var startIndex = modbusTCPTag.StartIndex;
+                var offset = modbusTCPTag.Offset;
                 switch (tag.DataType)
                 {
                     //bool
@@ -240,7 +240,7 @@ namespace CommonLibraryP.MachinePKG
                                     var tmp = StringToByte(string_val, stringReverse);
                                     await master.WriteMultipleRegistersAsync(station, startIndex, tmp);
                                 }
-                                ushort ushort_valres = (await master.ReadHoldingRegistersAsync((byte)station, (ushort)startIndex, (ushort)offset)).FirstOrDefault();
+                                ushort ushort_valres = (await master.ReadHoldingRegistersAsync(station, startIndex, offset)).FirstOrDefault();
                                 var res_str = tag.SetValue(Convert.ToChar(ushort_valres).ToString());
                                 TagsStatechange();
                                 return res_str;

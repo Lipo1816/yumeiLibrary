@@ -458,7 +458,7 @@ namespace CommonLibraryP.ShopfloorPKG
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ShopfloorDBContext>();
-                return await dbContext.Workorders.Where(x => x.ProcessId == processId && (Status)x.Status == Status.Running)
+                return await dbContext.Workorders.Where(x => x.ProcessId == processId && x.Status == 5)
                     .AsNoTracking().ToListAsync();
             }
         }

@@ -25,9 +25,15 @@
 
 <style>
     .diagram-container {
-        width: 100%;
-        height: 100%;
-        border: 1px solid white; /* Just visual */
+    width: 100%;
+    height: 100%;
+    border: 1px solid white;
+    overflow: hidden;
+    }
+
+    .img {
+    cursor: auto;
+    overflow: auto;
     }
 </style>
 
@@ -60,7 +66,7 @@
         <DxGridLayoutItem Row="0" Column="0" RowSpan="2">
             <Template>
                 <div class="p-3">
-                    <DxGrid @ref="@mapGrid" Data="@mapConfigs" FocusedRowEnabled="true" FocusedRowChanged="MapSelected" DataItemDeleting="DeleteMap">
+                    <DxGrid @ref="@mapGrid" Data="@mapConfigs" SelectedDataItem="@taregtMapConfigObj" SelectedDataItemChanged="DataItemSelected" AllowSelectRowByClick="true" SelectionMode="GridSelectionMode.Single" HighlightRowOnHover="true" DataItemDeleting="DeleteMap">
                         <ToolbarTemplate>
                             <DxToolbar SizeMode="SizeMode.Large" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
                                 <DxToolbarItem IconCssClass="oi oi-plus" Click="NewMap" BeginGroup="true" />
@@ -88,18 +94,17 @@
                                     <DxToolbarItem Text="Station" Click="NewMapComponentStation" BeginGroup="true" />
                                 </Items>
                             </DxToolbarItem>
-                            <DxToolbarItem RenderStyle="ButtonRenderStyle.Secondary" Text="@($"{componentEditMode.ToString()}({mouseEventArgs?.ClientX}, {mouseEventArgs?.ClientY})")" Enabled="false" BeginGroup="true" />
-                            <DxToolbarItem RenderStyle="ButtonRenderStyle.Danger" IconCssClass="oi oi-trash" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
+                            @*                             <DxToolbarItem RenderStyle="ButtonRenderStyle.Secondary" Text="@($"{componentEditMode.ToString()}({mouseEventArgs?.ClientX}, {mouseEventArgs?.ClientY})")" Enabled="false" BeginGroup="true" />*@                            <DxToolbarItem RenderStyle="ButtonRenderStyle.Danger" IconCssClass="oi oi-trash" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" />
                         </Items>
                     </DxToolbar>
                 </div>
             </Template>
         </DxGridLayoutItem>
-        <DxGridLayoutItem Row="1" Column="1">
+        <DxGridLayoutItem Row="1" Column="1" CssClass="img">
             <Template>
                 @if (mapSelected)
                 {
-                    <div @ref="shapeLayer" class="h-100 w-100 card p-3"
+                    @* <div @ref="shapeLayer" class="h-100 w-100 card p-3"
                          style="background-image: url('@($"{imageDisplayByteString}")'); background-size:contain; background-position:center ;background-repeat: no-repeat"
                          @ondrop="OnDrop" ondragover="event.preventDefault();">
                         @foreach (var component in mapComponents)
@@ -108,14 +113,14 @@
                                               ComponentClickCallback="ComponentClick" IsFocus=@(CheckIsFocus(component.Id))
                                               ComponentMouseEventStartArgsCallback="StartAction" />
                         }
-                    </div>
-                    @* <div class="diagram-container">
-                        <CascadingValue Value="Diagram" IsFixed="true">
-                            <DiagramCanvas style=@($"background-image: url('{imageDisplayByteString}'); background-size:contain; background-position:center ;background-repeat: no-repeat")>
+                    </div> *@
+                    <div class="diagram-container" style=@($"background-image: url('{imageDisplayByteString}'); background-size:contain; background-position:center ;background-repeat: no-repeat")>
+                        <CascadingValue Value="Diagram">
+                            <DiagramCanvas>
 
                             </DiagramCanvas>
                         </CascadingValue>
-                    </div> *@
+                    </div>
                 }
             </Template>
         </DxGridLayoutItem>
@@ -147,9 +152,9 @@
                 </DxFormLayoutItem>
                 <DxFormLayoutItem ColSpanLg="12" BeginRow="true">
                     <DxFileInput FilesUploading="OnFilesUploading"
-                                 AllowMultiFileUpload="false"
-                                 MaxFileSize="15000000"
-                                 AcceptedFileTypes="AllowedFileExtensions">
+                    AllowMultiFileUpload="false"
+                    MaxFileSize="15000000"
+                    AcceptedFileTypes="AllowedFileExtensions">
                     </DxFileInput>
                 </DxFormLayoutItem>
                 <DxFormLayoutItem ColSpanLg="12">
@@ -226,11 +231,14 @@
 
 @code {
     #region map
+
     IGrid? mapGrid { get; set; }
     private IEnumerable<MapConfig>? mapConfigs;
-    private MapConfig? targetMapConfig;
+    private Object? taregtMapConfigObj;
+    private MapConfig? targetMapConfig => taregtMapConfigObj as MapConfig;
     private bool mapSelected => targetMapConfig is not null;
     private bool mapPopupVisible = false;
+
 
     private readonly List<string> AllowedFileExtensions = new() { ".jpg", ".jpeg", ".png" };
 
@@ -248,8 +256,6 @@
         }
     }
 
-    private MapComponentEditMode componentEditMode;
-    private MouseEventArgs? mouseEventArgs;
     #endregion
 
     #region components
@@ -268,18 +274,19 @@
     protected override async Task OnInitializedAsync()
     {
         await InitParam();
-        //await InitDiagram();
+        await InitDiagram();
     }
 
     private async Task InitDiagram()
     {
         var options = new BlazorDiagramOptions
             {
-                AllowMultiSelection = true,
+                AllowMultiSelection = false,
                 Zoom =
             {
-                Enabled = true,
+                Enabled = false,
             },
+                AllowPanning = false,
                 Links =
             {
                 DefaultRouter = new NormalRouter(),
@@ -288,18 +295,7 @@
             };
 
         Diagram = new BlazorDiagram(options);
-
-        var firstNode = Diagram.Nodes.Add(new NodeModel(position: new Point(50, 50))
-            {
-                Title = "Node 1"
-            });
-        var secondNode = Diagram.Nodes.Add(new NodeModel(position: new Point(200, 100))
-            {
-                Title = "Node 2"
-            });
-
-        await Task.CompletedTask;
-
+        Diagram.RegisterComponent<MapDiagramNode, MapDiagramNodeComponent>();
     }
 
     private async Task InitParam()
@@ -311,23 +307,18 @@
 
     #region map
 
-    private void MapSelected(GridFocusedRowChangedEventArgs args)
-    {
-        targetMapConfig = args.DataItem as MapConfig;
-    }
-
     private void ShowMapPopup() => mapPopupVisible = true;
     private async Task CloseMapPopup()
     {
         mapPopupVisible = false;
         await Task.Delay(1);
-        targetMapConfig = null;
+        taregtMapConfigObj = null;
         await InitParam();
     }
 
     private void NewMap()
     {
-        targetMapConfig = new MapConfig { ImageType = string.Empty };
+        taregtMapConfigObj = new MapConfig { ImageType = string.Empty };
         ShowMapPopup();
     }
 
@@ -382,8 +373,19 @@
     #endregion
 
     #region component
-    private ElementReference shapeLayer { get; set; }
-    private Rect shapePanelSize;
+
+    private async Task DataItemSelected(Object? obj)
+    {
+        taregtMapConfigObj = obj;
+        Diagram.Nodes.Clear();
+        foreach (var node in mapComponents)
+        {
+            Diagram.Nodes.Add((new MapDiagramNode(position: new Point(node.PositionX, node.PositionY))).SetConfig(node));
+        }
+
+        await Task.CompletedTask;
+    }
+
     private void ShowComponentPopup() => mapComponentPopupVisible = true;
     private async Task CloseComponentPopup()
     {
@@ -410,49 +412,49 @@
         notificationService.ShowToast(res);
     }
 
-    private async Task ComponentClick(Guid id)
-    {
-        targetMapComponent = mapComponents?.FirstOrDefault(x => x.Id == id);
-        await InvokeAsync(StateHasChanged);
-    }
+    // private async Task ComponentClick(Guid id)
+    // {
+    //     targetMapComponent = mapComponents?.FirstOrDefault(x => x.Id == id);
+    //     await InvokeAsync(StateHasChanged);
+    // }
 
-    private bool CheckIsFocus(Guid id)
-    {
-        return mapComponentSelected ? targetMapComponent.Id == id : false;
-    }
+    // private bool CheckIsFocus(Guid id)
+    // {
+    //     return mapComponentSelected ? targetMapComponent.Id == id : false;
+    // }
 
-    private async Task StartAction(MapComponentEditMode mapComponentEditMode, MouseEventArgs e)
-    {
-        mouseEventArgs = e;
-        componentEditMode = mapComponentEditMode;
-        await InvokeAsync(StateHasChanged);
-    }
+    // private async Task StartAction(MapComponentEditMode mapComponentEditMode, MouseEventArgs e)
+    // {
+    //     mouseEventArgs = e;
+    //     componentEditMode = mapComponentEditMode;
+    //     await InvokeAsync(StateHasChanged);
+    // }
 
-    private async Task OnDrop(MouseEventArgs e)
-    {
-        if (mapComponentSelected)
-        {
-            shapePanelSize = await js.InvokeAsync<Rect>("GetPosition", shapeLayer);
+    // private async Task OnDrop(MouseEventArgs e)
+    // {
+    //     if (mapComponentSelected)
+    //     {
+    //         shapePanelSize = await js.InvokeAsync<Rect>("GetPosition", shapeLayer);
 
-            switch (componentEditMode)
-            {
-                case MapComponentEditMode.Move:
-                    targetMapComponent.PositionX = (e.ClientX - mouseEventArgs.OffsetX - shapePanelSize.Left) / shapePanelSize.Width * 100;
-                    //targetMapComponent.PositionX += (deltaX / 100);
-                    targetMapComponent.PositionY = (e.ClientY - mouseEventArgs.OffsetY - shapePanelSize.Top) / shapePanelSize.Height * 100;
-                    //targetMapComponent.PositionY += (deltaY / 100);
-                    break;
-                case MapComponentEditMode.ResizeCorner:
-                    targetMapComponent.Width = (e.ClientX - shapePanelSize.Left) / shapePanelSize.Width * 100 - targetMapComponent.PositionX;
-                    targetMapComponent.Height = (e.ClientY - shapePanelSize.Top) / shapePanelSize.Height * 100 - targetMapComponent.PositionY;
-                    break;
-                default:
-                    break;
-            }
-            componentEditMode = MapComponentEditMode.None;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
+    //         switch (componentEditMode)
+    //         {
+    //             case MapComponentEditMode.Move:
+    //                 targetMapComponent.PositionX = (e.ClientX - mouseEventArgs.OffsetX - shapePanelSize.Left) / shapePanelSize.Width * 100;
+    //                 //targetMapComponent.PositionX += (deltaX / 100);
+    //                 targetMapComponent.PositionY = (e.ClientY - mouseEventArgs.OffsetY - shapePanelSize.Top) / shapePanelSize.Height * 100;
+    //                 //targetMapComponent.PositionY += (deltaY / 100);
+    //                 break;
+    //             case MapComponentEditMode.ResizeCorner:
+    //                 targetMapComponent.Width = (e.ClientX - shapePanelSize.Left) / shapePanelSize.Width * 100 - targetMapComponent.PositionX;
+    //                 targetMapComponent.Height = (e.ClientY - shapePanelSize.Top) / shapePanelSize.Height * 100 - targetMapComponent.PositionY;
+    //                 break;
+    //             default:
+    //                 break;
+    //         }
+    //         componentEditMode = MapComponentEditMode.None;
+    //         await InvokeAsync(StateHasChanged);
+    //     }
+    // }
 
     public class Rect
     {

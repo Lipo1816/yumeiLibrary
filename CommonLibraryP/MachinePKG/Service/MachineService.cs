@@ -290,7 +290,7 @@ namespace CommonLibraryP.MachinePKG
             MachineConfigChanged(machine.Id, dataEditMode);
         }
 
-        public async void MachineStatusChangedRecord(Machine machine, MachineStatusRecordType machineStatusRecordType)
+        public async Task MachineStatusChangedRecord(Machine machine, MachineStatusRecordType machineStatusRecordType)
         {
             if (!machine.RecordStatusChanged)
             {
@@ -305,7 +305,7 @@ namespace CommonLibraryP.MachinePKG
                     {
                         Id = Guid.NewGuid(),
                         MachineID = machine.Id,
-                        Status = (int)machine.MachineStatus,
+                        Status = machine.StatusCode,
                         LogTime = DateTime.Now,
                     };
                     await dbContext.MachineStatusLogs.AddAsync(newRocord);
@@ -356,12 +356,12 @@ namespace CommonLibraryP.MachinePKG
                 if (i == totalCount - 1)
                 {
                     //res.Add(new(machineStatusLogs[i].LogTime, DateTime.Now, (Status)machineStatusLogs[i].Status));
-                    yield return new(machineStatusLogs[i].LogTime, DateTime.Now, (Status)machineStatusLogs[i].Status);
+                    yield return new(machineStatusLogs[i].LogTime, DateTime.Now, machineStatusLogs[i].Status);
                 }
                 else
                 {
                     //res.Add(new(machineStatusLogs[i].LogTime, machineStatusLogs[i + 1].LogTime, (Status)machineStatusLogs[i].Status));
-                    yield return new(machineStatusLogs[i].LogTime, machineStatusLogs[i + 1].LogTime, (Status)machineStatusLogs[i].Status);
+                    yield return new(machineStatusLogs[i].LogTime, machineStatusLogs[i + 1].LogTime, machineStatusLogs[i].Status);
                 }
                 await Task.Delay(delayMilliSec);
                 progress?.Report(i * 100 / totalCount);

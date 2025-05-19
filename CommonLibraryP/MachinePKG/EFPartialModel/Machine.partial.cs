@@ -52,67 +52,39 @@ namespace CommonLibraryP.MachinePKG
         public bool hasTags => hasCategory && TagCategory?.Tags.Count > 0;
         public bool hasTagsUpdateByTime => hasTags && TagCategory.Tags.Any(x => x.UpdateByTime);
 
-        //public bool hasCustomStatusCategory => LogicStatusCategory != null;
+        private int statusCode;
+        public int StatusCode => statusCode;
+        public string StatusStr => CommonEnumHelper.GetStatusDetail(statusCode).DisplayName;
 
-        //public bool hasCustomStatusCondition => hasCustomStatusCategory && LogicStatusCategory?.LogicStatusConditions.Count > 0;
-
-        //public bool hasErrorCodeCategory => ErrorCodeCategory != null;
-
-        //public bool hasErrorCodeMapping => hasErrorCodeCategory && ErrorCodeCategory?.ErrorCodeMappings.Count > 0;
-
-        protected Status status;
-        public Status MachineStatus => status;
-        public string StatusStr => status.ToString();
-        public bool machineAvailable => status != Status.Init && status != Status.TryConnecting && status != Status.Disconnect && status != Status.Stop && status != Status.Error;
-
-        protected Status customStatus;
-        public Status CustomStatus => customStatus;
-        public string CustomStatusStr => customStatus.ToString();
-
-        //private DateTime initTime;
         protected DateTime lastStatusChangedTime;
         protected DateTime lastTagUpdateTime;
 
-        private bool runFlag => status != Status.Init && status != Status.Disconnect && status != Status.TryConnecting;
+        protected virtual bool runFlag => statusCode is not 0 && statusCode is not 1 && statusCode is not 2;
         public bool RunFlag => runFlag;
 
-        public bool canManualRetryFlag => isAutoRetry ? false : status is Status.Disconnect || status is Status.Error;
+        public bool canManualRetryFlag => isAutoRetry ? false : statusCode is 2 || statusCode is 8;
 
         protected string errorMsg = string.Empty;
         public string ErrorMsg => errorMsg;
 
-        private string errorCodeDescription = string.Empty;
+        public Func<int, Task>? MachineStatuschangedAct;
+        public Func<Machine, MachineStatusRecordType, Task>? MachineStatechangedRecordAct;
 
-        public string ErrorCodeDescription => errorCodeDescription;
-
-
-        public Action<Status>? MachineStatechangedAct;
-        public Action<Machine, MachineStatusRecordType>? MachineStatechangedRecordAct;
         protected void MachineStatechanged()
         {
-            MachineStatechangedAct?.Invoke(status);
+            MachineStatuschangedAct?.Invoke(statusCode);
             if (RecordStatusChanged)
             {
                 MachineStatechangedRecordAct?.Invoke(this, MachineStatusRecordType.InputStatus);
             }
         }
 
-        public Action? CustomStatusChangedAct;
-        private void CustomStatusChange() => CustomStatusChangedAct?.Invoke();
-
-        public Action? ErrorCodeDescriptionChangedAct;
-        private void ErrorCodeDescriptionChange() => ErrorCodeDescriptionChangedAct?.Invoke();
-
-
-        public Action? TagsStatechangedAct;
+        public Func<Task>? TagsStatechangedAct;
         protected void TagsStatechange() => TagsStatechangedAct?.Invoke();
-
-        public Action? UIUpdateAct;
-        protected void UIUPdate() => UIUpdateAct?.Invoke();
 
         public void InitMachine()
         {
-            status = Status.Init;
+            statusCode = 0;
             if (hasTags)
             {
                 foreach (var item in TagCategory.Tags)
@@ -180,80 +152,6 @@ namespace CommonLibraryP.MachinePKG
             return Task.CompletedTask;
         }
 
-        //private Task UpdateCustomStatus()
-        //{
-        //    if (hasTags && hasCustomStatusCondition)
-        //    {
-        //        var customStatusTag = TagCategory?.Tags.FirstOrDefault(x => (SpecialTagType)x.SpecialType == SpecialTagType.CustomStatus && x.DataType == LogicStatusCategory?.DataType);
-        //        if (customStatusTag is not null)
-        //        {
-        //            //var connditionStatus = LogicStatusCategory?.LogicStatusConditions.FirstOrDefault(x => x.ConditionString == customStatusTag.ValueString);
-        //            //if (connditionStatus is not null)
-        //            //{
-        //            //    SetCustomStatus((Status)connditionStatus.Status);
-        //            //}
-        //            //else
-        //            //{
-        //            //    SetCustomStatus(Status.Init);
-        //            //}
-        //            bool conditionMatched = false;
-        //            foreach (var condition in LogicStatusCategory?.LogicStatusConditions)
-        //            {
-        //                if (condition.ConditionString.Compute<bool>(("value", customStatusTag.Value))) // false)
-        //                {
-        //                    SetCustomStatus((Status)condition.Status);
-        //                    conditionMatched = true;
-        //                }
-        //            }
-        //            if (!conditionMatched)
-        //            {
-        //                SetCustomStatus(Status.Init);
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        SetCustomStatus(Status.Init);
-        //    }
-        //    return Task.CompletedTask;
-        //}
-
-        //private Task UpdateErrorCode()
-        //{
-        //    if (CustomStatus == Status.Error)
-        //    {
-        //        if (hasTags && hasErrorCodeMapping)
-        //        {
-        //            var customErrorCodeTag = TagCategory?.Tags.FirstOrDefault(x => (SpecialTagType)x.SpecialType == SpecialTagType.DetailCode && x.DataType == LogicStatusCategory?.DataType);
-        //            if (customErrorCodeTag is not null)
-        //            {
-        //                var errorCodeMapping = ErrorCodeCategory?.ErrorCodeMappings.FirstOrDefault(x => x.ConditionString == customErrorCodeTag.ValueString);
-        //                if (errorCodeMapping is not null)
-        //                {
-        //                    SetErrorDescription(errorCodeMapping.Description);
-        //                }
-        //                else
-        //                {
-        //                    SetErrorDescription("no error code matched");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                SetErrorDescription("no error code tag found");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            SetErrorDescription("not tag or error code not defined");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        SetErrorDescription(string.Empty);
-        //    }
-        //    return Task.CompletedTask;
-        //}
-
         public void StartUpdating()
         {
             try
@@ -275,9 +173,9 @@ namespace CommonLibraryP.MachinePKG
                             }
                             else
                             {
-                                if (status == Status.Disconnect || status == Status.Init)
+                                if (statusCode is 0 || statusCode is 2)
                                 {
-                                    if (MaxRetryCount == -1)
+                                    if (MaxRetryCount is -1)
                                     {
                                         await ConnectAsync();
 
@@ -291,7 +189,7 @@ namespace CommonLibraryP.MachinePKG
                                     }
 
                                 }
-                                else if (status == Status.TryConnecting)
+                                else if (statusCode is 1)
                                 {
 
                                 }
@@ -325,19 +223,16 @@ namespace CommonLibraryP.MachinePKG
         }
         protected void Init()
         {
-            //if (status != Status.Init)
-            //{
-            status = Status.Init;
+            statusCode = 0;
             errorMsg = string.Empty;
             lastStatusChangedTime = DateTime.Now;
             MachineStatechanged();
-            //}
         }
         protected void Idle()
         {
-            if (status != Status.Idle)
+            if (statusCode is not 4)
             {
-                status = Status.Idle;
+                statusCode = 4;
                 errorMsg = string.Empty;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
@@ -345,9 +240,19 @@ namespace CommonLibraryP.MachinePKG
         }
         protected void TryConnecting()
         {
-            if (status != Status.TryConnecting)
+            if (statusCode is not 1)
             {
-                status = Status.TryConnecting;
+                statusCode = 1;
+                errorMsg = string.Empty;
+                lastStatusChangedTime = DateTime.Now;
+                MachineStatechanged();
+            }
+        }
+        public void FetchingData()
+        {
+            if (statusCode is not 3)
+            {
+                statusCode = 3;
                 errorMsg = string.Empty;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
@@ -355,9 +260,9 @@ namespace CommonLibraryP.MachinePKG
         }
         public void Running()
         {
-            if (status != Status.Running)
+            if (statusCode is not 5)
             {
-                status = Status.Running;
+                statusCode = 5;
                 errorMsg = string.Empty;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
@@ -365,9 +270,9 @@ namespace CommonLibraryP.MachinePKG
         }
         protected void Pause()
         {
-            if (status != Status.Pause)
+            if (statusCode is not 6)
             {
-                status = Status.Pause;
+                statusCode = 6;
                 errorMsg = string.Empty;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
@@ -375,18 +280,18 @@ namespace CommonLibraryP.MachinePKG
         }
         protected void Stop()
         {
-            if (status != Status.Stop)
+            if (statusCode is not 7)
             {
-                status = Status.Stop;
+                statusCode = 7;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
             }
         }
         protected void Disconnect(string msg)
         {
-            if (status != Status.Disconnect)
+            if (statusCode is not 2)
             {
-                status = Status.Disconnect;
+                statusCode = 2;
                 lastStatusChangedTime = DateTime.Now;
                 if (!string.IsNullOrEmpty(msg))
                 {
@@ -401,30 +306,26 @@ namespace CommonLibraryP.MachinePKG
         }
         protected void Error(string msg)
         {
-            if (status != Status.Error)
+            if (statusCode is not 8)
             {
-                status = Status.Error;
+                statusCode = 8;
                 errorMsg = msg;
                 lastStatusChangedTime = DateTime.Now;
                 MachineStatechanged();
             }
         }
 
-        protected void SetCustomStatus(Status status)
+        protected void SetCustomStatusCode(int CustomStatusCode)
         {
-            if (customStatus != status)
-            {
-                customStatus = status;
-                CustomStatusChange();
-            }
-        }
 
-        protected void SetErrorDescription(string description)
-        {
-            if (errorCodeDescription != description)
+            if (CustomStatusCode <= 100)
             {
-                errorCodeDescription = description;
-                ErrorCodeDescriptionChange();
+                throw new Exception("call reserved status with build in function first");
+            }
+            if (CustomStatusCode != statusCode)
+            {
+                statusCode = CustomStatusCode;
+                MachineStatechanged();
             }
         }
         //dispose

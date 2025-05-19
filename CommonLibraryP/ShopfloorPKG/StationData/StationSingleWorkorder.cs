@@ -29,7 +29,7 @@ namespace CommonLibraryP.ShopfloorPKG
 
         public override bool CanDeployWorkorder => WorkorderAmountValid && WorkorderAmount is 0;
 
-        public override bool Canrun => StationStatus is Status.Init && WorkorderAmountValid && WorkorderAmount is 1;
+        public override bool Canrun => StationStatusCode is 0 && WorkorderAmountValid && WorkorderAmount is 1;
 
         public override RequestResult SetWorkorder(Workorder wo)
         {
@@ -37,7 +37,7 @@ namespace CommonLibraryP.ShopfloorPKG
             {
                 return new(4, "Workorder already exist");
             }
-            if (StationStatus is not Status.Init)
+            if (StationStatusCode is not 0)
             {
                 return new(4, "Station is not at Init status");
             }
@@ -52,11 +52,11 @@ namespace CommonLibraryP.ShopfloorPKG
             {
                 return new(4, $"Station {Name} workorder amount invalid{WorkorderAmount}");
             }
-            if (StationStatus is not Status.Init)
+            if (StationStatusCode is not 0)
             {
                 return new(4, "Station is not at Init status");
             }
-            SetStationStatus(Status.Running);
+            SetStationStatus(5);
             UIUpdate();
             return new(2, $"Run station {Name} success");
         }

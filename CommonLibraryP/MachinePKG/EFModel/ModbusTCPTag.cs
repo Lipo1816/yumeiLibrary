@@ -48,17 +48,17 @@ namespace CommonLibraryP.MachinePKG
             }
         }
         [Required]
-        [Range(1, 5)]
-        public int Station { get; set; }
+        [Range(1, 255)]
+        public byte Station { get; set; }
         public bool InputOrOutput { get; set; }
         [Required]
-        [Range(0, 10000)]
-        public int StartIndex { get; set; }
+        [Range(0, 65535)]
+        public ushort StartIndex { get; set; }
         [Required]
-        [Range(1, 10)]
-        public int Offset { get; set; }
+        [Range(1, 65535)]
+        public ushort Offset { get; set; }
         [NotMapped]
-        public int OffsetMinValue => IsMultipleValue ? 2 : 1;
+        public ushort OffsetMinValue => IsMultipleValue ? (ushort)2 : (ushort)1;
 
         [NotMapped]
         public bool OffsetEditable => IsMultipleValue || IsString;

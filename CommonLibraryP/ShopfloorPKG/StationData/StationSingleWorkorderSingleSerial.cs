@@ -22,7 +22,7 @@ namespace CommonLibraryP.ShopfloorPKG
 
         public override RequestResult CheckCanAddItem()
         {
-            if (StationStatus is not Status.Running)
+            if (StationStatusCode is not 5)
             {
                 return new RequestResult(4, $"Station {Name} is not running");
             }
@@ -57,7 +57,7 @@ namespace CommonLibraryP.ShopfloorPKG
         }
         public override RequestResult CheckCanRemoveItem()
         {
-            if (StationStatus is not Status.Running)
+            if (StationStatusCode is not 5)
             {
                 return new RequestResult(4, $"Station {Name} is not running");
             }

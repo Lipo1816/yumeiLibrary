@@ -32,7 +32,6 @@ namespace CommonLibraryP.MachinePKG
 
         public Object Value => value;
         private Object value = new();
-        //private bool 
         public string ValueString => FormatingValueToString();
 
         public event Func<Tag, Task>? TagValueChanged;

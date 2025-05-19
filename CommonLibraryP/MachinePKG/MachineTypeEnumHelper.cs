@@ -24,16 +24,15 @@ namespace CommonLibraryP.MachinePKG
 
         public static List<ConnectionTypeWrapperClass> GetSuitableConnectionTypeWrapperClasses(int currentIndex)
         {
-            //int tmp = currentIndex;
             var target = GetConnectionTypeWrapperClassByIndex(currentIndex);
-            foreach (var a in connectionTypeWrapperClasses)
-            {
-                var x = a.Type.GetType();
-                var r = x.IsAssignableFrom(target?.Type);
-            }
+            //foreach (var a in connectionTypeWrapperClasses)
+            //{
+            //    var x = a.Type.GetType();
+            //    var r = x.IsAssignableFrom(target?.Type);
+            //}
             return connectionTypeWrapperClasses.Where(x => x.Type.IsAssignableFrom(target?.Type)).ToList();
         }
-
+        
         public static ConnectionTypeWrapperClass? GetConnectionTypeWrapperClassByIndex(int index)
         {
             return connectionTypeWrapperClasses.FirstOrDefault(x => x.Index == index);

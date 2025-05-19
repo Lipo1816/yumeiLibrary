@@ -167,9 +167,8 @@
         if (hasMachine)
         {
             await RetriveTagCategory();
-            machine.MachineStatechangedAct += StatusUpdate;
+            machine.MachineStatuschangedAct += StatusUpdate;
             machine.TagsStatechangedAct += UIUpdate;
-            machine.UIUpdateAct += UIUpdate;
         }
     }
 
@@ -177,9 +176,8 @@
     {
         if (hasMachine)
         {
-            machine.MachineStatechangedAct -= StatusUpdate;
+            machine.MachineStatuschangedAct -= StatusUpdate;
             machine.TagsStatechangedAct -= UIUpdate;
-            machine.UIUpdateAct -= UIUpdate;
         }
 
     }
@@ -189,12 +187,12 @@
         tagCategories = await machineService.GetAllTagCategories();
     }
 
-    private async void StatusUpdate(Status status)
+    private async Task StatusUpdate(int statusCode)
     {
         await InvokeAsync(StateHasChanged);
     }
 
-    private async void UIUpdate()
+    private async Task UIUpdate()
     {
         await InvokeAsync(StateHasChanged);
     }

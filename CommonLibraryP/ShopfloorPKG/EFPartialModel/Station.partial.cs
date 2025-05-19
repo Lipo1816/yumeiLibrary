@@ -38,12 +38,12 @@ namespace CommonLibraryP.ShopfloorPKG
         };
 
 
-        private Status stationStatus = Status.Init;
-        public Status StationStatus => stationStatus;
+        private int stationStatusCode = 0;
+        public int StationStatusCode => stationStatusCode;
 
-        protected void SetStationStatus(Status s, string msg = "Normal")
+        protected void SetStationStatus(int statusCode, string msg = "Normal")
         {
-            stationStatus = s;
+            stationStatusCode = statusCode;
             SetErrorMsg(msg);
             UIUpdate();
         }
@@ -53,18 +53,18 @@ namespace CommonLibraryP.ShopfloorPKG
 
         private void SetErrorMsg(string s)
         {
-            errorMsg = StationStatus is Status.Error ? s : "Normal";
+            errorMsg = stationStatusCode is 8 ? s : "Normal";
         }
         protected void UIUpdate()
         {
             UIUpdateAct?.Invoke();
         }
-        public Action? UIUpdateAct;
+        public Func<Task>? UIUpdateAct;
 
 
         public void InitStation()
         {
-            stationStatus = Status.Init;
+            stationStatusCode = 0;
             errorMsg = String.Empty;
             UIUpdate();
         }
@@ -147,7 +147,7 @@ namespace CommonLibraryP.ShopfloorPKG
 
         protected void Error(string s)
         {
-            stationStatus = Status.Error;
+            stationStatusCode = 8;
             SetErrorMsg(s);
             UIUpdate();
         }

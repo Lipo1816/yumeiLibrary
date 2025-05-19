@@ -36,7 +36,7 @@ namespace CommonLibraryP.MachinePKG
 
         //public Guid? ErrorCodeCategoryId { get; set; }
 
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } = true;
 
         [Required]
         [Range(100, 65535)]

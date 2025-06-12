@@ -95,7 +95,7 @@
     </BodyContentTemplate>
 </DxPopup>
 
-<DxPopup @bind-Visible="@machineTreePopupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
+@* <DxPopup @bind-Visible="@machineTreePopupVisible" CloseOnOutsideClick="false" ShowHeader="true" ShowFooter="false" Width="50rem">
     <HeaderTemplate>
         <div class="w-100 p-3 border border-bottom">
             <DxToolbar>
@@ -106,16 +106,16 @@
         </div>
     </HeaderTemplate>
     <BodyContentTemplate Context="bodycontext">
-        @* <DxTreeView @ref="@dxTreeView" Data="@(MachineTypeEnumHelper.GetConnectionTypeWrapperClasses())"
+         <DxTreeView @ref="@dxTreeView" Data="@(MachineTypeEnumHelper.GetConnectionTypeWrapperClasses())"
         AnimationType="LayoutAnimationType.Slide">
             <DataMappings>
                 <DxTreeViewDataMapping Text="@nameof(ConnectionTypeWrapperClass.DisplayName)"
                 Key="@nameof(ConnectionTypeWrapperClass.Index)"
                 ParentKey="@nameof(ConnectionTypeWrapperClass.ParentIndex)" />
             </DataMappings>
-        </DxTreeView> *@
+        </DxTreeView> 
     </BodyContentTemplate>
-</DxPopup>
+</DxPopup> *@
 
 @code {
 

@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250616022057_AddEnableFieldsToInspectionReportTime")]
+    partial class AddEnableFieldsToInspectionReportTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -727,90 +730,6 @@ namespace CommonLibraryP.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WorkorderLists");
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.temprature_Hu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("MachineGroupNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("battery_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("battery_low")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity_low")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature_low")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("temprature_Hus");
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.temprature_Hu_log", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MachineGroupNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("battery")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("temprature_Hu_logs");
                 });
 
             modelBuilder.Entity("CommonLibraryP.MachinePKG.EquipmentSpec", b =>

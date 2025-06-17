@@ -91,5 +91,33 @@ namespace CommonLibraryP.MachinePKG
                 }
             }
         }
+        public async Task<(bool IsSuccess, string Msg)> DeleteAsync(string machineNo, string item)
+        {
+            if (string.IsNullOrWhiteSpace(machineNo) || string.IsNullOrWhiteSpace(item))
+                return (false, "機台編號與項目不可為空");
+
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var entity = await dbContext.EquipmentSpecs
+                    .FirstOrDefaultAsync(x => x.機台編號 == machineNo && x.項目 == item);
+
+                if (entity == null)
+                    return (false, "找不到指定資料");
+
+                dbContext.EquipmentSpecs.Remove(entity);
+                await dbContext.SaveChangesAsync();
+                return (true, "刪除成功");
+            }
+        }
+        // 取得全部設備規格資料
+        public async Task<List<EquipmentSpec>> GetAllAsync()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return await dbContext.EquipmentSpecs.AsNoTracking().ToListAsync();
+            }
+        }
     }
 }

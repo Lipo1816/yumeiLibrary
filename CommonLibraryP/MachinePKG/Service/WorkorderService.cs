@@ -51,5 +51,20 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             return await _db.Workorders.FindAsync(workorderNo);
         }
+
+
+        public async Task AddAsync(Workorder workorder)
+        {
+            if (workorder == null)
+                throw new ArgumentNullException(nameof(workorder));
+
+            // 檢查主鍵是否已存在，避免重複新增
+            var exists = await _db.Workorders.AnyAsync(x => x.工單號 == workorder.工單號);
+            if (exists)
+                throw new InvalidOperationException($"工單號 {workorder.工單號} 已存在，無法重複新增。");
+
+            _db.Workorders.Add(workorder);
+            await _db.SaveChangesAsync();
+        }
     }
 }

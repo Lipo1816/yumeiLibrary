@@ -46,8 +46,15 @@ namespace CommonLibraryP.MachinePKG
         public DbSet<ProblemDescript> ProblemDescripts { get; set; }
 
         public DbSet<ReportWorkOrder> ReportWorkOrders { get; set; }
-
+        public DbSet<EquipmentSpecLimit> EquipmentSpecLimits { get; set; }
         public DbSet<InspecWOList> InspecWOLists { get; set; }
+
+        public DbSet<EquiManufacturer_Information> EquiManufacturer_Informations { get; set; }
+
+        public DbSet<temprature_Hu_log> temprature_Hu_logs { get; set; }
+
+        public DbSet<temprature_Hu> temprature_Hus { get; set; }
+
         //public virtual DbSet<Condition> Conditions { get; set; }
 
         //public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
@@ -56,6 +63,12 @@ namespace CommonLibraryP.MachinePKG
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<EquiManufacturer_Information>(entity =>
+            {
+                entity.ToTable("EquiManufacturer_Information");
+                entity.HasKey(e => e.Id);
+            });
+
             modelBuilder.Entity<ModbusSlaveConfig>(entity =>
             {
 

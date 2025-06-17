@@ -144,5 +144,19 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<InspectionList?> GetInspectionListAsync(string orderNo, string machineName)
+        {
+            return await _context.InspectionLists
+                .FirstOrDefaultAsync(x => x.單號 == orderNo && x.機台名稱 == machineName);
+        }
+
+        public async Task UpdateInspectionListAsync(InspectionList inspectionList)
+        {
+            if (inspectionList == null)
+                throw new ArgumentNullException(nameof(inspectionList));
+
+            _context.InspectionLists.Update(inspectionList);
+            await _context.SaveChangesAsync();
+        }
     }
 }

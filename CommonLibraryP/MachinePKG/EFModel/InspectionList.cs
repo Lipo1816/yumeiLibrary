@@ -32,5 +32,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
 
         [Required]
         public string 單號 { get; set; } = "";
+
+        public string? 檢查結果 { get; set; }
     }
 }

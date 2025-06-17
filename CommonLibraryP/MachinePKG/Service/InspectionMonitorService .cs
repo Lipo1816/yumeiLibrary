@@ -95,6 +95,8 @@ namespace CommonLibraryP.MachinePKG.Service
                 await CheckAndGenerateDailyInspectionRecords();
                 await CheckAndGenerateWeeklyInspectionRecords();
                 await CheckAndGenerateMonthlyInspectionRecords();
+                await CheckAndGenerateQuarterlyInspectionRecords(); // ← 加在這裡
+                await CheckAndGenerateYearlyInspectionRecords();    // ← 加在這裡
                 await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken); // 每分鐘檢查一次
             }
         }
@@ -246,5 +248,151 @@ namespace CommonLibraryP.MachinePKG.Service
                 await db.SaveChangesAsync();
             }
         }
+
+        private async Task CheckAndGenerateQuarterlyInspectionRecords()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+
+            var quarterlySetting = db.InspectionReportTimes.FirstOrDefault(x => x.Type == "Quarterly");
+            if (quarterlySetting?.QuarterMonth == null || quarterlySetting.QuarterDay == null || quarterlySetting.QuarterHour == null)
+                return;
+
+            var now = DateTime.Now;
+            int season = (now.Month - 1) / 3 + 1; // 第幾季 (1~4)
+            int monthInQuarter = (now.Month - 1) % 3 + 1; // 本季第幾個月 (1~3)
+            // 判斷是否到達指定季檢時間（允許誤差3分鐘）
+            if (monthInQuarter == quarterlySetting.QuarterMonth &&
+                now.Day == quarterlySetting.QuarterDay &&
+                now.Hour == quarterlySetting.QuarterHour)
+            {
+                var inspections = db.Inspections.Where(x => x.頻率 == "季").ToList();
+                var groups = inspections.GroupBy(x => x.機台編號);
+
+                string checknumber = "QI_" + now.ToString("yyyyMMddHH") + "_";
+
+                foreach (var group in groups)
+                {
+                    foreach (var item in group)
+                    {
+                        bool exists = db.InspectionRecords.Any(r =>
+                            r.機台編號 == item.機台編號 &&
+                            r.項目 == item.項目 &&
+                            r.檢查單號 == checknumber + item.機台編號 &&
+                            r.產生時間.Year == now.Year &&
+                            r.產生時間.Month == now.Month
+                        );
+                        if (exists) continue;
+
+                        var record = new InspectionRecord
+                        {
+                            機台編號 = item.機台編號,
+                            機台名稱 = item.機台名稱,
+                            項目 = item.項目,
+                            產生時間 = now,
+                            檢查人 = "",
+                            表單狀態 = InspectionFormStatus.UndoCheck,
+                            檢查單號 = checknumber + item.機台編號
+                        };
+                        db.InspectionRecords.Add(record);
+                    }
+
+                    // 產生 InspectionList（每台機台一筆）
+                    bool listExists = db.InspectionLists.Any(l =>
+                        l.機台編號 == group.Key &&
+                        l.產生時間.Year == now.Year &&
+                        l.產生時間.Month == now.Month &&
+                        l.TYPE == "Quarterly"
+                    );
+                    if (!listExists)
+                    {
+                        var inspectionList = new InspectionList
+                        {
+                            機台編號 = group.Key,
+                            機台名稱 = group.First().機台名稱 ?? "",
+                            產生時間 = now,
+                            TYPE = "Quarterly",
+                            表單狀態 = InspectionFormStatus.UndoCheck,
+                            檢查人 = "",
+                            單號 = checknumber + group.Key
+                        };
+                        db.InspectionLists.Add(inspectionList);
+                    }
+                }
+                await db.SaveChangesAsync();
+            }
+        }
+        private async Task CheckAndGenerateYearlyInspectionRecords()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+
+            var yearlySetting = db.InspectionReportTimes.FirstOrDefault(x => x.Type == "Yearly");
+            if (yearlySetting?.YearMonth == null || yearlySetting.YearDay == null || yearlySetting.YearHour == null)
+                return;
+
+            var now = DateTime.Now;
+            // 判斷是否到達指定年檢時間（允許誤差3分鐘）
+            if (now.Month == yearlySetting.YearMonth &&
+                now.Day == yearlySetting.YearDay &&
+                now.Hour == yearlySetting.YearHour)
+            {
+                var inspections = db.Inspections.Where(x => x.頻率 == "年").ToList();
+                var groups = inspections.GroupBy(x => x.機台編號);
+
+                string checknumber = "YI_" + now.ToString("yyyyMMddHH") + "_";
+
+                foreach (var group in groups)
+                {
+                    foreach (var item in group)
+                    {
+                        bool exists = db.InspectionRecords.Any(r =>
+                            r.機台編號 == item.機台編號 &&
+                            r.項目 == item.項目 &&
+                            r.檢查單號 == checknumber + item.機台編號 &&
+                            r.產生時間.Year == now.Year &&
+                            r.產生時間.Month == now.Month
+                        );
+                        if (exists) continue;
+
+                        var record = new InspectionRecord
+                        {
+                            機台編號 = item.機台編號,
+                            機台名稱 = item.機台名稱,
+                            項目 = item.項目,
+                            產生時間 = now,
+                            檢查人 = "",
+                            表單狀態 = InspectionFormStatus.UndoCheck,
+                            檢查單號 = checknumber + item.機台編號
+                        };
+                        db.InspectionRecords.Add(record);
+                    }
+
+                    // 產生 InspectionList（每台機台一筆）
+                    bool listExists = db.InspectionLists.Any(l =>
+                        l.機台編號 == group.Key &&
+                        l.產生時間.Year == now.Year &&
+                        l.產生時間.Month == now.Month &&
+                        l.TYPE == "Yearly"
+                    );
+                    if (!listExists)
+                    {
+                        var inspectionList = new InspectionList
+                        {
+                            機台編號 = group.Key,
+                            機台名稱 = group.First().機台名稱 ?? "",
+                            產生時間 = now,
+                            TYPE = "Yearly",
+                            表單狀態 = InspectionFormStatus.UndoCheck,
+                            檢查人 = "",
+                            單號 = checknumber + group.Key
+                        };
+                        db.InspectionLists.Add(inspectionList);
+                    }
+                }
+                await db.SaveChangesAsync();
+            }
+        }
+
     }
 }

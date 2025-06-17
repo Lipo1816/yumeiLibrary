@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250615015301_YourMigrationName")]
+    partial class YourMigrationName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,149 +24,6 @@ namespace CommonLibraryP.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.EquiManufacturer_Information", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PLC項目")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("廠商MAIL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("廠商電話")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機台名稱")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機台編號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機種代碼")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("線別編號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("設備廠商")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("購入日期")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("電控箱")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EquiManufacturer_Information", (string)null);
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.EquipmentSpecLimit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("機台名稱")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機台編號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機台項目代碼")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機台項目說明")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("機種代碼")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("水溫上限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("水溫下限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("線別編號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("規格型號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("說明1")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("資訊項目")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("轉速上限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("轉速下限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("電壓上限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("電壓下限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("電控制箱IP")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("電控制箱編號")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("電流上限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("電流下限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("項目")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("頻率上限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("頻率下限")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EquipmentSpecLimits");
-                });
 
             modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.InspecWOList", b =>
                 {
@@ -355,26 +215,17 @@ namespace CommonLibraryP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("DailyEnable")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan?>("DailyTime")
                         .HasColumnType("time");
 
                     b.Property<int?>("MonthlyDay")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("MonthlyEnable")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan?>("MonthlyTime")
                         .HasColumnType("time");
 
                     b.Property<int?>("QuarterDay")
                         .HasColumnType("int");
-
-                    b.Property<bool?>("QuarterEnable")
-                        .HasColumnType("bit");
 
                     b.Property<int?>("QuarterHour")
                         .HasColumnType("int");
@@ -389,17 +240,11 @@ namespace CommonLibraryP.Migrations
                     b.Property<string>("WeeklyDay")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("WeeklyEnable")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan?>("WeeklyTime")
                         .HasColumnType("time");
 
                     b.Property<int?>("YearDay")
                         .HasColumnType("int");
-
-                    b.Property<bool?>("YearEnable")
-                        .HasColumnType("bit");
 
                     b.Property<int?>("YearHour")
                         .HasColumnType("int");
@@ -727,90 +572,6 @@ namespace CommonLibraryP.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WorkorderLists");
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.temprature_Hu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("MachineGroupNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("battery_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("battery_low")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity_low")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature_high")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature_low")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("temprature_Hus");
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.temprature_Hu_log", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MachineGroupNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("battery")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("humidity")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("temperature")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("temprature_Hu_logs");
                 });
 
             modelBuilder.Entity("CommonLibraryP.MachinePKG.EquipmentSpec", b =>

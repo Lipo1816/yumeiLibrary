@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250701001026_AddInspectionWoItemTable")]
+    partial class AddInspectionWoItemTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,9 +218,6 @@ namespace CommonLibraryP.Migrations
                     b.Property<string>("點檢單號")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("點檢時間")
-                        .HasColumnType("int");
 
                     b.HasKey("ID");
 
@@ -430,9 +430,9 @@ namespace CommonLibraryP.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<bool?>("結果")
+                    b.Property<string>("結果")
                         .HasMaxLength(50)
-                        .HasColumnType("bit");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("責任單位")
                         .HasMaxLength(100)
@@ -441,9 +441,6 @@ namespace CommonLibraryP.Migrations
                     b.Property<string>("錯誤項目")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("點檢內容")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("點檢時間")
                         .HasColumnType("datetime2");

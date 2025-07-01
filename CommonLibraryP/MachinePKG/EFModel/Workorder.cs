@@ -51,5 +51,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public string? 物料採購單3 { get; set; }
 
         public string? 工單計算方式 { get; set; }
+
+        public DateTime Updatetime { get; set; }
     }
 }

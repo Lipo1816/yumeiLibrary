@@ -55,6 +55,8 @@ namespace CommonLibraryP.MachinePKG
 
         public DbSet<temprature_Hu> temprature_Hus { get; set; }
 
+        public DbSet<TagRecordData> TagRecordDatas { get; set; }
+        public DbSet<Inspection_WoItem> Inspection_WoItem { get; set; }
         //public virtual DbSet<Condition> Conditions { get; set; }
 
         //public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
@@ -68,7 +70,17 @@ namespace CommonLibraryP.MachinePKG
                 entity.ToTable("EquiManufacturer_Information");
                 entity.HasKey(e => e.Id);
             });
-
+            modelBuilder.Entity<Inspection_WoItem>(entity =>
+            {
+                entity.HasKey(e => new { e.點檢單號, e.點檢項目 });
+                entity.Property(e => e.點檢單號).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.點檢項目).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.點檢時間).IsRequired();
+                entity.Property(e => e.錯誤項目).HasMaxLength(50);
+                entity.Property(e => e.備註).HasMaxLength(200);
+                entity.Property(e => e.責任單位).HasMaxLength(100);
+                entity.Property(e => e.結果).HasMaxLength(50);
+            });
             modelBuilder.Entity<ModbusSlaveConfig>(entity =>
             {
 

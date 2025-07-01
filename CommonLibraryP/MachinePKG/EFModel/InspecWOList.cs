@@ -17,7 +17,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public string 點檢單號 { get; set; } = "";
 
         [Required]
-        public string 狀態 { get; set; } = "";
+        public InspectionFormStatus 狀態 { get; set; } = InspectionFormStatus.UndoCheck;
 
         public DateTime 報工時間 { get; set; }
 
@@ -35,5 +35,6 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public string? 錯誤描述 { get; set; }
 
         public bool? result { get; set; }
+        public int 點檢時間 { get; set; }
     }
 }

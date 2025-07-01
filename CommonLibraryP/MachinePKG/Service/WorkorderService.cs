@@ -17,7 +17,11 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             return await _db.Workorders.AsNoTracking().ToListAsync();
         }
-
+        public async Task UpdateAsync(Workorder entity)
+        {
+            _db.Workorders.Update(entity);
+            await _db.SaveChangesAsync();
+        }
         public async Task<RequestResult> UpsertWorkorder(Workorder w)
         {
             var exist = await _db.Workorders.FindAsync(w.工單號);
@@ -32,6 +36,17 @@ namespace CommonLibraryP.MachinePKG.Service
             await _db.SaveChangesAsync();
             // return new RequestResult { IsSuccess = true, Msg = "儲存成功" };
             return new(2, $"Upsert Workorder {w.工單號} success");
+        }
+        // 依工單查詢 Workorder
+        public Task<Workorder?> GetWorkorderByOrderNoAsync(string orderNo)
+        {
+            return _db.Workorders.FirstOrDefaultAsync(x => x.工單號 == orderNo);
+        }
+        public async Task<Workorder?> GetByWorkOrderNoAsync(string workOrderNo)
+        {
+            return await _db.Workorders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.工單號 == workOrderNo);
         }
 
         public async Task<RequestResult> DeleteWorkorder(string id)

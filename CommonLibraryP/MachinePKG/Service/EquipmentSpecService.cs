@@ -36,7 +36,20 @@ namespace CommonLibraryP.MachinePKG
                 return Task.FromResult(dbContext.EquipmentSpecs.AsNoTracking().FirstOrDefault(x => x.Id == id));
             }
         }
-
+        public async Task<List<string>> GetAllLineCodesAsync()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                return await dbContext.EquipmentSpecs
+                    .AsNoTracking()
+                    .Where(x => !string.IsNullOrEmpty(x.線別編號))
+                    .Select(x => x.線別編號)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToListAsync();
+            }
+        }
         // 新增或更新 EquipmentSpec
         public async Task<RequestResult> UpsertEquipmentSpec(EquipmentSpec spec)
         {

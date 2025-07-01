@@ -1,0 +1,54 @@
+﻿@page "/Inspection_WOItem"
+<h3>Inspection_WOItem</h3>
+@* <DxListBox Data="@WoItems" SelectionMode="ListBoxSelectionMode.None" > *@
+@*     <ItemTemplate Context="item"> *@
+@*         <div style="display:flex; align-items:center; gap:12px;">
+            <!-- 第一欄 Checkbox 綁定結果 -->
+            <input type="checkbox" @bind="item.結果" 
+                   @onchange="(e => item.結果 = ((bool?)((ChangeEventArgs)e).Value)?.ToString())"
+                   checked="@(item.結果 == "true")" /> *@
+            <!-- 第二欄 點檢項目 (Workorders成員) -->
+@*             <DxComboBox Data="@Workorder項目清單"
+                        @bind-Text="item.點檢項目"
+                        NullText="請選擇項目"
+                        Width="120px" />
+            <!-- 第三欄 ComboBox 錯誤項目 -->
+            <DxComboBox Data="@錯誤項目清單"
+                        @bind-Text="item.錯誤項目"
+                        NullText="請選擇錯誤"
+                        Width="120px" />
+            <!-- 第四欄 備註 -->
+            <DxTextBox @bind-Text="item.備註" Width="120px" />
+            <!-- 第五欄 ComboBox 責任單位 -->
+            <DxComboBox Data="@責任單位清單"
+                        @bind-Text="item.責任單位"
+                        NullText="請選擇單位"
+                        Width="120px" />
+            <!-- 第六欄 點檢時間 -->
+            <DxDateEdit @bind-Date="item.點檢時間" DisplayFormat="yyyy-MM-dd HH:mm" Width="160px" /> *@
+        @* </div> *@
+@*     </ItemTemplate> *@
+@* </DxListBox> *@
+
+<DxListBox Data="@WoItems"
+           TextFieldName="@nameof(Inspection_WoItem)"
+           SelectionMode="ListBoxSelectionMode.Single"
+           ShowCheckboxes="true"
+           CssClass="w-auto mt-1 me-1 flex-grow-1 chi-220"
+           style="flex-basis: 240px"
+           @bind-Values="@Values">
+</DxListBox>
+
+@code {
+    List<Inspection_WoItem> WoItems = new();
+    List<string> Workorder項目清單 = new(); // 由 Workorders 取得
+    List<string> 錯誤項目清單 = new() { "異常A", "異常B", "異常C" };
+    List<string> 責任單位清單 = new() { "單位A", "單位B", "單位C" };
+    IEnumerable<Inspection_WoItem> Values { get; set; }
+    // 載入 Workorders 成員
+    protected override async Task OnInitializedAsync()
+    {
+        // 這裡請用你的 service 取得 Workorders
+        // Workorder項目清單 = await WorkorderService.GetAllAsync().Select(x => x.項目).ToList();
+    }
+}

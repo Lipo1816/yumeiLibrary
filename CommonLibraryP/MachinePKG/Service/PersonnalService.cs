@@ -27,6 +27,22 @@ namespace CommonLibraryP.MachinePKG.Service
                 return Task.FromResult(dbContext.Personnal.AsNoTracking().ToList());
             }
         }
+        public Task<List<string>> GetAllProductionGroupsAsync()
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var groups = dbContext.Personnal
+                    .AsNoTracking()
+                    .Where(x => !string.IsNullOrEmpty(x.生產組名))
+                    .Select(x => x.生產組名)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+                return Task.FromResult(groups);
+            }
+        }
+
         public async Task<List<Personnal>> GetAllAsync()
         {
             using (var scope = scopeFactory.CreateScope())

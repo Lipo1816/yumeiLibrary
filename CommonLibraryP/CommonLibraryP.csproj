@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Content Remove="MachinePKG\Component\Setting\ConditionSetting.razor" />
+    <Content Remove="MachinePKG\EFModel\Inspection_WOItem.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +31,9 @@
 
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="24.2.7" />
+    <PackageReference Include="MailKit" Version="4.12.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />

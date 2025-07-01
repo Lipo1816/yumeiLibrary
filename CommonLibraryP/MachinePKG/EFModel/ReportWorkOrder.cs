@@ -36,5 +36,10 @@ namespace CommonLibraryP.MachinePKG.EFModel
 
         [Required]
         public DateTime 排產日 { get; set; }
+
+        public decimal 補料{ get; set; }
+        public decimal 餘料 { get; set; }
+        public decimal 廢料 { get; set; }
+        public decimal 已完成料 { get; set; }
     }
 }

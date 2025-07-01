@@ -18,10 +18,17 @@ namespace CommonLibraryP.MachinePKG.Service
 
         ///https://portal.temphawk.net/api/v2/devices/
 
-        public string token_Header { get; set; } = "?api_token=";
-        public string? token_Content { get; set; } = "VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK"; // 這是範例 token，請替換為實際的 API Token
-        //?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK
-       // //https://portal.temphawk.net/api/v2//devices/00EFD23A?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK
+        public string token_Header { get; set; } = "?api_token=";  //FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx
+        public string? token_Content { get; set; } // = "FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx"; // 這是範例 token，請替換為實際的 API Token
+
+       // token_Content=ReadTokenFromConfig();
+        public RestClient()
+        {
+            // 先讀取設定檔，若失敗則用預設值
+            token_Content = ReadTokenFromConfig() ?? "FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx";
+        }
+        //?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK     FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx
+        // //https://portal.temphawk.net/api/v2//devices/00EFD23A?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK
 
         public async Task<string> HttpRequestAsync()
         {
@@ -69,11 +76,37 @@ namespace CommonLibraryP.MachinePKG.Service
                 });
                 return result;
             }
-            catch
+            catch (Exception ex)
             {
                 // 可加上 log
                 return null;
             }
+        }
+
+
+        private string? ReadTokenFromConfig()
+        {
+            try
+            {
+                // 絕對路徑
+                var configPath = @"C:\Users\lipo.lee\source\repos\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
+                if (!File.Exists(configPath))
+                    return null;
+
+                var lines = File.ReadAllLines(configPath);
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("Temp_Token:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return line.Substring("Temp_Token:".Length).Trim();
+                    }
+                }
+            }
+            catch
+            {
+                // 可加上 log
+            }
+            return null;
         }
     }
     public enum EnumHttpVerb

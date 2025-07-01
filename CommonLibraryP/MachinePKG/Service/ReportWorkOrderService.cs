@@ -1,4 +1,5 @@
 ﻿using CommonLibraryP.MachinePKG.EFModel;
+using DevExpress.ReportServer.ServiceModel.DataContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommonLibraryP.MachinePKG.Service
@@ -11,7 +12,19 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             _context = context;
         }
+        public async Task<ReportWorkOrder?> GetLatestByWorkorderNoAsync(string workorderNo)
+        {
+            if (string.IsNullOrWhiteSpace(workorderNo))
+            {
+                return null;
+            }
 
+            // 依工單號查詢最新的 ReportWO，假設以 CreateTime 判斷最新記錄
+            return await _context.ReportWorkOrders
+                .Where(r => r.工單 == workorderNo)
+                .OrderByDescending(r => r.報工時間)
+                .FirstOrDefaultAsync();
+        }
         // 取得全部
         public async Task<List<ReportWorkOrder>> GetAllAsync()
         {
@@ -24,6 +37,25 @@ namespace CommonLibraryP.MachinePKG.Service
             return await _context.ReportWorkOrders.FindAsync(id);
         }
 
+        public async Task AddAsync(ReportWorkOrder entity)
+        {
+            _context.ReportWorkOrders.Add(entity);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<ReportWorkOrder?> GetByWorkOrderNoClosestToNowAsync(string workOrderNo)
+        {
+            var now = DateTime.Now;
+            return await _context.ReportWorkOrders
+                .Where(x => x.工單 == workOrderNo)
+                .OrderBy(x => Math.Abs(EF.Functions.DateDiffSecond(x.報工時間, now)))
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateAsync(ReportWorkOrder entity)
+        {
+            _context.ReportWorkOrders.Update(entity);
+            await _context.SaveChangesAsync();
+        }
         // 新增或更新
         public async Task UpsertAsync(ReportWorkOrder entity)
         {

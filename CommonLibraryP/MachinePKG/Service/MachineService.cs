@@ -227,7 +227,10 @@ namespace CommonLibraryP.MachinePKG
         {
             return Task.FromResult(machines.FirstOrDefault(x => x.Name == name));
         }
-
+        public Task<List<Machine>> GetAllMachines()
+        {
+            return Task.FromResult(machines.ToList());
+        }
         public virtual Machine InitMachineToDerivesClass(Machine machine)
         {
             var targetMachineType = MachineTypeEnumHelper.GetConnectionTypeWrapperClassByIndex(machine.ConnectionType);
@@ -621,6 +624,16 @@ namespace CommonLibraryP.MachinePKG
                 }
             }
             return null;
+        }
+
+        public async Task<List<Tag>> GetMachineTags(string machineName)
+        {
+            Machine? targetMachine = await GetMachineByName(machineName);
+            if (targetMachine != null && targetMachine.hasCategory)
+            {
+                return targetMachine.TagCategory.Tags.ToList();
+            }
+            return new List<Tag>();
         }
 
         public Tag? GetMachineTagById(Guid machineId, Guid tagId)

@@ -27,14 +27,22 @@ namespace CommonLibraryP.MachinePKG.EFModel
         [Required]
         public string? Type { get; set; }
 
-        // 新增欄位
-        public string? 錯誤項目1 { get; set; }
-        public string? 錯誤項目2 { get; set; }
-        public string? 錯誤項目3 { get; set; }
-        public string? 錯誤項目4 { get; set; }
-        public string? 錯誤描述 { get; set; }
+        // 新增改善時間
+        public DateTime? 改善時間 { get; set; }
 
         public bool? result { get; set; }
         public int 點檢時間 { get; set; }
+
+        public string? 錯誤代碼 { get; set; }   // 新增
+        public string? 分類 { get; set; }       // 新增
+
+
+        public string? 錯誤項目 { get; set; }
+
+        public string? 備註 { get; set; }
+
+        public string? 責任單位 { get; set; }
+        public int? 檢查數量 { get; set; }
+        public int? NG數量 { get; set; }
     }
 }

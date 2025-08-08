@@ -39,8 +39,16 @@ namespace CommonLibraryP.MachinePKG.Service
 
         public async Task AddAsync(ReportWorkOrder entity)
         {
-            _context.ReportWorkOrders.Add(entity);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.ReportWorkOrders.Add(entity);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
         public async Task<ReportWorkOrder?> GetByWorkOrderNoClosestToNowAsync(string workOrderNo)
         {

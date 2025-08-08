@@ -50,7 +50,7 @@ namespace CommonLibraryP.MachinePKG
             {
                 if (tag is ModbusTCPTag modbusTCPTag)
                 {
-                    if (RunFlag)
+                    if (RunFlag )
                     {
                         bool output = modbusTCPTag.InputOrOutput;
                         

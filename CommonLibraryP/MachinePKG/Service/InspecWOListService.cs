@@ -29,14 +29,22 @@ namespace CommonLibraryP.MachinePKG.Service
             dbEntity.產生時間 = entity.產生時間;
             dbEntity.報工人員 = entity.報工人員;
             dbEntity.Type = entity.Type;
-            dbEntity.錯誤項目1 = entity.錯誤項目1;
-            dbEntity.錯誤項目2 = entity.錯誤項目2;
-            dbEntity.錯誤項目3 = entity.錯誤項目3;
-            dbEntity.錯誤項目4 = entity.錯誤項目4;
-            dbEntity.錯誤描述 = entity.錯誤描述;
+            //dbEntity.錯誤項目1 = entity.錯誤項目1;
+            //dbEntity.錯誤項目2 = entity.錯誤項目2;
+            //dbEntity.錯誤項目3 = entity.錯誤項目3;
+            //dbEntity.錯誤項目4 = entity.錯誤項目4;
+            //dbEntity.錯誤描述 = entity.錯誤描述;
             dbEntity.result = entity.result;
+            dbEntity.改善時間 = entity.改善時間;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
 
-            await _context.SaveChangesAsync();
+                throw;
+            }
         }
 
 

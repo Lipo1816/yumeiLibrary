@@ -46,7 +46,12 @@ namespace CommonLibraryP.MachinePKG.EFModel
 
         [Required]
         public string 檢查單號 { get; set; } = "";
-        
 
+        // 新增欄位（允許 null）
+        public string? 檢查 { get; set; }
+        public string? 標準 { get; set; }
+        public string? 方式 { get; set; }
+        public bool? 結果 { get; set; }
     }
+
 }

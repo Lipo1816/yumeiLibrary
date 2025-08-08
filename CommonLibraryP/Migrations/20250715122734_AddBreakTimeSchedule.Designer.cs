@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250715122734_AddBreakTimeSchedule")]
+    partial class AddBreakTimeSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,71 +39,18 @@ namespace CommonLibraryP.Migrations
                     b.Property<DateTime>("ModifyTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsEnable")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("StartTime")
+                    b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("LineName", "WeekDay", "PeriodNo", "ModifyTime");
 
                     b.ToTable("BreakTimeSchedules");
-                });
-
-            modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.Data_Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("人員")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("品管看板")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("工單報工")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("工單看板")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("群組")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("設備看板")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("設備管理")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("設備點檢")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("資料分析")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("資料設定")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Data_Permissions");
                 });
 
             modelBuilder.Entity("CommonLibraryP.MachinePKG.EFModel.EquiManufacturer_Information", b =>
@@ -254,21 +204,12 @@ namespace CommonLibraryP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int?>("NG數量")
-                        .HasColumnType("int");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("result")
                         .HasColumnType("bit");
-
-                    b.Property<string>("備註")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("分類")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("報工人員")
                         .IsRequired()
@@ -281,25 +222,25 @@ namespace CommonLibraryP.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("改善時間")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("檢查數量")
-                        .HasColumnType("int");
-
                     b.Property<int>("狀態")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("產生時間")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("責任單位")
+                    b.Property<string>("錯誤描述")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("錯誤代碼")
+                    b.Property<string>("錯誤項目1")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("錯誤項目")
+                    b.Property<string>("錯誤項目2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("錯誤項目3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("錯誤項目4")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("點檢單號")
@@ -405,21 +346,12 @@ namespace CommonLibraryP.Migrations
                     b.Property<DateTime?>("完成時間")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("方式")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("標準")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("機台名稱")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("機台編號")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("檢查")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("檢查人")
@@ -435,9 +367,6 @@ namespace CommonLibraryP.Migrations
 
                     b.Property<string>("紀錄值")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("結果")
-                        .HasColumnType("bit");
 
                     b.Property<int>("表單狀態")
                         .HasColumnType("int");
@@ -528,16 +457,9 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("Index")
-                        .HasColumnType("int");
-
                     b.Property<string>("備註")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("分類")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool?>("結果")
                         .HasMaxLength(50)
@@ -547,17 +469,12 @@ namespace CommonLibraryP.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("錯誤代碼")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("錯誤項目")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("點檢內容")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("點檢時間")
                         .HasColumnType("datetime2");

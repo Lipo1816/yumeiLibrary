@@ -10,6 +10,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
 {
    public class Inspection_WoItem
     {
+        public int Index { get; set; } // ← 新增這行
         [Key, Column(Order = 0)]
         [Required]
         public string 點檢單號 { get; set; } = string.Empty;
@@ -17,7 +18,8 @@ namespace CommonLibraryP.MachinePKG.EFModel
         [Key, Column(Order = 1)]
         [Required]
         public string 點檢項目 { get; set; } = string.Empty;
-
+        public string? 錯誤代碼 { get; set; }   // 新增
+        public string? 分類 { get; set; }       // 新增
         [Required]
         public DateTime 點檢時間 { get; set; }
 

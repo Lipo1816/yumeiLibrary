@@ -136,5 +136,40 @@ namespace CommonLibraryP.MachinePKG.Service
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
             return Task.FromResult(db.EquipmentSpecLimits.AsNoTracking().ToList());
         }
+        public class TagLimitInfo
+        {
+            public string MachineCode { get; set; }
+            public string TagName { get; set; }
+            public double? UpperLimit { get; set; }
+            public double? LowerLimit { get; set; }
+            // ... 其他欄位
+        }
+
+        // EquipmentSpecLimitService
+        public async Task<List<TagLimitInfo>> GetAllWithLimitsAsync()
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+
+            var query = db.EquipmentSpecLimits
+                .Where(x =>
+                    x.電壓上限 != null || x.電壓下限 != null ||
+                    x.電流上限 != null || x.電流下限 != null ||
+                    x.頻率上限 != null || x.頻率下限 != null ||
+                    x.轉速上限 != null || x.轉速下限 != null ||
+                    x.水溫上限 != null || x.水溫下限 != null
+                )
+                .Select(x => new TagLimitInfo
+                {
+                    MachineCode = x.機台編號,
+                    TagName = x.項目, // 這裡用 x.項目 當作 TagName，請依實際需求調整
+                    UpperLimit = (double?)
+                        (x.電壓上限 ?? x.電流上限 ?? x.頻率上限 ?? x.轉速上限 ?? x.水溫上限),
+                    LowerLimit = (double?)
+                        (x.電壓下限 ?? x.電流下限 ?? x.頻率下限 ?? x.轉速下限 ?? x.水溫下限)
+                });
+
+            return await query.ToListAsync();
+        }
     }
 }

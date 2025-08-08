@@ -57,6 +57,9 @@ namespace CommonLibraryP.MachinePKG
 
         public DbSet<TagRecordData> TagRecordDatas { get; set; }
         public DbSet<Inspection_WoItem> Inspection_WoItem { get; set; }
+        public DbSet<BreakTimeSchedule> BreakTimeSchedules { get; set; }
+
+        public DbSet<Data_Permission> Data_Permissions { get; set; }
         //public virtual DbSet<Condition> Conditions { get; set; }
 
         //public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
@@ -77,6 +80,9 @@ namespace CommonLibraryP.MachinePKG
                 entity.Property(e => e.點檢項目).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.點檢時間).IsRequired();
                 entity.Property(e => e.錯誤項目).HasMaxLength(50);
+                entity.Property(e => e.點檢內容).HasMaxLength(200);
+                entity.Property(e => e.錯誤代碼).HasMaxLength(50);
+                entity.Property(e => e.分類).HasMaxLength(50);
                 entity.Property(e => e.備註).HasMaxLength(200);
                 entity.Property(e => e.責任單位).HasMaxLength(100);
                 entity.Property(e => e.結果).HasMaxLength(50);
@@ -276,77 +282,8 @@ namespace CommonLibraryP.MachinePKG
                 entity.Property(e => e.頻率).IsRequired();
                 // 其他欄位如需長度限制可加 .HasMaxLength(x)
             });
-            //modelBuilder.Entity<Condition>(entity =>
-            //{
-            //    entity.HasKey(e => e.Id);
-
-            //    entity.ToTable("Conditions");
-
-            //    entity.HasIndex(e => e.Name).IsUnique();
-
-            //    entity.HasMany(e => e.ConditionNodes).WithOne(p => p.Condition)
-            //        .HasForeignKey(q => q.ConditionId);
-            //});
-
-            //modelBuilder.Entity<ConditionNode>(entity =>
-            //{
-            //    entity.UseTpcMappingStrategy();
-
-            //    entity.HasKey(e => e.Id);
-
-            //    //entity.ToTable("ConditionNodes");
-
-            //    entity.HasOne(e => e.Condition).WithMany(p => p.ConditionNodes);
-
-            //    entity.HasOne(e => e.ParentNode).WithMany(f => f.ChildNodes)
-            //    .HasForeignKey(g => g.ParentNodeId);
-            //});
-
-            //modelBuilder.Entity<ConditionLogicNode>(entity =>
-            //{
-
-            //    entity.ToTable("ConditionLogicNodes");
-
-            //});
-
-            //modelBuilder.Entity<ConditionConstDataNode>(entity =>
-            //{
-
-            //    entity.ToTable("ConditionConstDataNodes");
-
-            //});
-
-            //modelBuilder.Entity<ConditionTagDataNode>(entity =>
-            //{
-
-            //    entity.ToTable("ConditionTagDataNodes");
-
-            //});
-
-
-
-
-
-            //modelBuilder.Entity<ConditionAction>(entity =>
-            //{
-            //    entity.UseTpcMappingStrategy();
-
-            //    entity.HasKey(e => e.Id);
-
-            //    entity.HasOne(e => e.Condition).WithMany(p => p.ConditionActions);
-            //});
-            //modelBuilder.Entity<AwaitAction>(entity =>
-            //{
-
-            //    entity.ToTable("AwaitActions");
-
-            //});
-            //modelBuilder.Entity<SetTagAction>(entity =>
-            //{
-
-            //    entity.ToTable("SetTagActions");
-
-            //});
+            modelBuilder.Entity<BreakTimeSchedule>()
+    .HasKey(b => new { b.LineName, b.WeekDay, b.PeriodNo, b.ModifyTime });
 
         }
     }

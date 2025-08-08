@@ -59,7 +59,7 @@ namespace CommonLibraryP.MachinePKG
         protected DateTime lastStatusChangedTime;
         protected DateTime lastTagUpdateTime;
 
-        protected virtual bool runFlag => statusCode is not 0 && statusCode is not 1 && statusCode is not 2;
+        protected virtual bool runFlag => statusCode is not 0 && statusCode is not 1 && statusCode is not 2 && statusCode is not 8;
         public bool RunFlag => runFlag;
 
         public bool canManualRetryFlag => isAutoRetry ? false : statusCode is 2 || statusCode is 8;
@@ -151,15 +151,15 @@ namespace CommonLibraryP.MachinePKG
         {
             return Task.CompletedTask;
         }
-
         public void StartUpdating()
         {
             try
             {
-                new Thread(async () =>
+                _ = Task.Run(async () =>
                 {
                     while (Enabled)
                     {
+                        var sh = statusCode;
                         try
                         {
                             if (runFlag)
@@ -178,7 +178,6 @@ namespace CommonLibraryP.MachinePKG
                                     if (MaxRetryCount is -1)
                                     {
                                         await ConnectAsync();
-
                                     }
                                     else
                                     {
@@ -187,12 +186,8 @@ namespace CommonLibraryP.MachinePKG
                                             await ConnectAsync();
                                         }
                                     }
-
                                 }
-                                else if (statusCode is 1)
-                                {
-
-                                }
+                                // statusCode == 1 不處理
                             }
                         }
                         catch (IOException ex)
@@ -212,15 +207,85 @@ namespace CommonLibraryP.MachinePKG
                             await Task.Delay(UpdateDelay);
                         }
                     }
-                }
-                ).Start();
-
+                });
             }
             catch (Exception e)
             {
                 Error(e.Message);
             }
         }
+        //public void StartUpdating()
+        //{
+        //    try
+        //    {
+        //        new Thread(async () =>
+        //        {
+        //            while (Enabled)
+        //            {
+
+        //                var sh = statusCode;
+
+        //                try
+        //                {
+        //                    if (runFlag)
+        //                    {
+        //                        await UpdateStatus();
+        //                        if (hasTagsUpdateByTime)
+        //                        {
+        //                            await UpdateTags();
+        //                            TagsStatechange();
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        if (statusCode is 0 || statusCode is 2)
+        //                        {
+        //                            if (MaxRetryCount is -1)
+        //                            {
+        //                                await ConnectAsync();
+
+        //                            }
+        //                            else
+        //                            {
+        //                                if (retryCount < MaxRetryCount)
+        //                                {
+        //                                    await ConnectAsync();
+        //                                }
+        //                            }
+
+        //                        }
+        //                        else if (statusCode is 1)
+        //                        {
+
+        //                        }
+        //                    }
+        //                }
+        //                catch (IOException ex)
+        //                {
+        //                    Disconnect(ex.Message);
+        //                }
+        //                catch (SocketException e)
+        //                {
+        //                    Disconnect(e.Message);
+        //                }
+        //                catch (Exception e)
+        //                {
+        //                    Error(e.Message);
+        //                }
+        //                finally
+        //                {
+        //                    await Task.Delay(UpdateDelay);
+        //                }
+        //            }
+        //        }
+        //        ).Start();
+
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Error(e.Message);
+        //    }
+        //}
         protected void Init()
         {
             statusCode = 0;

@@ -121,6 +121,10 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                     entity.檢查人 = record.檢查人;
                     entity.完成時間 = record.完成時間;
                     entity.表單狀態 = record.表單狀態;
+                    entity.檢查 = record.檢查;
+                    entity.標準 = record.標準;
+                    entity.方式 = record.方式;
+                    entity.結果 = record.結果;
                     // 其他欄位如需更新可一併處理
                 }
             }

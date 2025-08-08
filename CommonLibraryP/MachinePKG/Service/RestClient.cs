@@ -25,7 +25,7 @@ namespace CommonLibraryP.MachinePKG.Service
         public RestClient()
         {
             // 先讀取設定檔，若失敗則用預設值
-            token_Content = ReadTokenFromConfig() ?? "FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx";
+            token_Content = ReadTokenFromConfig() ?? "hqR9JS1Gu8pYrJrancwhy1ImffLnupAYq9HmiTDbU761bc3Z0sUxrq0i1ki4";
         }
         //?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK     FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx
         // //https://portal.temphawk.net/api/v2//devices/00EFD23A?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK
@@ -89,7 +89,7 @@ namespace CommonLibraryP.MachinePKG.Service
             try
             {
                 // 絕對路徑
-                var configPath = @"C:\Users\lipo.lee\source\repos\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
+                var configPath = @"E:\玉美\code\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
                 if (!File.Exists(configPath))
                     return null;
 

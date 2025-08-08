@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250805064002_UpdateInspecWOListTable")]
+    partial class UpdateInspecWOListTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -405,21 +408,12 @@ namespace CommonLibraryP.Migrations
                     b.Property<DateTime?>("完成時間")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("方式")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("標準")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("機台名稱")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("機台編號")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("檢查")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("檢查人")
@@ -435,9 +429,6 @@ namespace CommonLibraryP.Migrations
 
                     b.Property<string>("紀錄值")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("結果")
-                        .HasColumnType("bit");
 
                     b.Property<int>("表單狀態")
                         .HasColumnType("int");

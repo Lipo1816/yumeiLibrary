@@ -93,6 +93,7 @@ namespace CommonLibraryP.MachinePKG
             using (var scope = scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var dbContext1 = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
                 return Task.FromResult(dbContext.Machines.AsNoTracking().ToList());
             }
         }

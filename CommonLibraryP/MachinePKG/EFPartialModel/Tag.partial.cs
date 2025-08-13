@@ -25,9 +25,9 @@ namespace CommonLibraryP.MachinePKG
             InitVal();
         }
 
-        public int StartIndex { get; set; }   // 新增這一行
+        //public int StartIndex { get; set; }   // 新增這一行
 
-        public int Offset { get; set; }   // 新增這一行
+        //public int Offset { get; set; }   // 新增這一行
 
         private DateTime lastUpdateTime;
         public DateTime LastUpdateTime => lastUpdateTime;

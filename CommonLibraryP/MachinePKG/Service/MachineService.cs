@@ -226,7 +226,9 @@ namespace CommonLibraryP.MachinePKG
 
         public Task<Machine?> GetMachineByName(string name)
         {
-            return Task.FromResult(machines.FirstOrDefault(x => x.Name == name));
+            //return Task.FromResult(machines.FirstOrDefault(x => x.Name == name));
+
+            return Task.FromResult(machines.FirstOrDefault(x =>x.Name.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)));
         }
         public Task<List<Machine>> GetAllMachines()
         {

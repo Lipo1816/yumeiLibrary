@@ -59,6 +59,7 @@ namespace CommonLibraryP.MachinePKG
         public DbSet<Inspection_WoItem> Inspection_WoItem { get; set; }
         public DbSet<BreakTimeSchedule> BreakTimeSchedules { get; set; }
 
+        public DbSet<WorkOrderPersonRecord> WorkOrderPersonRecords { get; set; }
         public DbSet<Data_Permission> Data_Permissions { get; set; }
         //public virtual DbSet<Condition> Conditions { get; set; }
 
@@ -177,6 +178,8 @@ namespace CommonLibraryP.MachinePKG
                 //entity.ToTable("ConditionLogicNodes");
 
             });
+
+            modelBuilder.Entity<WorkOrderPersonRecord>().HasKey(x => new { x.姓名, x.工單, x.時間 });
 
 
             modelBuilder.Entity<EquipmentSpec>(entity =>

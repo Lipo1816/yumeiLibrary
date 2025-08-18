@@ -18,6 +18,37 @@ namespace CommonLibraryP.MachinePKG.Service
             this.scopeFactory = scopeFactory;
         }
 
+
+        public async Task AddPersonRecordAsync(string name, string workOrder, DateTime time, string status)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var record = new WorkOrderPersonRecord
+                {
+                    姓名 = name,
+                    工單 = workOrder,
+                    時間 = time,
+                    狀態 = status
+                };
+                dbContext.WorkOrderPersonRecords.Add(record);
+                await dbContext.SaveChangesAsync();
+            }
+        }
+        public async Task<List<string>> GetDistinctPersonNamesByWorkOrderAsync(string workOrderNo)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var names = await dbContext.WorkOrderPersonRecords
+                    .AsNoTracking()
+                    .Where(x => x.工單 == workOrderNo)
+                    .Select(x => x.姓名)
+                    .Distinct()
+                    .ToListAsync();
+                return names;
+            }
+        }
         // 取得所有 Personnal
         public Task<List<Personnal>> GetAllPersonnals()
         {
@@ -42,7 +73,20 @@ namespace CommonLibraryP.MachinePKG.Service
                 return Task.FromResult(groups);
             }
         }
-
+        public Task<List<string>> GetPersonnelsByGroupAsync(string groupName)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                var personnels = dbContext.Personnal
+                    .AsNoTracking()
+                    .Where(p => p.生產組名 == groupName && !string.IsNullOrEmpty(p.人員姓名))
+                    .Select(p => p.人員姓名!)
+                    .OrderBy(x => x)
+                    .ToList();
+                return Task.FromResult(personnels);
+            }
+        }
         public async Task<List<Personnal>> GetAllAsync()
         {
             using (var scope = scopeFactory.CreateScope())

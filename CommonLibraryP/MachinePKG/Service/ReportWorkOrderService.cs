@@ -46,13 +46,15 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             catch (Exception e)
             {
-
                 throw;
             }
         }
         public async Task<ReportWorkOrder?> GetByWorkOrderNoClosestToNowAsync(string workOrderNo)
         {
             var now = DateTime.Now;
+
+            var d = _context.ReportWorkOrders.Where(x => x.工單 == workOrderNo);
+
             return await _context.ReportWorkOrders
                 .Where(x => x.工單 == workOrderNo)
                 .OrderBy(x => Math.Abs(EF.Functions.DateDiffSecond(x.報工時間, now)))

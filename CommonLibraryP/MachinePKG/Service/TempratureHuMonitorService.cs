@@ -53,9 +53,34 @@ namespace CommonLibraryP.MachinePKG.Service
                 }
                 catch (Exception ex)
                 {
-                    // 可加上 log
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var huService = scope.ServiceProvider.GetRequiredService<TempratureHuService>();
+                        var logService = scope.ServiceProvider.GetRequiredService<TempratureHuLogService>();
+
+                        var devices = await huService.GetAllAsync();
+                        foreach (var device in devices)
+                        {
+                            var lastLog = await logService.GetLastLogByMachineNumber(device.MachineNumber);
+                            if (lastLog == null || lastLog.Status != "noConnection")
+                            {
+                                var log = new temprature_Hu_log
+                                {
+                                    MachineName = device.MachineName,
+                                    MachineNumber = device.MachineNumber,
+                                    MachineGroupNumber = "",
+                                    temperature = 0,
+                                    humidity = 0,
+                                    battery = 0,
+                                    Status = "noConnection",
+                                    CreateDate = DateTime.Now
+                                };
+                                await logService.UpsertAsync(log);
+                            }
+                        }
+                    }
+                    await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
                 }
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
         }
 

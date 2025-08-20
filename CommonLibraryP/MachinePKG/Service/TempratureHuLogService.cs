@@ -16,7 +16,13 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             _db = db;
         }
-
+        public async Task<temprature_Hu_log?> GetLastLogByMachineNumber(string machineNumber)
+        {
+            return await _db.temprature_Hu_logs
+                .Where(x => x.MachineNumber == machineNumber)
+                .OrderByDescending(x => x.CreateDate)
+                .FirstOrDefaultAsync();
+        }
         // 取得全部
         public async Task<List<temprature_Hu_log>> GetAllAsync()
         {

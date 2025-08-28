@@ -58,7 +58,13 @@ namespace CommonLibraryP.MachinePKG
                 try
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                    var target = dbContext.EquipmentSpecs.FirstOrDefault(x => x.Id == spec.Id);
+                    var target = dbContext.EquipmentSpecs.FirstOrDefault(x =>
+                        x.機台編號 == spec.機台編號 &&
+                        x.資訊項目 == spec.資訊項目 &&
+                        x.機台項目說明 == spec.機台項目說明
+                    );
+
+
                     bool exist = target is not null;
                     if (exist)
                     {

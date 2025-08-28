@@ -25,7 +25,7 @@ namespace CommonLibraryP.MachinePKG.Service
         public RestClient()
         {
             // 先讀取設定檔，若失敗則用預設值
-            token_Content = ReadTokenFromConfig() ?? "pi0Qzp0E4myl2JeSKlN5AUoQIWEW8LQX0V13s7CLtT4ZpMfNUNycQRlJjB3h";
+            token_Content = ReadTokenFromConfig() ?? "B0lSaKjiM0SSSKjRJauVVLYRLylTZUZ0ncs1TXSXQc2ozN4OvkZGKdSJs9X3";
         }
         //?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK     FQAagh78Z6byQWqx9rYcHvdKWhifMzUFNd6HYqhL5p7PFk8jPkxru3WKXDyx
         // //https://portal.temphawk.net/api/v2//devices/00EFD23A?api_token=VUQY38XHEGF4WWM3YTlLdRJYBOj26VCOMoSyuzy80pm0fqJbGrTQlT63lfeK

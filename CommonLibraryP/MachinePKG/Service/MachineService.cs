@@ -547,9 +547,12 @@ namespace CommonLibraryP.MachinePKG
                 try
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                    var targetTag = await dbContext.Set<T>().FirstOrDefaultAsync(x => x.Id == newTag.Id);
+                    var targetTag = await dbContext.Set<T>().FirstOrDefaultAsync(x => x.Name == newTag.Name);
                     if (targetTag is not null)
                     {
+
+                        newTag.Id = targetTag.Id;
+                        newTag.CategoryId = targetTag.CategoryId;
                         dbContext.Entry<T>(targetTag).CurrentValues.SetValues(newTag);
                     }
                     else

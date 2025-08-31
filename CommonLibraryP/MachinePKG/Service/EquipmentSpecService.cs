@@ -61,7 +61,8 @@ namespace CommonLibraryP.MachinePKG
                     var target = dbContext.EquipmentSpecs.FirstOrDefault(x =>
                         x.機台編號 == spec.機台編號 &&
                         x.資訊項目 == spec.資訊項目 &&
-                        x.機台項目說明 == spec.機台項目說明
+                        x.機台項目說明 == spec.機台項目說明 &&
+                        x.PLC_XY位址 == spec.PLC_XY位址
                     );
 
 

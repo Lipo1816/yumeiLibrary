@@ -135,7 +135,8 @@ public class CarbonMonitorService : BackgroundService
                     db.CarbonGeneratorParameters.Add(param);
                 }
                 await db.SaveChangesAsync();
-            }
+            await Task.Delay(_interval, stoppingToken);
+        }
 
 
             await Task.Delay(_interval, stoppingToken);

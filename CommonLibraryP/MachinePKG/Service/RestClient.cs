@@ -89,7 +89,8 @@ namespace CommonLibraryP.MachinePKG.Service
             try
             {
                 // 絕對路徑
-                var configPath = @"E:\玉美\code\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
+                 var configPath = @"E:\玉美\code\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
+               // var configPath = Path.Combine(AppContext.BaseDirectory, "UserConfig", "userConfig.txt");
                 if (!File.Exists(configPath))
                     return null;
 

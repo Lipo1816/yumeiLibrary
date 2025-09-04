@@ -28,6 +28,19 @@ namespace CommonLibraryP.MachinePKG.Service
 
             return data.GroupBy(x => x.GeneratorName).ToList();
         }
+
+        public async Task<List<IGrouping<string, CarbonGeneratorParameter>>> GetGroupedByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            using var db = _dbFactory.CreateDbContext();
+            var data = await db.CarbonGeneratorParameters
+                .Where(x => x.RecordTime != null && x.RecordTime >= startDate && x.RecordTime <= endDate)
+                .OrderByDescending(x => x.RecordTime)
+                .ToListAsync();
+
+            return data.GroupBy(x => x.GeneratorName).ToList();
+        }
+
+
     }
 }
 

@@ -17,9 +17,34 @@ public class CarbonMonitorService : BackgroundService
     {
         _serviceProvider = serviceProvider;
     }
+    public static double CalculateCarbonEmission(double electricity, double? carbonFactor = null)
+    {
+        // 若未指定碳排係數，預設 0.474
+        double factor = carbonFactor ?? 0.474;
+        return electricity * factor;
+    }
+
+    public static string? ReadCarboneTokenFromConfig(string configPath)
+    {
+        if (!File.Exists(configPath))
+            return null;
+
+        var lines = File.ReadAllLines(configPath);
+        foreach (var line in lines)
+        {
+            if (line.TrimStart().StartsWith("Carbone_Token:", StringComparison.OrdinalIgnoreCase))
+            {
+                // 取出冒號後面的內容並去除空白
+                return line.Substring("Carbone_Token:".Length).Trim();
+            }
+        }
+        return null;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var configPath = @"E:\玉美\code\CommonLibraryP\CommonLibraryP\MachinePKG\Service\UserConfig\userConfig.txt";
+        string carboneToken = ReadCarboneTokenFromConfig(configPath) ?? "f9bda5d4-e3a1-4634-8ef4-85e0fd619bfa";
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = _serviceProvider.CreateScope();
@@ -27,10 +52,22 @@ public class CarbonMonitorService : BackgroundService
             var machineService = scope.ServiceProvider.GetRequiredService<MachineService>();
             var carbonFactorService = scope.ServiceProvider.GetRequiredService<TaiwanCarbonFactorService>();
 
-            try
-            {
+
                 // 取得碳排係數
-                var (factor, year, name) = await carbonFactorService.GetLatestAsync("f9bda5d4-e3a1-4634-8ef4-85e0fd619bfa");
+                // var (factor, year, name) = await carbonFactorService.GetLatestAsync(carboneToken);
+
+                double factor = 0.474; // 預設值
+                try
+                {
+                    var uu = await carbonFactorService.GetTaiwanGridEF_FromMOEAAsync();
+                    if (uu > 0) factor = uu;
+                }
+                catch
+                {
+                    // 取不到時使用預設值 0.474
+                }
+
+
 
                 // 取得所有機台
                 var machines = await machineService.GetAllMachines();
@@ -80,9 +117,7 @@ public class CarbonMonitorService : BackgroundService
                     }
 
 
-                    //  double? current = tags.FirstOrDefault(t => t.Name.Contains("Current"))?.Value as double?;
-                    // double? voltage = tags.FirstOrDefault(t => t.Name.Contains("Voltage"))?.Value as double?;
-                    // double? electricity = tags.FirstOrDefault(t => t.Name.Contains("Electricity"))?.Value as double?;
+
                     double carbonValue = electricity * factor;
 
                     var param = new CarbonGeneratorParameter
@@ -95,19 +130,16 @@ public class CarbonMonitorService : BackgroundService
                         Voltage = voltage,
                         Electricity = electricity,
                         RecordTime = DateTime.Now,
-                        Remark = $"Year:{year}, Source:{name}, CarbonValue:{carbonValue}"
+                        Remark = $"CarbonValue:{carbonValue}"
                     };
                     db.CarbonGeneratorParameters.Add(param);
                 }
                 await db.SaveChangesAsync();
             }
-            catch (Exception ex)
-            {
-                // 可加 log
-            }
+
 
             await Task.Delay(_interval, stoppingToken);
         }
     }
-}
+
 

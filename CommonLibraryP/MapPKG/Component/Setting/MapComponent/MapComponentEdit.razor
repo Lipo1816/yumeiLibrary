@@ -150,7 +150,7 @@
     private async Task StartAction(MapComponentEditMode mapComponentEditMode, MouseEventArgs e)
     {
         isDragging = true;
-        Console.WriteLine(mapComponentEditMode.ToString());
+      //  Console.WriteLine(mapComponentEditMode.ToString());
         ComponentMouseEventStartArgsCallback?.Invoke(mapComponentEditMode, e);
         await Task.CompletedTask;
     }

@@ -21,7 +21,7 @@ namespace CommonLibraryP.ResourcePKG
             cpuUsage = cpuCounter.NextValue();
             PerformanceCounter availableMemoryCounter = new("Memory", "Available MBytes");
             availableMemory = availableMemoryCounter.NextValue();
-            Console.WriteLine($"cpu: {cpuUsage}% memory: {availableMemory}%");
+         //   Console.WriteLine($"cpu: {cpuUsage}% memory: {availableMemory}%");
             //await Task.Delay(500);
         }
     }

@@ -1,7 +1,14 @@
-﻿using System.Net.Http;
+﻿using DevExpress.Pdf;
+using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
+
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using UglyToad.PdfPig;
+
 
 public class TaiwanCarbonFactorService
 {
@@ -42,4 +49,29 @@ public class TaiwanCarbonFactorService
             throw new Exception("取得碳排係數失敗：" + ex.Message, ex);
         }
     }
+
+    public  async Task<double> GetTaiwanGridEF_FromMOEAAsync()
+    {
+        // 直接用 113 年度示例；實務上先抓清單頁找最新檔案連結
+        try
+        {
+            var pdfUrl = "https://www.moeaea.gov.tw/ecw/populace/content/wHandMenuFile.ashx?file_id=16728";
+
+            using var pdfBytes = await _http.GetStreamAsync(pdfUrl);
+            using var mem = new MemoryStream(); await pdfBytes.CopyToAsync(mem);
+            mem.Position = 0;
+
+            using var doc = UglyToad.PdfPig.PdfDocument.Open(mem);
+            var allText = string.Join("\n", doc.GetPages().Select(p => p.Text));
+            var m = Regex.Match(allText, @"(\d+(\.\d+)?)\s*公斤\s*CO2e\/度");
+            if (!m.Success) throw new Exception("未在 PDF 內找到係數");
+            return double.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture); // 0.474
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+
 }

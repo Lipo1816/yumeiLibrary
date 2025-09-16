@@ -11,7 +11,7 @@ using CommonLibraryP.MachinePKG;
 public class CarbonMonitorService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(10); // 每 10 分鐘執行一次
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(20); // 每 10 分鐘執行一次
 
     public CarbonMonitorService(IServiceProvider serviceProvider)
     {

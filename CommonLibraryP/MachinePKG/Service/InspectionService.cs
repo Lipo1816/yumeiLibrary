@@ -119,7 +119,7 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                     // 更新欄位（可依實際需求調整）
                     entity.紀錄值 = record.紀錄值;
                     entity.檢查人 = record.檢查人;
-                    entity.完成時間 = record.完成時間;
+                    entity.完成時間 = DateTime.Now; //record.完成時間;
                     entity.表單狀態 = record.表單狀態;
                     entity.檢查 = record.檢查;
                     entity.標準 = record.標準;
@@ -141,6 +141,7 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                 else if (list.表單狀態 == InspectionFormStatus.CheckDone)
                     list.表單狀態 = InspectionFormStatus.ModifyCheck;
 
+                list.完成時間 = DateTime.Now;
                 // 設定檢查人
                 if (!string.IsNullOrEmpty(檢查人))
                     list.檢查人 = 檢查人;

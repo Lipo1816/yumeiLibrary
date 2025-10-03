@@ -70,6 +70,14 @@ namespace CommonLibraryP.MachinePKG
 
         //public virtual DbSet<ConditionAction> ConditionActions { get; set; }
 
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+        {
+            // 統一設定所有 decimal / decimal? 的精度與小數位
+            builder.Properties<decimal>().HavePrecision(18, 6);
+            builder.Properties<decimal?>().HavePrecision(18, 6);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<EquiManufacturer_Information>(entity =>

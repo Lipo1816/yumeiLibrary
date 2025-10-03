@@ -73,7 +73,15 @@ namespace CommonLibraryP.MachinePKG.Service
 
         public async Task<List<InspectionRecord>> GetInspectionRecordsAsync()
         {
-            return await _context.InspectionRecords.ToListAsync();
+            try
+            {
+                return await _context.InspectionRecords.ToListAsync();
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
         // 取得全部 InspectionList
 public async Task<List<InspectionList>> GetAllInspectionListsAsync()
@@ -124,7 +132,9 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                     entity.檢查 = record.檢查;
                     entity.標準 = record.標準;
                     entity.方式 = record.方式;
+                    entity.檢查點位 = record.檢查點位;
                     entity.結果 = record.結果;
+                    entity.維修期限 = record.維修期限;
                     // 其他欄位如需更新可一併處理
                 }
             }

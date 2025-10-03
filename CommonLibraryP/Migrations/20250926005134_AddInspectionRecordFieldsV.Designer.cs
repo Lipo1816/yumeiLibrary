@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    [Migration("20250916052309_AddEmailSentSetting")]
-    partial class AddEmailSentSetting
+    [Migration("20250926005134_AddInspectionRecordFieldsV")]
+    partial class AddInspectionRecordFieldsV
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -251,10 +251,12 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("水溫上限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("水溫下限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("線別編號")
                         .IsRequired()
@@ -273,16 +275,20 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("轉速上限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("轉速下限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("電壓上限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("電壓下限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("電控制箱IP")
                         .IsRequired()
@@ -293,20 +299,24 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("電流上限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("電流下限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("項目")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("頻率上限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal?>("頻率下限")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.HasKey("Id");
 
@@ -497,6 +507,12 @@ namespace CommonLibraryP.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("檢查錯誤")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("檢查點位")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("產生時間")
                         .HasColumnType("datetime2");
 
@@ -505,6 +521,9 @@ namespace CommonLibraryP.Migrations
 
                     b.Property<bool?>("結果")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("維修期限")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("表單狀態")
                         .HasColumnType("int");
@@ -724,10 +743,12 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("已完成料")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("廢料")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<DateTime>("排產日")
                         .HasColumnType("datetime2");
@@ -737,10 +758,12 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("補料")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("餘料")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.HasKey("ID");
 

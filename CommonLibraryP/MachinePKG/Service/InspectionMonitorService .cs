@@ -62,7 +62,9 @@ namespace CommonLibraryP.MachinePKG.Service
                             檢查 = item.檢查,   // 若 item 有此屬性，否則可設 null
                             標準 = item.標準,
                             方式 = item.方式,
+                            檢查點位 = item.點檢位置,
                             結果 = false         // 預設 null，或依邏輯給值
+                            
                         };
                         db.InspectionRecords.Add(record);
                     }
@@ -148,6 +150,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             產生時間 = now,
                             檢查人 = "",
                             表單狀態 = InspectionFormStatus.UndoCheck,
+                            檢查點位 = item.點檢位置,
                             檢查單號 = checknumber + item.機台編號
                         };
                         db.InspectionRecords.Add(record);
@@ -219,6 +222,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             項目 = item.項目,
                             產生時間 = now,
                             檢查人 = "",
+                            檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
                             檢查單號 = checknumber + item.機台編號
                         };
@@ -296,6 +300,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             項目 = item.項目,
                             產生時間 = now,
                             檢查人 = "",
+                            檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
                             檢查單號 = checknumber + item.機台編號
                         };
@@ -367,6 +372,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             項目 = item.項目,
                             產生時間 = now,
                             檢查人 = "",
+                            檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
                             檢查單號 = checknumber + item.機台編號
                         };

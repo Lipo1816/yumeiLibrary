@@ -4,6 +4,7 @@ using CommonLibraryP.MachinePKG;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommonLibraryP.Migrations
 {
     [DbContext(typeof(MachineDBContext))]
-    partial class MachineDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250926014656_AddInspectionRecordFieldTest")]
+    partial class AddInspectionRecordFieldTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -475,6 +478,9 @@ namespace CommonLibraryP.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Test")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("完成時間")
                         .HasColumnType("datetime2");

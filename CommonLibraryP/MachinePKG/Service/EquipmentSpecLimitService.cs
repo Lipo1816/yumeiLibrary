@@ -19,6 +19,16 @@ namespace CommonLibraryP.MachinePKG.Service
             this.scopeFactory = scopeFactory;
         }
 
+        public async Task<EquipmentSpecLimit?> GetLimitAsync(string machineCode, string itemDescription)
+        {
+            // 假設您有一個資料庫上下文 dbContext
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+
+            return await db.EquipmentSpecLimits
+                .FirstOrDefaultAsync(x => x.機台編號 == machineCode && x.機台項目說明 == itemDescription);
+        }
+
         // 取得所有資料
         public async Task<List<EquipmentSpecLimit>> GetAllAsync()
         {

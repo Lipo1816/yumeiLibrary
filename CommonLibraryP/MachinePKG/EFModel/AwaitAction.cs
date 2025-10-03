@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CommonLibraryP.MachinePKG
 {
-    public partial class AwaitAction: ConditionAction
+    public partial class AwaitAction: ConditionAction  //lipo
     {
         [Range(1000, Int16.MaxValue)]
         public int DelayMillisecond { get; set; }

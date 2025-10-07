@@ -63,8 +63,8 @@ namespace CommonLibraryP.MachinePKG.Service
                             標準 = item.標準,
                             方式 = item.方式,
                             檢查點位 = item.點檢位置,
-                            結果 = false         // 預設 null，或依邏輯給值
-                            
+                            結果 = null         // 預設 null，或依邏輯給值
+
                         };
                         db.InspectionRecords.Add(record);
                     }
@@ -151,7 +151,8 @@ namespace CommonLibraryP.MachinePKG.Service
                             檢查人 = "",
                             表單狀態 = InspectionFormStatus.UndoCheck,
                             檢查點位 = item.點檢位置,
-                            檢查單號 = checknumber + item.機台編號
+                            檢查單號 = checknumber + item.機台編號,
+                             結果 = null
                         };
                         db.InspectionRecords.Add(record);
                     }
@@ -224,7 +225,8 @@ namespace CommonLibraryP.MachinePKG.Service
                             檢查人 = "",
                             檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
-                            檢查單號 = checknumber + item.機台編號
+                            檢查單號 = checknumber + item.機台編號,
+                            結果 = null
                         };
                         db.InspectionRecords.Add(record);
                     }
@@ -302,7 +304,8 @@ namespace CommonLibraryP.MachinePKG.Service
                             檢查人 = "",
                             檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
-                            檢查單號 = checknumber + item.機台編號
+                            檢查單號 = checknumber + item.機台編號,
+                            結果 = null
                         };
                         db.InspectionRecords.Add(record);
                     }
@@ -374,7 +377,8 @@ namespace CommonLibraryP.MachinePKG.Service
                             檢查人 = "",
                             檢查點位 = item.點檢位置,
                             表單狀態 = InspectionFormStatus.UndoCheck,
-                            檢查單號 = checknumber + item.機台編號
+                            檢查單號 = checknumber + item.機台編號,
+                            結果 = null
                         };
                         db.InspectionRecords.Add(record);
                     }

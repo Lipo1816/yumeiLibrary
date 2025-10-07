@@ -64,6 +64,8 @@ namespace CommonLibraryP.MachinePKG
 
         public DbSet<CarbonGeneratorParameter> CarbonGeneratorParameters { get; set; }
         public DbSet<EmailSentSetting> EmailSentSettings { get; set; }
+
+        public DbSet<Data_Person_Permissions> DataPersonPermissions { get; set; }
         //public virtual DbSet<Condition> Conditions { get; set; }
 
         //public virtual DbSet<ConditionNode> ConditionNodes { get; set; }

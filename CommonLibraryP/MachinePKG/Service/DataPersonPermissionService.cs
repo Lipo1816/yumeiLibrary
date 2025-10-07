@@ -1,55 +1,54 @@
 ﻿using CommonLibraryP.MachinePKG.EFModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CommonLibraryP.MachinePKG.Service
 {
-    public class DataPermissionService
+    public class DataPersonPermissionService
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public DataPermissionService(IServiceScopeFactory scopeFactory)
+        public DataPersonPermissionService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
         }
 
-
-
-
-
         // 取得全部
-        public async Task<List<Data_Permission>> GetAllAsync()
+        public async Task<List<Data_Person_Permissions>> GetAllAsync()
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-            return await db.Data_Permissions.AsNoTracking().ToListAsync();
+            return await db.DataPersonPermissions.AsNoTracking().ToListAsync();
         }
 
         // 依 Id 取得單筆
-        public async Task<Data_Permission?> GetByIdAsync(int id)
+        public async Task<Data_Person_Permissions?> GetByIdAsync(int id)
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-            return await db.Data_Permissions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await db.DataPersonPermissions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         // 新增或更新
-        public async Task<(bool IsSuccess, string Msg)> UpsertAsync(Data_Permission data)
+        public async Task<(bool IsSuccess, string Msg)> UpsertAsync(Data_Person_Permissions data)
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
             try
             {
-                var target = await db.Data_Permissions.FirstOrDefaultAsync(x => x.Id == data.Id);
+                var target = await db.DataPersonPermissions.FirstOrDefaultAsync(x => x.Id == data.Id);
                 if (target != null)
                 {
                     db.Entry(target).CurrentValues.SetValues(data);
                 }
                 else
                 {
-                    await db.Data_Permissions.AddAsync(data);
+                    await db.DataPersonPermissions.AddAsync(data);
                 }
                 await db.SaveChangesAsync();
                 return (true, "儲存成功");
@@ -67,10 +66,10 @@ namespace CommonLibraryP.MachinePKG.Service
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
             try
             {
-                var target = await db.Data_Permissions.FirstOrDefaultAsync(x => x.Id == id);
+                var target = await db.DataPersonPermissions.FirstOrDefaultAsync(x => x.Id == id);
                 if (target != null)
                 {
-                    db.Data_Permissions.Remove(target);
+                    db.DataPersonPermissions.Remove(target);
                     await db.SaveChangesAsync();
                     return (true, "刪除成功");
                 }
@@ -84,13 +83,15 @@ namespace CommonLibraryP.MachinePKG.Service
                 return (false, $"刪除失敗: {ex.Message}");
             }
         }
-        public async Task<Data_Permission?> GetByGroupAsync(string groupName)
+
+        // 依人員ID取得單筆
+        public async Task<Data_Person_Permissions?> GetByPersonIdAsync(string personId)
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-            return await db.Data_Permissions
+            return await db.DataPersonPermissions
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.群組 == groupName);
+                .FirstOrDefaultAsync(x => x.人員ID == personId);
         }
     }
 }

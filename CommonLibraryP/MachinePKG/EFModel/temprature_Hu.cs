@@ -27,5 +27,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public double? humidity_low { get; set; }
         public double? battery_high { get; set; }
         public double? battery_low { get; set; }
+        // 新增 ChangeType 屬性
+        //public string? ChangeType { get; set; }
     }
 }

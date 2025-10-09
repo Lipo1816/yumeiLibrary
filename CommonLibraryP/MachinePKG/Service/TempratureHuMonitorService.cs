@@ -36,7 +36,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             {
                                 var log = new temprature_Hu_log
                                 {
-                                    MachineName = response.device.name,
+                                    MachineName = device.MachineName,
                                     MachineNumber = response.device.id,
                                     MachineGroupNumber = "",
                                     temperature = TryParseDouble(response.device.device_data?[0]?.data?[0]?.value),
@@ -79,7 +79,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             }
                         }
                     }
-                    await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
             }
         }

@@ -38,7 +38,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
 
         public DateTime? 完成時間 { get; set; } // 可為 null
 
-        [Required]
+
         public string 檢查人 { get; set; } = "";
 
         [Required]

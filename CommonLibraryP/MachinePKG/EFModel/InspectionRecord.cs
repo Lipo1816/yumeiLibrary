@@ -39,7 +39,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public DateTime? 完成時間 { get; set; } // 可為 null
 
 
-        public string 檢查人 { get; set; } = "";
+        public string? 檢查人 { get; set; } = "";
 
         [Required]
         public InspectionFormStatus 表單狀態 { get; set; }
@@ -56,7 +56,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public DateTime? 維修期限 { get; set; }
         public string? 檢查錯誤 { get; set; }
         // 新增欄位：維修完成
-        public bool 維修完成 { get; set; }
+        public bool? 維修完成 { get; set; }
 
     }
 

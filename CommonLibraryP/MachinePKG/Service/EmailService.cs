@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CommonLibraryP.MachinePKG.Service
 {
-    class EmailService
+  public  class EmailService
     {
         private readonly string _smtpServer;
         private readonly int _smtpPort;

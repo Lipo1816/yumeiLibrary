@@ -59,5 +59,17 @@ namespace CommonLibraryP.MachinePKG.Service
                 await _db.SaveChangesAsync();
             }
         }
+
+
+        public async Task<List<temprature_Hu_log>> GetByMachineNumberAndDateRangeAsync(string machineNumber, DateTime start, DateTime end)
+        {
+            // 假設你有注入 DbContext，名稱為 _db 或 context
+            return await _db.temprature_Hu_logs
+                .Where(log => log.MachineNumber == machineNumber
+                    && log.CreateDate >= start
+                    && log.CreateDate <= end)
+                .OrderBy(log => log.CreateDate)
+                .ToListAsync();
+        }
     }
 }

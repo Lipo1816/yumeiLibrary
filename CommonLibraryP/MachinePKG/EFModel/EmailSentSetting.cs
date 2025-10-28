@@ -19,5 +19,11 @@ namespace CommonLibraryP.MachinePKG.EFModel
 
         public DateTime? 建立時間 { get; set; }
 
+        // 新增且允許 null
+        public bool? 生產 { get; set; }
+        public bool? 品管 { get; set; }
+        public bool? 設備 { get; set; }
+        public bool? 環境溫溼度 { get; set; }
+
     }
 }

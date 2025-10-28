@@ -33,6 +33,23 @@ namespace CommonLibraryP.MachinePKG.Service
                 await _db.SaveChangesAsync();
             }
         }
+        public async Task UpdateAsync(EmailSentSetting setting)
+        {
+            //using var context = new YourDbContext(); // 請替換為實際 DbContext
+            var existing = await _db.EmailSentSettings.FindAsync(setting.Id);
+            if (existing != null)
+            {
+                // 更新所有欄位
+                existing.ischoose = setting.ischoose;
+                existing.品管 = setting.品管;
+                existing.設備 = setting.設備;
+                existing.環境溫溼度 = setting.環境溫溼度;
+                existing.建立時間 = setting.建立時間;
+
+                _db.EmailSentSettings.Update(existing);
+                await _db.SaveChangesAsync();
+            }
+        }
         public async Task<List<EmailSentSetting>> GetAllAsync()
         {
             return await _db.EmailSentSettings.ToListAsync();

@@ -10,12 +10,12 @@ namespace CommonLibraryP.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "維修完成",
-                table: "InspectionRecords",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            //migrationBuilder.AddColumn<bool>(
+            //    name: "維修完成",
+            //    table: "InspectionRecords",
+            //    type: "bit",
+            //    nullable: false,
+            //    defaultValue: false);
         }
 
         /// <inheritdoc />

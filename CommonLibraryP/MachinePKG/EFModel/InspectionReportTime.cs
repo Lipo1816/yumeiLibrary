@@ -34,11 +34,13 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public int? QuarterDay { get; set; }   // 1~30
         public int? QuarterHour { get; set; }  // 1~24
         public bool? QuarterEnable { get; set; }
+        public TimeSpan? QuarterTime { get; set; } // 新增：季檢時間
 
         // 年檢用
         public int? YearMonth { get; set; }    // 1~12
         public int? YearDay { get; set; }      // 1~30
         public int? YearHour { get; set; }     // 1~24
         public bool? YearEnable { get; set; }
+        public TimeSpan? YearTime { get; set; } // 新增：年檢時間
     }
 }

@@ -266,16 +266,17 @@ namespace CommonLibraryP.MachinePKG.Service
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
 
             var quarterlySetting = db.InspectionReportTimes.FirstOrDefault(x => x.Type == "Quarterly");
-            if (quarterlySetting?.QuarterMonth == null || quarterlySetting.QuarterDay == null || quarterlySetting.QuarterHour == null)
+            if (quarterlySetting?.QuarterMonth == null || quarterlySetting.QuarterDay == null || quarterlySetting.QuarterTime == null)
                 return;
 
             var now = DateTime.Now;
             int season = (now.Month - 1) / 3 + 1; // 第幾季 (1~4)
             int monthInQuarter = (now.Month - 1) % 3 + 1; // 本季第幾個月 (1~3)
-            // 判斷是否到達指定季檢時間（允許誤差3分鐘）
+                                                          // 判斷是否到達指定季檢時間（允許誤差3分鐘）
             if (monthInQuarter == quarterlySetting.QuarterMonth &&
                 now.Day == quarterlySetting.QuarterDay &&
-                now.Hour == quarterlySetting.QuarterHour)
+                quarterlySetting.QuarterTime != null &&
+                Math.Abs((now.TimeOfDay - quarterlySetting.QuarterTime.Value).TotalMinutes) < 3)
             {
                 var inspections = db.Inspections.Where(x => x.頻率 == "季").ToList();
                 var groups = inspections.GroupBy(x => x.機台編號);
@@ -341,14 +342,14 @@ namespace CommonLibraryP.MachinePKG.Service
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
 
             var yearlySetting = db.InspectionReportTimes.FirstOrDefault(x => x.Type == "Yearly");
-            if (yearlySetting?.YearMonth == null || yearlySetting.YearDay == null || yearlySetting.YearHour == null)
+            if (yearlySetting?.YearMonth == null || yearlySetting.YearDay == null || yearlySetting.YearTime == null)
                 return;
 
             var now = DateTime.Now;
             // 判斷是否到達指定年檢時間（允許誤差3分鐘）
             if (now.Month == yearlySetting.YearMonth &&
                 now.Day == yearlySetting.YearDay &&
-                now.Hour == yearlySetting.YearHour)
+                 Math.Abs((now.TimeOfDay - yearlySetting.YearTime.Value).TotalMinutes) < 3)
             {
                 var inspections = db.Inspections.Where(x => x.頻率 == "年").ToList();
                 var groups = inspections.GroupBy(x => x.機台編號);

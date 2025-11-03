@@ -61,6 +61,20 @@ namespace CommonLibraryP.MachinePKG.Service
                 entity.WeeklyTime = time.WeeklyTime;
                 entity.MonthlyDay = time.MonthlyDay;
                 entity.MonthlyTime = time.MonthlyTime;
+                entity.QuarterMonth = time.QuarterMonth;
+                entity.QuarterDay = time.QuarterDay;
+                entity.QuarterTime = time.QuarterTime;
+                entity.YearMonth = time.YearMonth;
+                entity.YearDay = time.YearDay;
+                entity.YearTime = time.YearTime;
+                entity.DailyEnable = time.DailyEnable;
+                entity.WeeklyEnable = time.WeeklyEnable;
+                entity.MonthlyEnable = time.MonthlyEnable;
+                entity.QuarterEnable = time.QuarterEnable;
+                entity.YearEnable = time.YearEnable;
+
+
+
             }
             await _context.SaveChangesAsync();
         }

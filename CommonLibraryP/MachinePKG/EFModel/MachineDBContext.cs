@@ -66,6 +66,8 @@ namespace CommonLibraryP.MachinePKG
         public DbSet<EmailSentSetting> EmailSentSettings { get; set; }
 
         public DbSet<Data_Person_Permissions> DataPersonPermissions { get; set; }
+        
+        public DbSet<TagLimitAlarmLog> TagLimitAlarmLogs { get; set; }
         //public virtual DbSet<Condition> Conditions { get; set; }
 
         //public virtual DbSet<ConditionNode> ConditionNodes { get; set; }
@@ -300,6 +302,20 @@ namespace CommonLibraryP.MachinePKG
             });
             modelBuilder.Entity<BreakTimeSchedule>()
     .HasKey(b => new { b.LineName, b.WeekDay, b.PeriodNo, b.ModifyTime });
+
+            modelBuilder.Entity<TagLimitAlarmLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.ToTable("TagLimitAlarmLogs");
+                entity.Property(e => e.MachineCode).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.MachineName).HasMaxLength(100).IsRequired(false);
+                entity.Property(e => e.TagName).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.TagDescription).HasMaxLength(200).IsRequired(false);
+                entity.Property(e => e.AlarmType).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.AlarmStatus).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.Remarks).HasMaxLength(500).IsRequired(false);
+                entity.Property(e => e.AlarmTime).IsRequired();
+            });
 
         }
     }

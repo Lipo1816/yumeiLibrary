@@ -101,22 +101,38 @@ namespace CommonLibraryP.MachinePKG.Service
             try
             {
                 var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                var target = db.EquipmentSpecLimits.FirstOrDefault(x => x.Id == spec.Id);
+                
+                // 先嘗試用 Id 查找（如果 Id > 0）
+                EquipmentSpecLimit? target = null;
+                if (spec.Id > 0)
+                {
+                    target = await db.EquipmentSpecLimits.FirstOrDefaultAsync(x => x.Id == spec.Id);
+                }
+                
+                // 如果用 Id 找不到，或 Id 為 0，則用業務鍵（機台編號 + 項目）查找
+                if (target == null && !string.IsNullOrEmpty(spec.機台編號) && !string.IsNullOrEmpty(spec.項目))
+                {
+                    target = await db.EquipmentSpecLimits.FirstOrDefaultAsync(x => 
+                        x.機台編號 == spec.機台編號 && x.項目 == spec.項目);
+                }
+                
                 bool exist = target is not null;
                 if (exist)
                 {
+                    // 更新現有記錄
                     db.Entry(target).CurrentValues.SetValues(spec);
                 }
                 else
                 {
+                    // 新增記錄
                     await db.EquipmentSpecLimits.AddAsync(spec);
                 }
                 await db.SaveChangesAsync();
-                return new(2, $"Upsert EquipmentSpecLimit {spec.Id} success");
+                return new(2, $"Upsert EquipmentSpecLimit {spec.機台編號}-{spec.項目} success");
             }
             catch (Exception e)
             {
-                return new(4, $"Upsert EquipmentSpecLimit {spec.Id} fail({e.Message})");
+                return new(4, $"Upsert EquipmentSpecLimit {spec.機台編號}-{spec.項目} fail({e.Message})");
             }
         }
         public async Task<(bool IsSuccess, string Msg)> DeleteAsync(string machineNo, string item)
@@ -149,10 +165,11 @@ namespace CommonLibraryP.MachinePKG.Service
         public class TagLimitInfo
         {
             public string MachineCode { get; set; }
+            public string MachineName { get; set; }
             public string TagName { get; set; }
+            public string ItemDesript { get; set; }
             public double? UpperLimit { get; set; }
             public double? LowerLimit { get; set; }
-            // ... 其他欄位
         }
 
         // EquipmentSpecLimitService
@@ -172,7 +189,9 @@ namespace CommonLibraryP.MachinePKG.Service
                 .Select(x => new TagLimitInfo
                 {
                     MachineCode = x.機台編號,
-                    TagName = x.項目, // 這裡用 x.項目 當作 TagName，請依實際需求調整
+                    MachineName = x.機台名稱,
+                    TagName = x.項目,
+                    ItemDesript = x.機台項目說明,
                     UpperLimit = (double?)
                         (x.電壓上限 ?? x.電流上限 ?? x.頻率上限 ?? x.轉速上限 ?? x.水溫上限),
                     LowerLimit = (double?)

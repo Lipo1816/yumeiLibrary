@@ -69,18 +69,34 @@ namespace CommonLibraryP.MachinePKG
                     bool exist = target is not null;
                     if (exist)
                     {
-                        dbContext.Entry(target).CurrentValues.SetValues(spec);
+                        // 更新現有記錄，手動複製屬性（不更新 Id）
+                        target.項目 = spec.項目;
+                        target.機台名稱 = spec.機台名稱;
+                        target.機種代碼 = spec.機種代碼;
+                        target.機台編號 = spec.機台編號;
+                        target.線別編號 = spec.線別編號;
+                        target.資訊項目 = spec.資訊項目;
+                        target.機台項目說明 = spec.機台項目說明;
+                        target.機台項目代碼 = spec.機台項目代碼;
+                        target.規格型號 = spec.規格型號;
+                        target.說明1 = spec.說明1;
+                        target.PLC讀值型態 = spec.PLC讀值型態;
+                        target.PLC_XY位址 = spec.PLC_XY位址;
+                        target.PLC讀值位址ModbusAdd = spec.PLC讀值位址ModbusAdd;
+                        target.條件或格式 = spec.條件或格式;
+                        target.電控制箱編號 = spec.電控制箱編號;
+                        target.電控制箱IP = spec.電控制箱IP;
                     }
                     else
                     {
                         await dbContext.EquipmentSpecs.AddAsync(spec);
                     }
                     await dbContext.SaveChangesAsync();
-                    return new(2, $"Upsert EquipmentSpec {spec.Id} success");
+                    return new(2, $"Upsert EquipmentSpec success");
                 }
                 catch (Exception e)
                 {
-                    return new(4, $"Upsert EquipmentSpec {spec.Id} fail({e.Message})");
+                    return new(4, $"Upsert EquipmentSpec fail({e.Message})");
                 }
             }
         }

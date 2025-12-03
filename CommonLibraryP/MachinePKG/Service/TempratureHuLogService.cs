@@ -71,5 +71,49 @@ namespace CommonLibraryP.MachinePKG.Service
                 .OrderBy(log => log.CreateDate)
                 .ToListAsync();
         }
+
+        // 取得每個設備的最新一筆記錄（優化效能）
+        public async Task<List<temprature_Hu_log>> GetLatestLogsByAllMachinesAsync()
+        {
+            // 優化：查詢最近 7 天的資料，但限制總筆數以避免載入過多資料
+            var recentDate = DateTime.Now.AddDays(-7);
+            
+            // 載入最近 7 天的記錄，按時間倒序排列，限制最多 10000 筆
+            // 這樣可以確保取得最新的記錄，同時避免載入過多資料
+            var recentLogs = await _db.temprature_Hu_logs
+                .AsNoTracking()
+                .Where(log => log.CreateDate >= recentDate)
+                .OrderByDescending(log => log.CreateDate)
+                .Take(10000) // 限制最多 10000 筆，避免載入過多資料
+                .ToListAsync();
+
+            // 如果最近 7 天沒有資料，嘗試查詢所有記錄（不限時間，但限制筆數）
+            if (!recentLogs.Any())
+            {
+                recentLogs = await _db.temprature_Hu_logs
+                    .AsNoTracking()
+                    .OrderByDescending(log => log.CreateDate)
+                    .Take(10000) // 限制最多 10000 筆
+                    .ToListAsync();
+            }
+
+            // 在記憶體中分組並取得每個設備的最新記錄
+            // 因為已經 OrderByDescending，所以每個組的 First 就是最新的
+            return recentLogs
+                .GroupBy(log => log.MachineNumber)
+                .Select(g => g.First()) // 因為已經 OrderByDescending，所以 First 就是最新的
+                .ToList();
+        }
+
+        // 取得最新記錄的建立時間（用於顯示數據擷取時間）
+        public async Task<DateTime?> GetLatestCreateDateAsync()
+        {
+            return await _db.temprature_Hu_logs
+                .AsNoTracking()
+                .Where(log => (log.temperature ?? 0) != 0 && (log.humidity ?? 0) != 0)
+                .OrderByDescending(log => log.CreateDate)
+                .Select(log => log.CreateDate)
+                .FirstOrDefaultAsync();
+        }
     }
 }

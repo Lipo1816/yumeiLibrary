@@ -115,5 +115,31 @@ namespace CommonLibraryP.MachinePKG.Service
                 .Select(log => log.CreateDate)
                 .FirstOrDefaultAsync();
         }
+
+        // 取得最近記錄的原始列表（不分組，用於過濾全 0 數據）
+        public async Task<List<temprature_Hu_log>> GetRecentLogsRawAsync(int days = 7, int maxRecords = 10000)
+        {
+            var recentDate = DateTime.Now.AddDays(-days);
+            
+            // 載入最近 N 天的記錄，按時間倒序排列，限制最多 maxRecords 筆
+            var recentLogs = await _db.temprature_Hu_logs
+                .AsNoTracking()
+                .Where(log => log.CreateDate >= recentDate)
+                .OrderByDescending(log => log.CreateDate)
+                .Take(maxRecords)
+                .ToListAsync();
+
+            // 如果最近 N 天沒有資料，嘗試查詢所有記錄（不限時間，但限制筆數）
+            if (!recentLogs.Any())
+            {
+                recentLogs = await _db.temprature_Hu_logs
+                    .AsNoTracking()
+                    .OrderByDescending(log => log.CreateDate)
+                    .Take(maxRecords)
+                    .ToListAsync();
+            }
+
+            return recentLogs;
+        }
     }
 }

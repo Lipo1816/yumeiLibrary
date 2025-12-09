@@ -1,39 +1,47 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonLibraryP.MachinePKG.EFModel;
 
 namespace CommonLibraryP.MachinePKG.Service
 {
-    public class TagLimitCheckService : IDisposable
+    public class TagLimitCheckService : BackgroundService
     {
-        private readonly EquipmentSpecLimitService _limitService;
-        private readonly MachineService _machineService;
-        private readonly Timer _timer;
         private readonly ConcurrentDictionary<string, bool> _machineNormalDict = new();
         // 記錄每個機台+標籤的上一次警報狀態（避免重複寫入）
         private readonly ConcurrentDictionary<string, (bool IsAlarm, int? LogId)> _lastAlarmState = new();
         // 記錄每個 tag 最後發送郵件的時間（避免一小時內重複寄送）
         private readonly ConcurrentDictionary<string, DateTime> _lastEmailSentTime = new();
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(10);
+
         /// <summary>
         /// 取得所有機台的上下限狀態快取（key=機台編號, value=true:正常/false:有超限）
         /// </summary>
         public IReadOnlyDictionary<string, bool> MachineNormalDict => _machineNormalDict;
-        //public TagLimitCheckService(EquipmentSpecLimitService limitService, MachineService machineService)
-        //{
-        //    _limitService = limitService;
-        //    _machineService = machineService;
-        //    _timer = new Timer(async _ => await CheckAllAsync(), null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
-        //}
+
         public TagLimitCheckService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
-            _timer = new Timer(async _ => await CheckAllAsync(), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            // 立即執行第一次檢查
+            await CheckAllAsync(stoppingToken);
+
+            // 之後每 10 分鐘執行一次
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(_checkInterval, stoppingToken);
+                await CheckAllAsync(stoppingToken);
+            }
         }
         // 取得機台是否正常
         public bool IsMachineNormal(string machineCode)
@@ -42,8 +50,11 @@ namespace CommonLibraryP.MachinePKG.Service
         }
 
         // 主檢查邏輯
-        private async Task CheckAllAsync()
+        private async Task CheckAllAsync(CancellationToken cancellationToken = default)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             using var scope = _scopeFactory.CreateScope();
             var limitService = scope.ServiceProvider.GetRequiredService<EquipmentSpecLimitService>();
             var machineService = scope.ServiceProvider.GetRequiredService<MachineService>();
@@ -247,11 +258,6 @@ namespace CommonLibraryP.MachinePKG.Service
             sb.AppendLine("此為系統自動發送，請勿回覆。");
 
             return sb.ToString();
-        }
-
-        public void Dispose()
-        {
-            _timer?.Dispose();
         }
     }
 }

@@ -72,8 +72,8 @@ namespace CommonLibraryP.MachinePKG.Service
                 bool allNormal = true;
                 foreach (var tagLimit in group)
                 {
-                    // 3. 取得 tag 即時值
-                    var tag = await machineService.GetMachineTag(tagLimit.MachineCode, tagLimit.TagName);
+                    // 3. 取得 tag 即時值（從 EquipmentSpecs 和 ModbusTCPTags 查詢）
+                    var tag = await machineService.GetTagFromEquipmentSpecByMachineCode(tagLimit.MachineCode, tagLimit.TagName);
                     if (tag == null || tag.Value == null) continue;
 
                     if (tag.Value is IConvertible)

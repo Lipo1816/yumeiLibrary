@@ -632,6 +632,59 @@ namespace CommonLibraryP.MachinePKG
             return null;
         }
 
+        /// <summary>
+        /// 從 EquipmentSpecs 的機台編號查詢 ModbusTCPTag（包含即時值）
+        /// </summary>
+        public async Task<Tag?> GetTagFromEquipmentSpecByMachineCode(string machineCode, string tagName)
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+
+            // 1. 從 EquipmentSpecs 找到對應的機台資訊（使用機台編號或機台名稱）
+            var equipmentSpec = await db.EquipmentSpecs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.機台編號 == machineCode || x.機台名稱 == machineCode);
+
+            if (equipmentSpec == null)
+                return null;
+
+            // 2. 從 Machine 表找到對應的機台（使用機台編號或機台名稱匹配 Machine.Name）
+            // 優先使用機台編號，如果找不到再用機台名稱
+            var machine = await db.Machines
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => 
+                    m.Name == equipmentSpec.機台編號 || 
+                    m.Name == equipmentSpec.機台名稱);
+
+            if (machine == null || machine.TagCategoryId == null)
+                return null;
+
+            // 3. 從記憶體中的 Machine 取得 tag（這樣可以取得即時值）
+            var inMemoryMachine = await GetMachineByName(machine.Name);
+            if (inMemoryMachine != null && inMemoryMachine.hasCategory)
+            {
+                var tag = inMemoryMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
+                if (tag != null)
+                {
+                    // 如果需要即時更新，更新 tag 值
+                    if (!tag.UpdateByTime)
+                    {
+                        await inMemoryMachine.UpdateTag(tag);
+                    }
+                    return tag;
+                }
+            }
+
+            // 4. 如果記憶體中沒有，從資料庫查詢 ModbusTCPTags（但沒有即時值）
+            var dbTag = await db.ModbusTCPTags
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => 
+                    t.CategoryId == machine.TagCategoryId && 
+                    t.Name == tagName);
+
+            return dbTag;
+        }
+
         public async Task<List<Tag>> GetMachineTags(string machineName)
         {
             Machine? targetMachine = await GetMachineByName(machineName);

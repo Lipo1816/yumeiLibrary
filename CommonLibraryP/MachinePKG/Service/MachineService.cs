@@ -648,14 +648,15 @@ namespace CommonLibraryP.MachinePKG
             if (equipmentSpec == null)
                 return null;
 
-            // 2. 從 Machine 表找到對應的機台（使用機台編號或機台名稱匹配 Machine.Name）
-            // 優先使用機台編號，如果找不到再用機台名稱
+            // 2. 從 Machine 表找到對應的機台
+            // Machine.Name 對應的是 電控制箱編號，不是機台編號或機台名稱
+            //var machine = await db.Machines
+            //    .AsNoTracking()
+            //    .FirstOrDefaultAsync(m => m.Name == equipmentSpec.條件或格式);
+            var machineName = equipmentSpec.條件或格式?.Replace("\r", "").Replace("\n", "").Trim();
             var machine = await db.Machines
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => 
-                    m.Name == equipmentSpec.機台編號 || 
-                    m.Name == equipmentSpec.機台名稱);
-
+                .FirstOrDefaultAsync(m => m.Name == machineName);
             if (machine == null || machine.TagCategoryId == null)
                 return null;
 

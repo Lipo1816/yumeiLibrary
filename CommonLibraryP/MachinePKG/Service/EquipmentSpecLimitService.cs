@@ -190,7 +190,8 @@ namespace CommonLibraryP.MachinePKG.Service
                 {
                     MachineCode = x.機台編號,
                     MachineName = x.機台名稱,
-                    TagName = x.項目,
+                    // Tag Name 的命名原則：{機台編號}_{資訊項目}_{機台項目代碼}
+                    TagName = $"{x.機台編號}_{x.資訊項目}_{x.機台項目代碼}",
                     ItemDesript = x.機台項目說明,
                     UpperLimit = (double?)
                         (x.電壓上限 ?? x.電流上限 ?? x.頻率上限 ?? x.轉速上限 ?? x.水溫上限),

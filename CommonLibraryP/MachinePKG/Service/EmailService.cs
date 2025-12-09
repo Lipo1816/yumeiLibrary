@@ -1,9 +1,9 @@
-﻿using MailKit.Security;
-using MimeKit;
-using MailKit.Net.Smtp;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,28 +15,173 @@ namespace CommonLibraryP.MachinePKG.Service
         private readonly int _smtpPort;
         private readonly string _smtpUser;
         private readonly string _smtpPassword;
+        private readonly bool _enableSsl;
+        private readonly string _fromEmail;
 
-        public EmailService(string smtpServer, int smtpPort, string smtpUser, string smtpPassword)
+        public EmailService(string smtpServer, int smtpPort, string smtpUser, string smtpPassword, bool enableSsl = false, string? fromEmail = null)
         {
             _smtpServer = smtpServer;
             _smtpPort = smtpPort;
             _smtpUser = smtpUser;
             _smtpPassword = smtpPassword;
+            _enableSsl = enableSsl;
+            _fromEmail = fromEmail ?? smtpUser;
+        }
+
+        /// <summary>
+        /// 從配置文件創建 EmailService 實例
+        /// </summary>
+        public static EmailService CreateFromConfig()
+        {
+            var config = LoadConfigFromFile();
+            return new EmailService(
+                config.SmtpServer,
+                config.SmtpPort,
+                config.SmtpUser,
+                config.SmtpPassword,
+                config.EnableSsl,
+                config.FromEmail
+            );
+        }
+
+        /// <summary>
+        /// 從配置文件讀取 SMTP 設定參數
+        /// </summary>
+        public static EmailConfig LoadConfigFromFile()
+        {
+            var configPath = Path.Combine(AppContext.BaseDirectory, "UserConfig", "emailConfig.txt");
+            
+            // 預設值
+            var config = new EmailConfig
+            {
+                SmtpServer = "smtp.sinon.com.tw",
+                SmtpPort = 25,
+                SmtpUser = "yu.mes@yumeifarm.tw",
+                SmtpPassword = "SNS@0930",
+                EnableSsl = false,
+                FromEmail = "yu.mes@yumeifarm.tw"
+            };
+
+            if (!File.Exists(configPath))
+            {
+                // 如果設定檔不存在，使用預設值
+                return config;
+            }
+
+            try
+            {
+                var lines = File.ReadAllLines(configPath);
+                foreach (var line in lines)
+                {
+                    var parts = line.Split('=', 2);
+                    if (parts.Length != 2) continue;
+                    
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+                    
+                    switch (key)
+                    {
+                        case "SmtpServer":
+                            config.SmtpServer = value;
+                            break;
+                        case "SmtpPort":
+                            if (int.TryParse(value, out int port))
+                                config.SmtpPort = port;
+                            break;
+                        case "EmailUser":
+                            config.SmtpUser = value;
+                            break;
+                        case "EmailPassword":
+                            config.SmtpPassword = value;
+                            break;
+                        case "EnableSsl":
+                            if (bool.TryParse(value, out bool ssl))
+                                config.EnableSsl = ssl;
+                            break;
+                        case "FromEmail":
+                            config.FromEmail = value;
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果讀取失敗，使用預設值
+                // 可以考慮記錄日誌
+                Console.WriteLine($"讀取 Email 設定失敗：{ex.Message}");
+            }
+
+            return config;
         }
 
         public async Task SendEmailAsync(string fromName, string fromEmail, string toName, string toEmail, string subject, string body)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(fromName, fromEmail));
-            message.To.Add(new MailboxAddress(toName, toEmail));
-            message.Subject = subject;
-            message.Body = new TextPart("plain") { Text = body };
+            // 驗證必填欄位
+            if (string.IsNullOrWhiteSpace(_smtpServer))
+            {
+                throw new ArgumentException("SMTP 主機不能為空");
+            }
+            
+            if (string.IsNullOrWhiteSpace(_smtpUser))
+            {
+                throw new ArgumentException("使用者帳號不能為空");
+            }
+            
+            if (string.IsNullOrWhiteSpace(_smtpPassword))
+            {
+                throw new ArgumentException("密碼不能為空");
+            }
+            
+            if (string.IsNullOrWhiteSpace(toEmail))
+            {
+                throw new ArgumentException("收件者信箱不能為空");
+            }
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_smtpServer, _smtpPort, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_smtpUser, _smtpPassword);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            try
+            {
+                using var client = new SmtpClient(_smtpServer, _smtpPort);
+                client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+                client.EnableSsl = _enableSsl;
+                
+                var mail = new MailMessage();
+                mail.From = new MailAddress(string.IsNullOrWhiteSpace(fromEmail) ? _fromEmail : fromEmail, fromName);
+                mail.To.Add(new MailAddress(toEmail, toName));
+                mail.Subject = subject;
+                mail.SubjectEncoding = Encoding.UTF8;
+                mail.Body = body;
+                mail.BodyEncoding = Encoding.UTF8;
+                mail.IsBodyHtml = false;
+                
+                await Task.Run(() => client.Send(mail));
+                
+                mail.Dispose();
+            }
+            catch (SmtpException smtpEx)
+            {
+                var details = $"SMTP 錯誤 ({smtpEx.StatusCode}): {smtpEx.Message}";
+                if (smtpEx.InnerException != null)
+                {
+                    details += $" | 詳細訊息: {smtpEx.InnerException.Message}";
+                }
+                throw new Exception(details, smtpEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"寄信失敗：{ex.Message}", ex);
+            }
         }
+    }
+
+    /// <summary>
+    /// Email 配置類別
+    /// </summary>
+    public class EmailConfig
+    {
+        public string SmtpServer { get; set; } = "smtp.sinon.com.tw";
+        public int SmtpPort { get; set; } = 25;
+        public string SmtpUser { get; set; } = "yu.mes@yumeifarm.tw";
+        public string SmtpPassword { get; set; } = "SNS@0930";
+        public bool EnableSsl { get; set; } = false;
+        public string FromEmail { get; set; } = "yu.mes@yumeifarm.tw";
     }
 }

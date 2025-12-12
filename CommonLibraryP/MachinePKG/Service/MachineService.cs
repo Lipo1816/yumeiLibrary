@@ -1,14 +1,6 @@
 ﻿using CommonLibraryP.API;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using CommonLibraryP.Data;
-using System.Net;
-using static System.Formats.Asn1.AsnWriter;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CommonLibraryP.MachinePKG
 {
@@ -228,7 +220,7 @@ namespace CommonLibraryP.MachinePKG
         {
             //return Task.FromResult(machines.FirstOrDefault(x => x.Name == name));
 
-            return Task.FromResult(machines.FirstOrDefault(x =>x.Name.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)));
+            return Task.FromResult(machines.FirstOrDefault(x => x.Name.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)));
         }
         public Task<List<Machine>> GetAllMachines()
         {
@@ -653,7 +645,7 @@ namespace CommonLibraryP.MachinePKG
             //var machine = await db.Machines
             //    .AsNoTracking()
             //    .FirstOrDefaultAsync(m => m.Name == equipmentSpec.條件或格式);
-            var machineName = equipmentSpec.條件或格式?.Replace("\r", "").Replace("\n", "").Trim();
+            var machineName = equipmentSpec.電控制箱編號?.Replace("\r", "").Replace("\n", "").Trim();
             var machine = await db.Machines
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Name == machineName);
@@ -679,8 +671,8 @@ namespace CommonLibraryP.MachinePKG
             // 4. 如果記憶體中沒有，從資料庫查詢 ModbusTCPTags（但沒有即時值）
             var dbTag = await db.ModbusTCPTags
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => 
-                    t.CategoryId == machine.TagCategoryId && 
+                .FirstOrDefaultAsync(t =>
+                    t.CategoryId == machine.TagCategoryId &&
                     t.Name == tagName);
 
             return dbTag;

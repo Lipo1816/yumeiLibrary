@@ -192,14 +192,31 @@ namespace CommonLibraryP.MachinePKG.Service
                     return;
                 }
 
-                // 創建 EmailService 實例
-                var emailService = EmailService.CreateFromConfig();
+                // 創建 EmailService 實例（使用 try-catch 確保配置讀取失敗不會導致未處理異常）
+                EmailService? emailService = null;
+                try
+                {
+                    emailService = EmailService.CreateFromConfig();
+                }
+                catch (Exception configEx)
+                {
+                    Console.WriteLine($"建立 EmailService 失敗: {configEx.Message}");
+                    Console.WriteLine($"堆疊追蹤: {configEx.StackTrace}");
+                    return; // 無法建立 EmailService，直接返回
+                }
+
+                if (emailService == null)
+                {
+                    Console.WriteLine("EmailService 為 null，無法發送郵件");
+                    return;
+                }
 
                 // 構建郵件內容
                 var subject = $"設備警報通知 - {alarmLog.MachineName}";
                 var body = BuildAlarmEmailBody(alarmLog);
 
                 // 發送郵件給所有收件人
+                bool hasSuccess = false;
                 foreach (var recipient in recipients)
                 {
                     try
@@ -212,21 +229,42 @@ namespace CommonLibraryP.MachinePKG.Service
                             subject: subject,
                             body: body
                         );
+                        hasSuccess = true;
+                        Console.WriteLine($"警報郵件發送成功 (收件人: {recipient.Email})");
+                    }
+                    catch (System.Net.Mail.SmtpException smtpEx)
+                    {
+                        // 詳細記錄 SMTP 錯誤
+                        Console.WriteLine($"發送警報郵件失敗 (收件人: {recipient.Email}): SMTP 錯誤 - {smtpEx.Message}");
+                        if (smtpEx.InnerException != null)
+                        {
+                            Console.WriteLine($"內部錯誤: {smtpEx.InnerException.Message}");
+                        }
+                        Console.WriteLine($"堆疊追蹤: {smtpEx.StackTrace}");
                     }
                     catch (Exception ex)
                     {
                         // 記錄發送失敗，但不影響其他收件人
                         Console.WriteLine($"發送警報郵件失敗 (收件人: {recipient.Email}): {ex.Message}");
+                        Console.WriteLine($"堆疊追蹤: {ex.StackTrace}");
                     }
                 }
 
-                // 記錄發送時間
-                _lastEmailSentTime[alarmKey] = DateTime.Now;
+                // 只有在至少有一封郵件發送成功時，才記錄發送時間
+                if (hasSuccess)
+                {
+                    _lastEmailSentTime[alarmKey] = DateTime.Now;
+                }
             }
             catch (Exception ex)
             {
                 // 記錄錯誤，但不影響警報記錄
-                Console.WriteLine($"發送警報郵件時發生錯誤: {ex.Message}");
+                Console.WriteLine($"發送警報郵件時發生未預期的錯誤: {ex.Message}");
+                Console.WriteLine($"堆疊追蹤: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"內部錯誤: {ex.InnerException.Message}");
+                }
             }
         }
 

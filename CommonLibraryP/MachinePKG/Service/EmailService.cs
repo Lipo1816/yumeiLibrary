@@ -137,13 +137,17 @@ namespace CommonLibraryP.MachinePKG.Service
                 throw new ArgumentException("收件者信箱不能為空");
             }
 
+            SmtpClient? client = null;
+            MailMessage? mail = null;
+            
             try
             {
-                using var client = new SmtpClient(_smtpServer, _smtpPort);
+                client = new SmtpClient(_smtpServer, _smtpPort);
                 client.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
                 client.EnableSsl = _enableSsl;
+                client.Timeout = 30000; // 設定 30 秒超時
                 
-                var mail = new MailMessage();
+                mail = new MailMessage();
                 mail.From = new MailAddress(string.IsNullOrWhiteSpace(fromEmail) ? _fromEmail : fromEmail, fromName);
                 mail.To.Add(new MailAddress(toEmail, toName));
                 mail.Subject = subject;
@@ -152,9 +156,8 @@ namespace CommonLibraryP.MachinePKG.Service
                 mail.BodyEncoding = Encoding.UTF8;
                 mail.IsBodyHtml = false;
                 
-                await Task.Run(() => client.Send(mail));
-                
-                mail.Dispose();
+                // 使用 SendAsync 而不是 Task.Run，這樣更符合 async/await 模式
+                await client.SendMailAsync(mail);
             }
             catch (SmtpException smtpEx)
             {
@@ -163,11 +166,21 @@ namespace CommonLibraryP.MachinePKG.Service
                 {
                     details += $" | 詳細訊息: {smtpEx.InnerException.Message}";
                 }
+                // 記錄錯誤但不重新拋出，讓調用者決定如何處理
+                Console.WriteLine($"EmailService 發送郵件失敗: {details}");
                 throw new Exception(details, smtpEx);
             }
             catch (Exception ex)
             {
-                throw new Exception($"寄信失敗：{ex.Message}", ex);
+                var errorMsg = $"寄信失敗：{ex.Message}";
+                Console.WriteLine($"EmailService 發送郵件時發生錯誤: {errorMsg}");
+                throw new Exception(errorMsg, ex);
+            }
+            finally
+            {
+                // 確保資源被正確釋放
+                mail?.Dispose();
+                client?.Dispose();
             }
         }
     }

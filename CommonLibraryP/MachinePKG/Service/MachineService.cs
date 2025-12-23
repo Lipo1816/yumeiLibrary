@@ -608,7 +608,7 @@ namespace CommonLibraryP.MachinePKG
             Machine? targetMachine = await GetMachineByName(machineName);
             if (targetMachine != null)
             {
-                if (targetMachine.hasCategory)
+                if (targetMachine.hasCategory && targetMachine.TagCategory != null)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
                     if (targetTag != null)
@@ -654,7 +654,7 @@ namespace CommonLibraryP.MachinePKG
 
             // 3. 從記憶體中的 Machine 取得 tag（這樣可以取得即時值）
             var inMemoryMachine = await GetMachineByName(machine.Name);
-            if (inMemoryMachine != null && inMemoryMachine.hasCategory)
+            if (inMemoryMachine != null && inMemoryMachine.hasCategory && inMemoryMachine.TagCategory != null)
             {
                 var tag = inMemoryMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
                 if (tag != null)
@@ -681,7 +681,7 @@ namespace CommonLibraryP.MachinePKG
         public async Task<List<Tag>> GetMachineTags(string machineName)
         {
             Machine? targetMachine = await GetMachineByName(machineName);
-            if (targetMachine != null && targetMachine.hasCategory)
+            if (targetMachine != null && targetMachine.hasCategory && targetMachine.TagCategory != null)
             {
                 return targetMachine.TagCategory.Tags.ToList();
             }
@@ -693,7 +693,7 @@ namespace CommonLibraryP.MachinePKG
             Machine? targetMachine = GetMachineByID(machineId);
             if (targetMachine != null)
             {
-                if (targetMachine.hasCategory)
+                if (targetMachine.hasCategory && targetMachine.TagCategory != null)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Id == tagId);
                     if (targetTag != null)
@@ -716,7 +716,7 @@ namespace CommonLibraryP.MachinePKG
                 {
                     return new(4, $"Machine {machineName} status {targetMachine.StatusStr} is not avaulable now");
                 }
-                if (targetMachine.hasCategory)
+                if (targetMachine.hasCategory && targetMachine.TagCategory != null)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
                     if (targetTag != null)
@@ -748,7 +748,7 @@ namespace CommonLibraryP.MachinePKG
                 {
                     return new(4, $"Machine {machineName} status {targetMachine.StatusStr} is not avaulable now");
                 }
-                if (targetMachine.hasCategory)
+                if (targetMachine.hasCategory && targetMachine.TagCategory != null)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Name == tagName);
                     if (targetTag != null)
@@ -858,7 +858,7 @@ namespace CommonLibraryP.MachinePKG
             Machine? targetMachine = GetMachineByID(machineId);
             if (targetMachine != null)
             {
-                if (targetMachine.hasCategory)
+                if (targetMachine.hasCategory && targetMachine.TagCategory != null)
                 {
                     Tag? targetTag = targetMachine.TagCategory.Tags.FirstOrDefault(x => x.Id == tagId);
                     if (targetTag != null)

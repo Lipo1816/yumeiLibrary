@@ -116,6 +116,21 @@ namespace CommonLibraryP.MachinePKG.Service
 
         public async Task SendEmailAsync(string fromName, string fromEmail, string toName, string toEmail, string subject, string body)
         {
+            await SendEmailAsync(fromName, fromEmail, toName, toEmail, subject, body, null);
+        }
+
+        /// <summary>
+        /// 發送郵件（支援附件）
+        /// </summary>
+        /// <param name="fromName">寄件者名稱</param>
+        /// <param name="fromEmail">寄件者信箱</param>
+        /// <param name="toName">收件者名稱</param>
+        /// <param name="toEmail">收件者信箱</param>
+        /// <param name="subject">主旨</param>
+        /// <param name="body">內容</param>
+        /// <param name="attachments">附件檔案路徑列表（可為 null 或空列表）</param>
+        public async Task SendEmailAsync(string fromName, string fromEmail, string toName, string toEmail, string subject, string body, IEnumerable<string>? attachments)
+        {
             // 驗證必填欄位
             if (string.IsNullOrWhiteSpace(_smtpServer))
             {
@@ -139,6 +154,7 @@ namespace CommonLibraryP.MachinePKG.Service
 
             SmtpClient? client = null;
             MailMessage? mail = null;
+            List<Attachment>? attachmentList = null;
             
             try
             {
@@ -155,6 +171,34 @@ namespace CommonLibraryP.MachinePKG.Service
                 mail.Body = body;
                 mail.BodyEncoding = Encoding.UTF8;
                 mail.IsBodyHtml = false;
+                
+                // 添加附件
+                if (attachments != null && attachments.Any())
+                {
+                    attachmentList = new List<Attachment>();
+                    foreach (var attachmentPath in attachments)
+                    {
+                        if (string.IsNullOrWhiteSpace(attachmentPath))
+                            continue;
+                            
+                        if (!File.Exists(attachmentPath))
+                        {
+                            Console.WriteLine($"警告：附件檔案不存在，已跳過：{attachmentPath}");
+                            continue;
+                        }
+                        
+                        try
+                        {
+                            var attachment = new Attachment(attachmentPath);
+                            attachmentList.Add(attachment);
+                            mail.Attachments.Add(attachment);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"警告：無法添加附件 {attachmentPath}：{ex.Message}");
+                        }
+                    }
+                }
                 
                 // 使用 SendAsync 而不是 Task.Run，這樣更符合 async/await 模式
                 await client.SendMailAsync(mail);
@@ -179,6 +223,13 @@ namespace CommonLibraryP.MachinePKG.Service
             finally
             {
                 // 確保資源被正確釋放
+                if (attachmentList != null)
+                {
+                    foreach (var attachment in attachmentList)
+                    {
+                        attachment?.Dispose();
+                    }
+                }
                 mail?.Dispose();
                 client?.Dispose();
             }

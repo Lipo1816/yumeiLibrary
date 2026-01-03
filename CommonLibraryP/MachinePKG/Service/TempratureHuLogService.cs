@@ -10,15 +10,16 @@ namespace CommonLibraryP.MachinePKG.Service
 {
     public class TempratureHuLogService
     {
-        private readonly MachineDBContext _db;
+        private readonly IDbContextFactory<MachineDBContext> _dbFactory;
 
-        public TempratureHuLogService(MachineDBContext db)
+        public TempratureHuLogService(IDbContextFactory<MachineDBContext> dbFactory)
         {
-            _db = db;
+            _dbFactory = dbFactory;
         }
         public async Task<temprature_Hu_log?> GetLastLogByMachineNumber(string machineNumber)
         {
-            return await _db.temprature_Hu_logs
+            using var db = await _dbFactory.CreateDbContextAsync();
+            return await db.temprature_Hu_logs
                 .Where(x => x.MachineNumber == machineNumber)
                 .OrderByDescending(x => x.CreateDate)
                 .FirstOrDefaultAsync();
@@ -26,45 +27,49 @@ namespace CommonLibraryP.MachinePKG.Service
         // 取得全部
         public async Task<List<temprature_Hu_log>> GetAllAsync()
         {
-            return await _db.temprature_Hu_logs.AsNoTracking().ToListAsync();
+            using var db = await _dbFactory.CreateDbContextAsync();
+            return await db.temprature_Hu_logs.AsNoTracking().ToListAsync();
         }
 
         // 依 Id 取得單筆
         public async Task<temprature_Hu_log?> GetByIdAsync(int id)
         {
-            return await _db.temprature_Hu_logs.FindAsync(id);
+            using var db = await _dbFactory.CreateDbContextAsync();
+            return await db.temprature_Hu_logs.FindAsync(id);
         }
 
         // 新增或更新
         public async Task UpsertAsync(temprature_Hu_log item)
         {
+            using var db = await _dbFactory.CreateDbContextAsync();
             if (item.Id == 0)
             {
-                _db.temprature_Hu_logs.Add(item);
+                db.temprature_Hu_logs.Add(item);
             }
             else
             {
-                _db.temprature_Hu_logs.Update(item);
+                db.temprature_Hu_logs.Update(item);
             }
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         // 刪除
         public async Task DeleteAsync(int id)
         {
-            var entity = await _db.temprature_Hu_logs.FindAsync(id);
+            using var db = await _dbFactory.CreateDbContextAsync();
+            var entity = await db.temprature_Hu_logs.FindAsync(id);
             if (entity != null)
             {
-                _db.temprature_Hu_logs.Remove(entity);
-                await _db.SaveChangesAsync();
+                db.temprature_Hu_logs.Remove(entity);
+                await db.SaveChangesAsync();
             }
         }
 
 
         public async Task<List<temprature_Hu_log>> GetByMachineNumberAndDateRangeAsync(string machineNumber, DateTime start, DateTime end)
         {
-            // 假設你有注入 DbContext，名稱為 _db 或 context
-            return await _db.temprature_Hu_logs
+            using var db = await _dbFactory.CreateDbContextAsync();
+            return await db.temprature_Hu_logs
                 .Where(log => log.MachineNumber == machineNumber
                     && log.CreateDate >= start
                     && log.CreateDate <= end)
@@ -72,74 +77,92 @@ namespace CommonLibraryP.MachinePKG.Service
                 .ToListAsync();
         }
 
-        // 取得每個設備的最新一筆記錄（優化效能）
-        public async Task<List<temprature_Hu_log>> GetLatestLogsByAllMachinesAsync()
+        /// <summary>
+        /// 高效取得每個設備的最新一筆有效日誌（溫度或濕度不為0）
+        /// 使用資料庫層面的查詢，避免載入所有資料到記憶體
+        /// </summary>
+        public async Task<Dictionary<string, temprature_Hu_log>> GetLatestValidLogsByMachineNumbersAsync(IEnumerable<string> machineNumbers)
         {
-            // 優化：查詢最近 7 天的資料，但限制總筆數以避免載入過多資料
-            var recentDate = DateTime.Now.AddDays(-7);
+            using var db = await _dbFactory.CreateDbContextAsync();
             
-            // 載入最近 7 天的記錄，按時間倒序排列，限制最多 10000 筆
-            // 這樣可以確保取得最新的記錄，同時避免載入過多資料
-            var recentLogs = await _db.temprature_Hu_logs
-                .AsNoTracking()
-                .Where(log => log.CreateDate >= recentDate)
-                .OrderByDescending(log => log.CreateDate)
-                .Take(10000) // 限制最多 10000 筆，避免載入過多資料
+            var machineNumberList = machineNumbers.ToList();
+            if (!machineNumberList.Any())
+                return new Dictionary<string, temprature_Hu_log>();
+
+            // 先找出每個設備的最新 CreateDate
+            var latestDates = await db.temprature_Hu_logs
+                .Where(log => machineNumberList.Contains(log.MachineNumber) 
+                    && log.temperature.HasValue && log.temperature.Value != 0
+                    && log.humidity.HasValue && log.humidity.Value != 0)
+                .GroupBy(log => log.MachineNumber)
+                .Select(g => new { MachineNumber = g.Key, MaxDate = g.Max(x => x.CreateDate) })
                 .ToListAsync();
 
-            // 如果最近 7 天沒有資料，嘗試查詢所有記錄（不限時間，但限制筆數）
-            if (!recentLogs.Any())
+            if (!latestDates.Any())
+                return new Dictionary<string, temprature_Hu_log>();
+
+            // 根據最新日期取得對應的日誌
+            var result = new Dictionary<string, temprature_Hu_log>();
+            foreach (var item in latestDates)
             {
-                recentLogs = await _db.temprature_Hu_logs
-                    .AsNoTracking()
-                    .OrderByDescending(log => log.CreateDate)
-                    .Take(10000) // 限制最多 10000 筆
-                    .ToListAsync();
+                var log = await db.temprature_Hu_logs
+                    .Where(x => x.MachineNumber == item.MachineNumber 
+                        && x.CreateDate == item.MaxDate
+                        && x.temperature.HasValue && x.temperature.Value != 0
+                        && x.humidity.HasValue && x.humidity.Value != 0)
+                    .OrderByDescending(x => x.Id) // 如果有多筆相同時間，取最新的 ID
+                    .FirstOrDefaultAsync();
+                
+                if (log != null)
+                    result[item.MachineNumber] = log;
             }
 
-            // 在記憶體中分組並取得每個設備的最新記錄
-            // 因為已經 OrderByDescending，所以每個組的 First 就是最新的
-            return recentLogs
-                .GroupBy(log => log.MachineNumber)
-                .Select(g => g.First()) // 因為已經 OrderByDescending，所以 First 就是最新的
-                .ToList();
+            return result;
         }
 
-        // 取得最新記錄的建立時間（用於顯示數據擷取時間）
-        public async Task<DateTime?> GetLatestCreateDateAsync()
+        /// <summary>
+        /// 取得所有設備的最新一筆有效日誌（更高效的方法，使用單一查詢）
+        /// </summary>
+        public async Task<Dictionary<string, temprature_Hu_log>> GetLatestValidLogsForAllMachinesAsync()
         {
-            return await _db.temprature_Hu_logs
+            using var db = await _dbFactory.CreateDbContextAsync();
+            
+            // 使用子查詢找出每個設備的最新日誌 ID
+            var latestLogIds = await db.temprature_Hu_logs
+                .Where(log => log.temperature.HasValue && log.temperature.Value != 0
+                    && log.humidity.HasValue && log.humidity.Value != 0)
+                .GroupBy(log => log.MachineNumber)
+                .Select(g => new 
+                { 
+                    MachineNumber = g.Key, 
+                    MaxId = g.Max(x => x.Id) 
+                })
+                .ToListAsync();
+
+            if (!latestLogIds.Any())
+                return new Dictionary<string, temprature_Hu_log>();
+
+            var ids = latestLogIds.Select(x => x.MaxId).ToList();
+            var logs = await db.temprature_Hu_logs
+                .Where(log => ids.Contains(log.Id))
                 .AsNoTracking()
-                .Where(log => (log.temperature ?? 0) != 0 && (log.humidity ?? 0) != 0)
+                .ToListAsync();
+
+            return logs.ToDictionary(log => log.MachineNumber, log => log);
+        }
+
+        /// <summary>
+        /// 取得最新的有效日誌建立時間（用於顯示數據擷取時間）
+        /// </summary>
+        public async Task<DateTime?> GetLatestValidLogDateAsync()
+        {
+            using var db = await _dbFactory.CreateDbContextAsync();
+            return await db.temprature_Hu_logs
+                .Where(log => log.temperature.HasValue && log.temperature.Value != 0
+                    && log.humidity.HasValue && log.humidity.Value != 0)
                 .OrderByDescending(log => log.CreateDate)
                 .Select(log => log.CreateDate)
                 .FirstOrDefaultAsync();
-        }
-
-        // 取得最近記錄的原始列表（不分組，用於過濾全 0 數據）
-        public async Task<List<temprature_Hu_log>> GetRecentLogsRawAsync(int days = 7, int maxRecords = 10000)
-        {
-            var recentDate = DateTime.Now.AddDays(-days);
-            
-            // 載入最近 N 天的記錄，按時間倒序排列，限制最多 maxRecords 筆
-            var recentLogs = await _db.temprature_Hu_logs
-                .AsNoTracking()
-                .Where(log => log.CreateDate >= recentDate)
-                .OrderByDescending(log => log.CreateDate)
-                .Take(maxRecords)
-                .ToListAsync();
-
-            // 如果最近 N 天沒有資料，嘗試查詢所有記錄（不限時間，但限制筆數）
-            if (!recentLogs.Any())
-            {
-                recentLogs = await _db.temprature_Hu_logs
-                    .AsNoTracking()
-                    .OrderByDescending(log => log.CreateDate)
-                    .Take(maxRecords)
-                    .ToListAsync();
-            }
-
-            return recentLogs;
         }
     }
 }

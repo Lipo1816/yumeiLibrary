@@ -56,6 +56,8 @@ namespace CommonLibraryP.MachinePKG
         public DbSet<temprature_Hu> temprature_Hus { get; set; }
 
         public DbSet<TagRecordData> TagRecordDatas { get; set; }
+
+        public DbSet<IncompleteCategoryDescription> IncompleteCategoryDescriptions { get; set; }
         public DbSet<Inspection_WoItem> Inspection_WoItem { get; set; }
         public DbSet<BreakTimeSchedule> BreakTimeSchedules { get; set; }
 
@@ -315,6 +317,14 @@ namespace CommonLibraryP.MachinePKG
                 entity.Property(e => e.AlarmStatus).HasMaxLength(20).IsRequired();
                 entity.Property(e => e.Remarks).HasMaxLength(500).IsRequired(false);
                 entity.Property(e => e.AlarmTime).IsRequired();
+            });
+
+            modelBuilder.Entity<IncompleteCategoryDescription>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.ToTable("IncompleteCategoryDescriptions");
+                entity.Property(e => e.未完成類別).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.未完成說明).HasMaxLength(200).IsRequired();
             });
 
         }

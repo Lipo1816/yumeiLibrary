@@ -57,6 +57,12 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public string? 檢查錯誤 { get; set; }
         // 新增欄位：維修完成
         public bool? 維修完成 { get; set; }
+        // 新增欄位：維修完成日
+        public DateTime? 維修完成日 { get; set; }
+        // 新增欄位：未完成類別
+        public string? 未完成類別 { get; set; }
+        // 新增欄位：未完成說明
+        public string? 未完成說明 { get; set; }
 
     }
 

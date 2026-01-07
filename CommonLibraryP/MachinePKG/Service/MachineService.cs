@@ -310,9 +310,9 @@ namespace CommonLibraryP.MachinePKG
                     await dbContext.SaveChangesAsync();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
+                // 忽略錯誤，不記錄狀態變更
             }
         }
 

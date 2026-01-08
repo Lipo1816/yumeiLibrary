@@ -167,7 +167,15 @@ namespace CommonLibraryP.MachinePKG.Service
                     _logger.LogError(ex, "檢查點檢表產生時發生錯誤");
                 }
                 
-                await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken); // 每2分鐘檢查一次
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken); // 每2分鐘檢查一次
+                }
+                catch (OperationCanceledException)
+                {
+                    // 正常取消，不需要記錄錯誤
+                    break;
+                }
             }
         }
 

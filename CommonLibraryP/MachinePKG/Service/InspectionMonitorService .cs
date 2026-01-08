@@ -138,7 +138,7 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             else
             {
-                _logger.LogDebug($"尚未到達日檢時間。目前時間: {now:HH:mm:ss}，設定時間: {dailySetting.DailyTime.Value:HH:mm:ss}，時間差: {timeDiff:F1} 分鐘");
+                _logger.LogDebug($"尚未到達日檢時間。目前時間: {now:HH:mm:ss}，設定時間: {dailySetting.DailyTime.Value:hh\\:mm\\:ss}，時間差: {timeDiff:F1} 分鐘");
             }
             }
             catch (Exception ex)
@@ -270,7 +270,7 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             else
             {
-                _logger.LogDebug($"尚未到達周檢時間。目前: {currentDayName} {now:HH:mm:ss}，設定: {weeklySetting.WeeklyDay} {weeklySetting.WeeklyTime.Value:HH:mm:ss}");
+                _logger.LogDebug($"尚未到達周檢時間。目前: {currentDayName} {now:HH:mm:ss}，設定: {weeklySetting.WeeklyDay} {weeklySetting.WeeklyTime.Value:hh\\:mm\\:ss}");
             }
             }
             catch (Exception ex)
@@ -370,7 +370,7 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             else
             {
-                _logger.LogDebug($"尚未到達月檢時間。目前: {now.Day}日 {now:HH:mm:ss}，設定: {monthlySetting.MonthlyDay}日 {monthlySetting.MonthlyTime.Value:HH:mm:ss}");
+                _logger.LogDebug($"尚未到達月檢時間。目前: {now.Day}日 {now:HH:mm:ss}，設定: {monthlySetting.MonthlyDay}日 {monthlySetting.MonthlyTime.Value:hh\\:mm\\:ss}");
             }
             }
             catch (Exception ex)
@@ -468,7 +468,7 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             else
             {
-                _logger.LogDebug($"尚未到達季檢時間。目前: 第{monthInQuarter}個月 {now.Day}日 {now:HH:mm:ss}，設定: 第{quarterlySetting.QuarterMonth}個月 {quarterlySetting.QuarterDay}日 {quarterlySetting.QuarterTime.Value:HH:mm:ss}");
+                _logger.LogDebug($"尚未到達季檢時間。目前: 第{monthInQuarter}個月 {now.Day}日 {now:HH:mm:ss}，設定: 第{quarterlySetting.QuarterMonth}個月 {quarterlySetting.QuarterDay}日 {quarterlySetting.QuarterTime.Value:hh\\:mm\\:ss}");
             }
             }
             catch (Exception ex)
@@ -563,7 +563,7 @@ namespace CommonLibraryP.MachinePKG.Service
             }
             else
             {
-                _logger.LogDebug($"尚未到達年檢時間。目前: {now.Month}月{now.Day}日 {now:HH:mm:ss}，設定: {yearlySetting.YearMonth}月{yearlySetting.YearDay}日 {yearlySetting.YearTime.Value:HH:mm:ss}");
+                _logger.LogDebug($"尚未到達年檢時間。目前: {now.Month}月{now.Day}日 {now:HH:mm:ss}，設定: {yearlySetting.YearMonth}月{yearlySetting.YearDay}日 {yearlySetting.YearTime.Value:hh\\:mm\\:ss}");
             }
             }
             catch (Exception ex)

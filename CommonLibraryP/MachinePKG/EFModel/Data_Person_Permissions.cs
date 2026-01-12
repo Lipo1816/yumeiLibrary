@@ -24,6 +24,7 @@ namespace CommonLibraryP.MachinePKG.EFModel
         public string 人員 { get; set; } = "0";
         public string 資料分析 { get; set; } = "0";
         public string 資料設定 { get; set; } = "0";
+        public string 管理設定 { get; set; } = "0";
         public string 人員姓名 { get; set; } = string.Empty;
         public string 生產組名 { get; set; } = string.Empty;
     }

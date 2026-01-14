@@ -58,13 +58,24 @@ namespace CommonLibraryP.MachinePKG
                 try
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
-                    var target = dbContext.EquipmentSpecs.FirstOrDefault(x =>
-                        x.機台編號 == spec.機台編號 &&
-                        x.資訊項目 == spec.資訊項目 &&
-                        x.機台項目說明 == spec.機台項目說明 &&
-                        x.PLC_XY位址 == spec.PLC_XY位址
-                    );
-
+                    EquipmentSpec? target = null;
+                    
+                    // 先嘗試用 Id 查找（如果 Id > 0）
+                    if (spec.Id > 0)
+                    {
+                        target = await dbContext.EquipmentSpecs.FirstOrDefaultAsync(x => x.Id == spec.Id);
+                    }
+                    
+                    // 如果用 Id 找不到，或 Id 為 0，則用業務鍵查找
+                    if (target == null)
+                    {
+                        target = await dbContext.EquipmentSpecs.FirstOrDefaultAsync(x =>
+                            x.機台編號 == spec.機台編號 &&
+                            x.資訊項目 == spec.資訊項目 &&
+                            x.機台項目說明 == spec.機台項目說明 &&
+                            x.PLC_XY位址 == spec.PLC_XY位址
+                        );
+                    }
 
                     bool exist = target is not null;
                     if (exist)

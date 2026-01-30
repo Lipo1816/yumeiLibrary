@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,7 +15,8 @@ namespace CommonLibraryP.MachinePKG.EFModel
         [Required]
         public string 人員ID { get; set; } = "";
 
-        public bool ischoose { get; set; }
+        /// <summary>允許 DB 為 NULL，避免讀取時拋出 SqlNullValueException</summary>
+        public bool? ischoose { get; set; }
 
         public DateTime? 建立時間 { get; set; }
 

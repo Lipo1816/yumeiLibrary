@@ -15,6 +15,9 @@ namespace CommonLibraryP.MachinePKG.Service
 
         public async Task AddAsync(EmailSentSetting setting)
         {
+            if (setting == null || string.IsNullOrWhiteSpace(setting.人員ID))
+                return;
+
             // 確保寫入資料時不會留下 Null，避免後續讀取拋出 SqlNullValueException
             setting.生產 ??= false;
             setting.品管 ??= false;
@@ -27,10 +30,12 @@ namespace CommonLibraryP.MachinePKG.Service
         }
         public async Task<EmailSentSetting?> GetByIdAsync(string 人員ID)
         {
-            // 直接用人員 ID 查找，並將可能為 Null 的欄位帶預設值，防止資料異常導致 Blazor 斷線
+            var trimmed = (人員ID ?? "").Trim();
+            if (string.IsNullOrEmpty(trimmed)) return null;
+            // 以 Trim 後比對，避免 人員ID 含前後空白時查不到既有記錄
             return await _db.EmailSentSettings
                 .AsNoTracking()
-                .Where(x => x.人員ID == 人員ID)
+                .Where(x => x.人員ID != null && x.人員ID.Trim() == trimmed)
                 .Select(x => new EmailSentSetting
                 {
                     Id = EF.Property<int?>(x, nameof(EmailSentSetting.Id)) ?? 0,
@@ -53,11 +58,11 @@ namespace CommonLibraryP.MachinePKG.Service
                     .SetProperty(e => e.建立時間, DateTime.Now));
         }
 
-        /// <summary>依人員ID更新，不載入實體，避免 DB 欄位為 NULL 時實體化拋出 SqlNullValueException。</summary>
+        /// <summary>依人員ID更新，不載入實體，避免 DB 欄位為 NULL 時實體化拋出 SqlNullValueException。以 Trim 後比對，避免 人員ID 含前後空白時漏更新。</summary>
         public async Task UpdateAsync(EmailSentSetting setting)
         {
-            var 人員ID = setting.人員ID ?? "";
-            if (string.IsNullOrWhiteSpace(人員ID)) return;
+            var 人員ID = (setting.人員ID ?? "").Trim();
+            if (string.IsNullOrEmpty(人員ID)) return;
 
             var ischoose = setting.ischoose ?? false;
             var 生產 = setting.生產 ?? false;
@@ -67,7 +72,7 @@ namespace CommonLibraryP.MachinePKG.Service
             var 建立時間 = setting.建立時間 ?? DateTime.Now;
 
             await _db.EmailSentSettings
-                .Where(x => x.人員ID == 人員ID)
+                .Where(x => x.人員ID != null && x.人員ID.Trim() == 人員ID)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(e => e.ischoose, ischoose)
                     .SetProperty(e => e.生產, 生產)

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -129,6 +129,38 @@ namespace CommonLibraryP.MachinePKG.Service
                 catch (Exception e)
                 {
                     return new(4, $"Upsert Personnal {p.人員ID} fail({e.Message})");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 刪除不在指定清單中的人員（用於 Excel 完全取代匯入）。
+        /// 會排除 reservedIds（如 aric、lipo、lipo1）不被刪除。
+        /// </summary>
+        public async Task<RequestResult> DeletePersonnalsNotInList(IEnumerable<string> keepIds, IEnumerable<string> reservedIds)
+        {
+            using (var scope = scopeFactory.CreateScope())
+            {
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
+                    var keepSet = new HashSet<string>(keepIds.Select(x => x?.Trim() ?? "").Where(x => !string.IsNullOrEmpty(x)), StringComparer.OrdinalIgnoreCase);
+                    var reservedSet = new HashSet<string>(reservedIds.Select(x => x?.Trim() ?? "").Where(x => !string.IsNullOrEmpty(x)), StringComparer.OrdinalIgnoreCase);
+
+                    var toDelete = dbContext.Personnal
+                        .Where(p => p.人員ID != null && !keepSet.Contains(p.人員ID) && !reservedSet.Contains(p.人員ID))
+                        .ToList();
+                    var count = toDelete.Count;
+                    if (count > 0)
+                    {
+                        dbContext.Personnal.RemoveRange(toDelete);
+                        await dbContext.SaveChangesAsync();
+                    }
+                    return new(2, $"DeletePersonnalsNotInList: removed {count} record(s)");
+                }
+                catch (Exception e)
+                {
+                    return new(4, $"DeletePersonnalsNotInList fail({e.Message})");
                 }
             }
         }

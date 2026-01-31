@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Concurrent;
@@ -161,20 +161,13 @@ namespace CommonLibraryP.MachinePKG.Service
                     return;
                 }
 
-                // TODO: 測試用 - 使用固定測試郵件地址
-                // 正式環境時，請改回從資料庫查詢收件人列表
-                var testRecipient = new { 人員姓名 = "測試收件人", Email = "lipo.lee@tm-robot.com" };
-                var recipients = new List<dynamic> { testRecipient };
-
-                // 正式環境的收件人查詢邏輯（暫時註解）
-                /*
-                // 取得收件人列表（設備警報設定為 true 的人員）
+                // 取得收件人列表（資料設定 - 郵件收件人名單中「設備」勾選為 true 的人員）
                 var emailSentSettingService = scope.ServiceProvider.GetRequiredService<EmailSentSettingService>();
                 var personnalService = scope.ServiceProvider.GetRequiredService<PersonnalService>();
-                
+
                 var emailSettings = await emailSentSettingService.GetAllAsync();
                 var allPersonnals = await personnalService.GetAllAsync();
-                
+
                 // 找出設備警報設定為 true 且 Email 不為空的人員
                 var recipients = emailSettings
                     .Where(s => s.設備 == true)
@@ -184,11 +177,11 @@ namespace CommonLibraryP.MachinePKG.Service
                         (setting, person) => new { person.人員姓名, person.Email })
                     .Where(x => !string.IsNullOrWhiteSpace(x.Email))
                     .ToList();
-                */
 
                 if (!recipients.Any())
                 {
                     // 沒有收件人，跳過
+                    Console.WriteLine($"設備警報：機台 {alarmLog.MachineName} 無收件人（請於「資料設定-郵件收件人名單」勾選「設備」），跳過發送郵件");
                     return;
                 }
 

@@ -1,4 +1,4 @@
-﻿using CommonLibraryP.MachinePKG.EFModel;
+using CommonLibraryP.MachinePKG.EFModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommonLibraryP.MachinePKG.Service
@@ -270,13 +270,16 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                 }
 
                 var groups = inspections.GroupBy(x => x.機台編號);
+                // 季：1-3月=Q1, 4-6月=Q2, 7-9月=Q3, 10-12月=Q4
+                int quarter = (now.Month - 1) / 3 + 1;
+                // 月/季/年使用「週期內穩定」的單號前綴，同一週期手動補產生才不會重複寫入
                 string checknumber = type switch
                 {
                     "Daily" => "DI_" + now.ToString("yyyyMMddHH") + "_",
                     "Weekly" => "WI_" + now.ToString("yyyyMMddHH") + "_",
-                    "Monthly" => "MI_" + now.ToString("yyyyMMddHH") + "_",
-                    "Quarterly" => "QI_" + now.ToString("yyyyMMddHH") + "_",
-                    "Yearly" => "YI_" + now.ToString("yyyyMMddHH") + "_",
+                    "Monthly" => "MI_" + now.ToString("yyyyMM") + "_",
+                    "Quarterly" => "QI_" + now.ToString("yyyy") + "Q" + quarter + "_",
+                    "Yearly" => "YI_" + now.ToString("yyyy") + "_",
                     _ => ""
                 };
 
@@ -313,12 +316,21 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                             l.產生時間.Month == now.Month &&
                             l.TYPE == type);
                     }
-                    else if (type == "Quarterly" || type == "Yearly")
+                    else if (type == "Quarterly")
                     {
+                        // 季檢：同一機台、同一年、同一季（1-3/4-6/7-9/10-12）只產生一筆
+                        int q = (now.Month - 1) / 3 + 1;
+                        var existingQ = await _context.InspectionLists
+                            .Where(l => l.機台編號 == group.Key && l.產生時間.Year == now.Year && l.TYPE == type)
+                            .ToListAsync();
+                        alreadyExists = existingQ.Any(l => (l.產生時間.Month - 1) / 3 + 1 == q);
+                    }
+                    else if (type == "Yearly")
+                    {
+                        // 年檢：同一機台、同一年只產生一筆（不依月份判斷，否則 2/1 會誤判為未產生）
                         alreadyExists = await _context.InspectionLists.AnyAsync(l =>
                             l.機台編號 == group.Key &&
                             l.產生時間.Year == now.Year &&
-                            l.產生時間.Month == now.Month &&
                             l.TYPE == type);
                     }
 
@@ -349,14 +361,32 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                             exists = existingRecords.Any(r =>
                                 cal.GetWeekOfYear(r.產生時間, weekRule, DayOfWeek.Monday) == thisWeek);
                         }
-                        else if (type == "Monthly" || type == "Quarterly" || type == "Yearly")
+                        else if (type == "Monthly")
                         {
                             exists = await _context.InspectionRecords.AnyAsync(r =>
                                 r.機台編號 == item.機台編號 &&
                                 r.項目 == item.項目 &&
-                                r.檢查單號 == checknumber + item.機台編號 &&
+                                r.檢查單號 != null && r.檢查單號.StartsWith("MI_") &&
                                 r.產生時間.Year == now.Year &&
                                 r.產生時間.Month == now.Month);
+                        }
+                        else if (type == "Quarterly")
+                        {
+                            int q = (now.Month - 1) / 3 + 1;
+                            var existingRecs = await _context.InspectionRecords
+                                .Where(r => r.機台編號 == item.機台編號 && r.項目 == item.項目 &&
+                                            r.檢查單號 != null && r.檢查單號.StartsWith("QI_") &&
+                                            r.產生時間.Year == now.Year)
+                                .ToListAsync();
+                            exists = existingRecs.Any(r => (r.產生時間.Month - 1) / 3 + 1 == q);
+                        }
+                        else if (type == "Yearly")
+                        {
+                            exists = await _context.InspectionRecords.AnyAsync(r =>
+                                r.機台編號 == item.機台編號 &&
+                                r.項目 == item.項目 &&
+                                r.檢查單號 != null && r.檢查單號.StartsWith("YI_") &&
+                                r.產生時間.Year == now.Year);
                         }
 
                         if (exists) continue;
@@ -405,9 +435,16 @@ public async Task<List<InspectionList>> GetAllInspectionListsAsync()
                     return (true, $"所有 {type} 點檢表已存在，無需補產生", 0);
                 }
             }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+            {
+                // 顯示內部例外（如：唯一鍵衝突、NOT NULL 違反等）以便除錯
+                var innerMsg = dbEx.InnerException?.Message ?? dbEx.Message;
+                return (false, $"補產生點檢表時發生錯誤: {innerMsg}", 0);
+            }
             catch (Exception ex)
             {
-                return (false, $"補產生點檢表時發生錯誤: {ex.Message}", 0);
+                var innerMsg = ex.InnerException != null ? $"{ex.Message} | 詳細: {ex.InnerException.Message}" : ex.Message;
+                return (false, $"補產生點檢表時發生錯誤: {innerMsg}", 0);
             }
         }
     }

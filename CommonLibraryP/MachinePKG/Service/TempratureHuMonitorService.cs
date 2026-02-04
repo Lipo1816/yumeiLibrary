@@ -1,4 +1,4 @@
-﻿using CommonLibraryP.MachinePKG.EFModel;
+using CommonLibraryP.MachinePKG.EFModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -153,8 +153,8 @@ namespace CommonLibraryP.MachinePKG.Service
                 string alarmKey = device.MachineNumber;
                 var lastState = _lastAlarmState.GetValueOrDefault(alarmKey, (HasAlarm: false, AlarmType: ""));
 
-                // 如果產生新警報且與上次狀態不同，則發送郵件
-                if (hasAlarm && (!lastState.HasAlarm || lastState.AlarmType != alarmType))
+                // 有警報就嘗試發送郵件（同一設備 1 小時內只寄一次，由 SendAlarmEmailIfNeededAsync 內節流；同一類型超過 1 小時也會再報）
+                if (hasAlarm)
                 {
                     await SendAlarmEmailIfNeededAsync(scope, device, temperature, humidity, alarmMessages, alarmKey);
                     _lastAlarmState[alarmKey] = (HasAlarm: true, AlarmType: alarmType);

@@ -84,7 +84,7 @@ namespace CommonLibraryP.MachinePKG.Service
         public async Task<Dictionary<string, temprature_Hu_log>> GetLatestValidLogsByMachineNumbersAsync(IEnumerable<string> machineNumbers)
         {
             using var db = await _dbFactory.CreateDbContextAsync();
-            
+            //////// 轉成清單以便多次使用
             var machineNumberList = machineNumbers.ToList();
             if (!machineNumberList.Any())
                 return new Dictionary<string, temprature_Hu_log>();

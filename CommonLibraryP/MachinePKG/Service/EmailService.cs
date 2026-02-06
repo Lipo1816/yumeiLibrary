@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -170,7 +170,19 @@ namespace CommonLibraryP.MachinePKG.Service
                 mail.SubjectEncoding = Encoding.UTF8;
                 mail.Body = body;
                 mail.BodyEncoding = Encoding.UTF8;
-                mail.IsBodyHtml = false;
+
+                // 如果內容看起來是 HTML，則以 HTML 格式寄出，否則維持純文字
+                // 目前溫溼度警報與恢復通知會使用 <html>…</html> 結構
+                if (!string.IsNullOrWhiteSpace(body) &&
+                    body.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    body.IndexOf("</html>", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    mail.IsBodyHtml = true;
+                }
+                else
+                {
+                    mail.IsBodyHtml = false;
+                }
                 
                 // 添加附件
                 if (attachments != null && attachments.Any())

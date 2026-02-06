@@ -84,7 +84,7 @@ namespace CommonLibraryP.MachinePKG.Service
         public async Task<Dictionary<string, temprature_Hu_log>> GetLatestValidLogsByMachineNumbersAsync(IEnumerable<string> machineNumbers)
         {
             using var db = await _dbFactory.CreateDbContextAsync();
-            
+            //////// 轉成清單以便多次使用
             var machineNumberList = machineNumbers.ToList();
             if (!machineNumberList.Any())
                 return new Dictionary<string, temprature_Hu_log>();
@@ -116,7 +116,7 @@ namespace CommonLibraryP.MachinePKG.Service
                 if (log != null)
                     result[item.MachineNumber] = log;
             }
-
+            ///// 上面的方法會對每個設備執行一次查詢，對於大量設備可能效率不佳，可以改為一次查詢取得所有最新日誌，再在記憶體中過濾
             return result;
         }
 

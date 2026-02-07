@@ -195,7 +195,7 @@ namespace CommonLibraryP.MachinePKG.Service
                             
                         if (!File.Exists(attachmentPath))
                         {
-                            Console.WriteLine($"警告：附件檔案不存在，已跳過：{attachmentPath}");
+                            Console.WriteLine($"警告! 附件檔案不存在，已跳過：{attachmentPath}");
                             continue;
                         }
                         
@@ -207,7 +207,7 @@ namespace CommonLibraryP.MachinePKG.Service
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"警告：無法添加附件 {attachmentPath}：{ex.Message}");
+                            Console.WriteLine($"警告! 無法添加附件 {attachmentPath}：{ex.Message}");
                         }
                     }
                 }

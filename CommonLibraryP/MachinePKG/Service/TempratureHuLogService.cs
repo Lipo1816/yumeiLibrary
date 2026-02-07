@@ -101,7 +101,7 @@ namespace CommonLibraryP.MachinePKG.Service
             if (!latestDates.Any())
                 return new Dictionary<string, temprature_Hu_log>();
 
-            // 根據最新日期取得對應的日誌
+            // 根據最新日期取得對應的日誌//
             var result = new Dictionary<string, temprature_Hu_log>();
             foreach (var item in latestDates)
             {

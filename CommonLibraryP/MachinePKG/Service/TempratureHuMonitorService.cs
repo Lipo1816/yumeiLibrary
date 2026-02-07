@@ -390,9 +390,9 @@ namespace CommonLibraryP.MachinePKG.Service
             }
 
             sb.AppendLine("<br/>");
-            sb.AppendLine($"<div>警報時間: {DateTime.Now:yyyy-MM-dd HH:mm:ss}</div>");
+            sb.AppendLine($"<div><警報時間:> {DateTime.Now:yyyy-MM-dd HH:mm:ss}</div>");
             sb.AppendLine("<br/>");
-            sb.AppendLine("<div>請儘快處理此警報。</div>");
+            sb.AppendLine("<div><請儘快處理此警報!></div>");
             sb.AppendLine("<br/>");
             sb.AppendLine("<div>此為系統自動發送，請勿回覆。</div>");
             sb.AppendLine("</body></html>");

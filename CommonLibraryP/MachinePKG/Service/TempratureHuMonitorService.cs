@@ -200,6 +200,8 @@ namespace CommonLibraryP.MachinePKG.Service
                         person => person.人員ID,
                         (setting, person) => new { person.人員姓名, person.Email })
                     .Where(x => !string.IsNullOrWhiteSpace(x.Email))
+                    .GroupBy(x => (x.Email ?? "").Trim().ToUpperInvariant())
+                    .Select(g => g.First())
                     .ToList();
 
                 if (!recipients.Any())
@@ -370,6 +372,8 @@ namespace CommonLibraryP.MachinePKG.Service
                         person => person.人員ID,
                         (setting, person) => new { person.人員姓名, person.Email })
                     .Where(x => !string.IsNullOrWhiteSpace(x.Email))
+                    .GroupBy(x => (x.Email ?? "").Trim().ToUpperInvariant())
+                    .Select(g => g.First())
                     .ToList();
 
                 if (!recipients.Any())

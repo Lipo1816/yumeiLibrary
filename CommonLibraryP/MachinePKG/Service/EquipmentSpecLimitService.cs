@@ -25,8 +25,37 @@ namespace CommonLibraryP.MachinePKG.Service
             using var scope = scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
 
-            return await db.EquipmentSpecLimits
+            // 1️⃣ 先用原本的精確條件查詢（機台編號 + 機台項目說明）
+            var limit = await db.EquipmentSpecLimits
                 .FirstOrDefaultAsync(x => x.機台編號 == machineCode && x.機台項目說明 == itemDescription);
+
+            if (limit != null)
+                return limit;
+
+            // 2️⃣ 如果找不到，做一次「容錯」查詢
+            // 情境：資料被污染，機台項目說明被寫成 "0" 等，但水溫/電流/轉速/頻率上下限仍存在
+            // 這裡依照說明1 的關鍵字與欄位是否有上下限值來做備援匹配
+
+            // 水溫 / 溫度
+            var desc = itemDescription?.Trim() ?? string.Empty;
+            bool isWaterTemp = desc.Contains("水溫") || desc.Contains("溫度");
+
+            if (isWaterTemp)
+            {
+                limit = await db.EquipmentSpecLimits
+                    .Where(x =>
+                        x.機台編號 == machineCode &&
+                        x.水溫上限 != null && x.水溫下限 != null)
+                    .OrderByDescending(x => x.Id) // 取最新的設定
+                    .FirstOrDefaultAsync();
+
+                if (limit != null)
+                    return limit;
+            }
+
+            // 其他型別（電流 / 轉速 / 頻率）若未來有類似問題，可在此依需求擴充
+
+            return null;
         }
 
         // 取得所有資料

@@ -19,24 +19,32 @@ namespace CommonLibraryP.MachinePKG.Service
             this.scopeFactory = scopeFactory;
         }
 
-        public async Task<EquipmentSpecLimit?> GetLimitAsync(string machineCode, string itemDescription)
+        /// <summary>
+        /// 取得對應的上下限設定。先以 機台編號+機台項目說明 精確查詢；找不到時可依 infoItem 用 機台編號+資訊項目 備援查詢（例如 A5 IN-GCM2/IN-FAN2 電流）。
+        /// </summary>
+        public async Task<EquipmentSpecLimit?> GetLimitAsync(string machineCode, string itemDescription, string? infoItem = null)
         {
-            // 假設您有一個資料庫上下文 dbContext
             using var scope = scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MachineDBContext>();
 
-            // 1️⃣ 先用原本的精確條件查詢（機台編號 + 機台項目說明）
+            // 1️⃣ 先用精確條件查詢（機台編號 + 機台項目說明）
             var limit = await db.EquipmentSpecLimits
                 .FirstOrDefaultAsync(x => x.機台編號 == machineCode && x.機台項目說明 == itemDescription);
 
             if (limit != null)
                 return limit;
 
-            // 2️⃣ 如果找不到，做一次「容錯」查詢
-            // 情境：資料被污染，機台項目說明被寫成 "0" 等，但水溫/電流/轉速/頻率上下限仍存在
-            // 這裡依照說明1 的關鍵字與欄位是否有上下限值來做備援匹配
+            // 2️⃣ 若有傳入 資訊項目，用 機台編號 + 資訊項目 備援查詢（同一機台不同測點如 IN-GCM2 / IN-FAN2 可正確對應）
+            if (!string.IsNullOrWhiteSpace(infoItem))
+            {
+                limit = await db.EquipmentSpecLimits
+                    .FirstOrDefaultAsync(x => x.機台編號 == machineCode && x.資訊項目 == infoItem);
 
-            // 水溫 / 溫度
+                if (limit != null)
+                    return limit;
+            }
+
+            // 3️⃣ 水溫容錯：機台項目說明被寫成 "0" 等，但水溫上下限仍存在
             var desc = itemDescription?.Trim() ?? string.Empty;
             bool isWaterTemp = desc.Contains("水溫") || desc.Contains("溫度");
 
@@ -46,14 +54,12 @@ namespace CommonLibraryP.MachinePKG.Service
                     .Where(x =>
                         x.機台編號 == machineCode &&
                         x.水溫上限 != null && x.水溫下限 != null)
-                    .OrderByDescending(x => x.Id) // 取最新的設定
+                    .OrderByDescending(x => x.Id)
                     .FirstOrDefaultAsync();
 
                 if (limit != null)
                     return limit;
             }
-
-            // 其他型別（電流 / 轉速 / 頻率）若未來有類似問題，可在此依需求擴充
 
             return null;
         }

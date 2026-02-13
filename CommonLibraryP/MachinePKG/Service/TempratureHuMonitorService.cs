@@ -185,6 +185,14 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             try
             {
+                // 僅在 07:00~17:00 間發送溫溼度警報 mail，其餘時間不寄出（仍照常更新狀態與記錄 FirstAlarmTime）
+                var now = DateTime.Now;
+                if (now.Hour < 7 || now.Hour >= 17)
+                {
+                    LogAlarmEmail("INFO", device.MachineName, alarmKey, $"目前時間 {now:HH:mm} 不在發送時段(07:00-17:00)，略過警報郵件發送。");
+                    return;
+                }
+
                 var lastSentTime = _lastEmailSentTime.GetValueOrDefault(alarmKey, DateTime.MinValue);
                 if (DateTime.Now - lastSentTime < TimeSpan.FromHours(1))
                     return;
@@ -232,7 +240,6 @@ namespace CommonLibraryP.MachinePKG.Service
 
                 LogAlarmEmail("INFO", device.MachineName, alarmKey, $"嘗試發送警報 mail，收件人數: {recipients.Count}。");
 
-                var now = DateTime.Now;
                 var totalHours = (now - firstAlarmTime).TotalHours;
                 int alarmHourIndex = Math.Max(1, (int)Math.Floor(totalHours) + 1);
 
@@ -361,6 +368,14 @@ namespace CommonLibraryP.MachinePKG.Service
         {
             try
             {
+                // 恢復通知 mail 亦僅在 07:00~17:00 間發送，其餘時間不寄出
+                var now = DateTime.Now;
+                if (now.Hour < 7 || now.Hour >= 17)
+                {
+                    LogAlarmEmail("INFO", device.MachineName, alarmKey, $"目前時間 {now:HH:mm} 不在發送時段(07:00-17:00)，略過恢復通知郵件發送。");
+                    return;
+                }
+
                 var emailSentSettingService = scope.ServiceProvider.GetRequiredService<EmailSentSettingService>();
                 var personnalService = scope.ServiceProvider.GetRequiredService<PersonnalService>();
                 var emailSettings = await emailSentSettingService.GetAllAsync();
@@ -403,7 +418,6 @@ namespace CommonLibraryP.MachinePKG.Service
                 }
 
                 LogAlarmEmail("INFO", device.MachineName, alarmKey, $"嘗試發送恢復通知，收件人數: {recipients.Count}。");
-                var now = DateTime.Now;
                 var body = BuildRecoveryEmailBody(device, temperature, humidity, firstAlarmTime, now);
                 var subject = $"溫溼度計警報恢復正常通知 - {device.MachineName}";
 
